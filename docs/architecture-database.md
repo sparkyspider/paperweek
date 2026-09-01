@@ -34,7 +34,7 @@ owned by the backend build. Expected shape, at a glance:
 | Table   | Purpose |
 |---------|---------|
 | `theme` | A life-theme (e.g. "Health", "Work") — the grouping a backlog task hangs off. `owner_id` = Zitadel sub. |
-| `task`  | A backlog or scheduled task, optionally under a `theme`. Carries `owner_id`, and once scheduled: which of the two visible weeks, which day (Mon–Sun), and which daypart (morning/afternoon/evening). |
+| `task`  | A backlog or scheduled task, optionally under a `theme`. Carries `owner_id`, and once scheduled: which of the two visible weeks, which day (Mon–Sun), and which daypart (morning/afternoon/evening/notes). |
 
 Table + column names are snake_case, `<domain>_<entity>` (drop the prefix when the
 entity is the domain's own namesake — `rules-database.md` §Naming, D-db-010).

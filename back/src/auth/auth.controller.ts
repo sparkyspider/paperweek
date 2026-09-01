@@ -87,15 +87,41 @@ export class AuthController {
     return { ok: true };
   }
 
-  /** GET /auth/me — the caller's lean profile, read straight off the verified token (no
-   *  Zitadel round-trip). Works for both a human BFF login and the prod-agent service
-   *  account (whose `ownerId` reflects any X-On-Behalf-Of header). */
+  /** GET /auth/me — the caller's lean profile. For human tokens, calls Zitadel's userinfo
+   *  endpoint to get email/name claims (which aren't in the access token). Agent tokens
+   *  return only the token claims. */
   @Get('me')
-  me(@CurrentUser() user: AuthUser): MeResponseDto {
+  async me(@CurrentUser() user: AuthUser): Promise<MeResponseDto> {
+    let email = user.email;
+    let name = user.name;
+
+    // For human tokens (not agent), call userinfo to get profile claims
+    if (!user.isAgent && user.token) {
+      try {
+        const userinfo = await fetch('http://localhost:8080/oidc/v1/userinfo', {
+          headers: { Authorization: `Bearer ${user.token}` },
+        }).then((r) => r.json() as Promise<{
+          email?: string;
+          name?: string;
+          preferred_username?: string;
+        }>);
+        email = userinfo.email ?? email;
+        name = userinfo.name ?? name;
+      } catch {
+        // Userinfo call failed — fall back to token claims (which may be undefined)
+      }
+    }
+
+    // displayName: name → email local part → undefined (never sub). If no human-readable
+    // identifier, return undefined and let the frontend show a neutral placeholder.
+    const displayName =
+      name ||
+      (email ? email.split('@')[0] : undefined);
+
     return {
       sub: user.sub,
-      email: user.email,
-      displayName: user.name,
+      email,
+      displayName,
       roles: user.roles,
       isAgent: user.isAgent,
     };

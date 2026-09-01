@@ -14,7 +14,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useApi } from '~/composables/useApi'
 
-export type Daypart = 'morning' | 'afternoon' | 'evening'
+export type Daypart = 'morning' | 'afternoon' | 'evening' | 'notes'
 
 export interface Task {
   id: string

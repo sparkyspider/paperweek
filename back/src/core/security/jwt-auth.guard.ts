@@ -31,6 +31,8 @@ export interface AuthUser {
    *  escalated: a non-agent caller may never act as anyone but themselves. */
   ownerId: string;
   claims: JWTPayload;
+  /** Raw JWT token string, for endpoints needing to call userinfo or other token-requiring APIs. */
+  token?: string;
 }
 
 /**
@@ -79,7 +81,7 @@ export class JwtAuthGuard implements CanActivate, OnModuleInit {
         issuer: this.zitadel.issuerUrl,
         audience: this.zitadel.audiences,
       });
-      const user = toAuthUser(payload);
+      const user = toAuthUser(payload, token);
 
       const onBehalfOf = headerValue(req.headers[ON_BEHALF_OF_HEADER]);
       if (onBehalfOf) {
@@ -107,7 +109,7 @@ function headerValue(v: string | string[] | undefined): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
-function toAuthUser(p: JWTPayload): AuthUser {
+function toAuthUser(p: JWTPayload, token?: string): AuthUser {
   // Zitadel roles claim shape: { roleKey: { orgId: orgDomain } }. Single org → flatten. The
   // claim KEY differs by grant type (see ROLES_CLAIM_PATTERN) — scan for whichever is present
   // and merge, rather than assuming one shape.
@@ -129,5 +131,6 @@ function toAuthUser(p: JWTPayload): AuthUser {
     isAgent: roles.includes('agent'),
     ownerId: sub,
     claims: p,
+    token,
   };
 }

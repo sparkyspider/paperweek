@@ -15,13 +15,13 @@ function act(t: { id: number; onAction?: () => void }) {
       <div
         v-for="t in toasts"
         :key="t.id"
-        class="pointer-events-auto flex items-center gap-3 rounded-xl border border-[var(--line)] bg-[var(--ink)] px-4 py-2.5 text-sm text-[var(--paper)] shadow-lg"
+        class="pointer-events-auto flex items-center gap-3 rounded-none bg-[var(--ink)] px-4 py-2.5 text-sm text-[var(--paper)] shadow-lg"
       >
         <span>{{ t.message }}</span>
         <button
           v-if="t.actionLabel"
           type="button"
-          class="font-semibold text-[var(--wc-sky)] underline decoration-dotted underline-offset-2 hover:text-white"
+          class="font-semibold text-[var(--wc-ochre)] underline decoration-dotted underline-offset-2 hover:text-white"
           @click="act(t)"
         >
           {{ t.actionLabel }}

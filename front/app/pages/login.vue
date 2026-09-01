@@ -34,7 +34,7 @@ async function submit() {
       <path d="M50 8c14 0 22 10 30 20s16 20 8 33-24 20-38 21-30-6-36-20S6 32 16 20 36 8 50 8z" fill="var(--wc-ochre)" opacity="0.3" transform="rotate(25 50 50)" />
     </svg>
 
-    <div class="paper-card relative z-10 flex w-full max-w-sm flex-col items-center gap-6 px-8 py-10 text-center">
+    <div class="paper-card--floating font-ui relative z-10 flex w-full max-w-sm flex-col items-center gap-6 px-8 py-10 text-center">
       <div class="flex flex-col items-center gap-1">
         <h1 class="font-hand text-[44px] font-bold leading-none text-[var(--ink)]">Paperweek</h1>
         <p class="gouache-underline font-hand inline-block w-fit text-lg text-[var(--ink-soft)]">
@@ -44,31 +44,31 @@ async function submit() {
 
       <WatercolorBlob color="#8fc1e3" :size="56" />
 
-      <form class="flex w-full flex-col gap-3 text-left" @submit.prevent="submit">
-        <label class="flex flex-col gap-1">
-          <span class="px-1 text-xs font-medium text-[var(--ink-soft)]">Email</span>
+      <form class="flex w-full flex-col gap-4 text-left" @submit.prevent="submit">
+        <label class="flex flex-col gap-0.5">
+          <span class="font-hand px-1 text-xl font-bold text-[var(--ink-soft)]">Email</span>
           <input
             v-model="email"
             type="email"
             autocomplete="email"
             required
-            class="w-full rounded-lg border border-[var(--line)] bg-[var(--paper-raised)] px-3 py-2 text-sm text-[var(--ink)] outline-none transition-colors focus:border-[var(--accent-ink)]"
+            class="font-ui w-full rounded-none border-0 border-b-2 border-b-[rgba(120,84,40,0.32)] bg-transparent px-1 py-2 text-sm text-[var(--ink)] outline-none transition-colors duration-150 focus:border-b-[3px] focus:border-b-[var(--accent-ink)]"
           >
         </label>
-        <label class="flex flex-col gap-1">
-          <span class="px-1 text-xs font-medium text-[var(--ink-soft)]">Password</span>
+        <label class="flex flex-col gap-0.5">
+          <span class="font-hand px-1 text-xl font-bold text-[var(--ink-soft)]">Password</span>
           <input
             v-model="password"
             type="password"
             autocomplete="current-password"
             required
-            class="w-full rounded-lg border border-[var(--line)] bg-[var(--paper-raised)] px-3 py-2 text-sm text-[var(--ink)] outline-none transition-colors focus:border-[var(--accent-ink)]"
+            class="font-ui w-full rounded-none border-0 border-b-2 border-b-[rgba(120,84,40,0.32)] bg-transparent px-1 py-2 text-sm text-[var(--ink)] outline-none transition-colors duration-150 focus:border-b-[3px] focus:border-b-[var(--accent-ink)]"
           >
         </label>
 
         <button
           type="submit"
-          class="mt-1 w-full rounded-full bg-[var(--accent-ink)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--accent-ink-dark)] disabled:opacity-60"
+          class="font-hand mt-1 w-full rounded-none bg-[#b5382e] px-5 py-3 text-xl font-bold text-[var(--paper-raised)] shadow-[0_2px_8px_rgba(155,47,38,0.25)] transition-all duration-150 hover:-translate-y-0.5 hover:bg-[#9c2f26] hover:shadow-[0_6px_16px_rgba(155,47,38,0.3)] disabled:translate-y-0 disabled:opacity-60 disabled:shadow-none disabled:hover:translate-y-0"
           :disabled="auth.pending"
         >
           {{ auth.pending ? 'Opening the door…' : 'Sign in' }}

@@ -15,6 +15,7 @@ enum Daypart {
   morning
   afternoon
   evening
+  notes
 }
 
 // Per-user data (SPEC.md: Mark and Tarryn each have their own themes/tasks in the one

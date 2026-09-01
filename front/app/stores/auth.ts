@@ -44,17 +44,19 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /** Store the token, then hydrate identity — richer `/auth/me` first, JWT claims as the
-   *  fallback so a session still "works" even before that endpoint exists. */
+   *  fallback so a session still "works" even before that endpoint exists. The header must
+   *  never show a literal "You": prefer a real display name, then the email, then a neutral
+   *  "Signed in" — never a placeholder pronoun. */
   async function applyAccessToken(token: string): Promise<void> {
     session.setAccessToken(token)
     const claims = decodeJwt(token)
     try {
-      const me = await api<{ id: string; name?: string; email?: string }>('/auth/me')
-      user.value = { id: me.id, name: me.name || me.email || 'You', email: me.email ?? '' }
+      const me = await api<{ sub: string; email?: string; displayName?: string }>('/auth/me')
+      user.value = { id: me.sub, name: me.displayName || me.email || 'Signed in', email: me.email ?? '' }
     } catch {
       const sub = (claims?.sub as string) ?? 'you'
       const email = (claims?.email as string) ?? ''
-      const name = (claims?.name as string) ?? email ?? 'You'
+      const name = (claims?.name as string) || email || 'Signed in'
       user.value = { id: sub, name, email }
     }
   }

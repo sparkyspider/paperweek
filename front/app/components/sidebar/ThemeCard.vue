@@ -1,18 +1,22 @@
 <script setup lang="ts">
-/** One life-theme in the sidebar: watercolor swatch, inline-editable name, an archive action
- *  (soft, with undo), and its backlog of unscheduled tasks — the drag SOURCE for scheduling,
- *  and a drop TARGET for unscheduling (drag a task back here from any day cell). */
-import { ref, computed, nextTick, onMounted } from 'vue'
+/** One life-theme in the sidebar: watercolor swatch (also the visibility toggle — click to
+ *  mute its tasks off the day strip), inline-editable name, an archive action (soft, with
+ *  undo), and its backlog of unscheduled tasks — the drag SOURCE for scheduling, and a drop
+ *  TARGET for unscheduling (drag a task back here from any day cell, or re-theme it by
+ *  dropping on a different theme's card). */
+import { ref, nextTick, onMounted } from 'vue'
 import type { Theme } from '~/stores/themes'
 import { THEME_PALETTE, useThemesStore } from '~/stores/themes'
 import { useTasksStore } from '~/stores/tasks'
 import { useToast } from '~/composables/useToast'
-import { positionBetween, taskIdFromDrag } from '~/utils/dnd'
+import { useThemeVisibility } from '~/composables/useThemeVisibility'
+import { taskIdFromDrag } from '~/utils/dnd'
 
 const props = defineProps<{ theme: Theme }>()
 
 const themes = useThemesStore()
 const tasks = useTasksStore()
+const visibility = useThemeVisibility()
 const { show } = useToast()
 
 const editing = ref(false)
@@ -23,8 +27,6 @@ const dragOver = ref(false)
 onMounted(() => {
   if (!tasks.backlogLoaded.has(props.theme.id)) tasks.fetchBacklog(props.theme.id)
 })
-
-const backlog = computed(() => tasks.backlogFor(props.theme.id))
 
 async function startEdit() {
   draft.value = props.theme.name
@@ -45,53 +47,55 @@ function archive() {
   show(`“${props.theme.name}” archived`, { actionLabel: 'Undo', onAction: () => undo?.() })
 }
 
-function onCreate(themeId: string, title: string) {
-  tasks.createBacklogTask(themeId, title)
-}
-
+/** Drop anywhere on the card (not on a specific task line) — append after the last occupied
+ *  line-slot. Per-line drop targets (which push a line down instead of appending) live inside
+ *  AddTaskInline now, since it owns the backlog's task rendering. Works regardless of this
+ *  theme's active/inactive filter state — dropping onto a muted theme is allowed. */
 function onDropEnd(e: DragEvent) {
   dragOver.value = false
   const id = taskIdFromDrag(e)
   if (!id) return
-  const last = backlog.value[backlog.value.length - 1]
-  tasks.patchTask(id, { themeId: props.theme.id, scheduledOn: null, daypart: null, position: positionBetween(last?.position, undefined) })
-}
-
-function onDropBefore(e: DragEvent, index: number) {
-  dragOver.value = false
-  const id = taskIdFromDrag(e)
-  if (!id) return
-  const before = backlog.value[index - 1]
-  const after = backlog.value[index]
-  tasks.patchTask(id, { themeId: props.theme.id, scheduledOn: null, daypart: null, position: positionBetween(before?.position, after?.position) })
+  const list = tasks.backlogFor(props.theme.id)
+  const nextIndex = list.length ? Math.max(...list.map(t => t.position)) + 1 : 0
+  tasks.patchTask(id, { themeId: props.theme.id, scheduledOn: null, daypart: null, position: nextIndex })
 }
 </script>
 
 <template>
   <div
-    class="paper-card p-3 transition-colors"
-    :class="dragOver ? 'bg-[var(--accent-ink-soft)]' : ''"
+    class="paper-card p-3 transition-all"
+    :class="[dragOver ? 'bg-[var(--accent-ink-soft)]' : '', visibility.isVisible(theme.id) ? '' : 'opacity-45']"
     @dragover.prevent
     @dragenter="dragOver = true"
     @dragleave="(e: DragEvent) => { if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node | null)) dragOver = false }"
     @drop.prevent="onDropEnd"
   >
     <div class="group flex items-center gap-2">
-      <WatercolorBlob :color="theme.color" :size="24" />
+      <button
+        type="button"
+        class="shrink-0 rounded-full transition-transform hover:scale-110"
+        :class="visibility.isVisible(theme.id) ? '' : 'grayscale'"
+        :title="visibility.isVisible(theme.id) ? `Hide ${theme.name} tasks` : `Show ${theme.name} tasks`"
+        :aria-label="visibility.isVisible(theme.id) ? `Hide ${theme.name} tasks` : `Show ${theme.name} tasks`"
+        :aria-pressed="!visibility.isVisible(theme.id)"
+        @click="visibility.toggle(theme.id)"
+      >
+        <WatercolorBlob :color="theme.color" :size="24" />
+      </button>
 
       <input
         v-if="editing"
         ref="nameInput"
         v-model="draft"
         type="text"
-        class="min-w-0 flex-1 border-b border-dashed border-[var(--accent-ink)] bg-transparent text-[17px] font-semibold text-[var(--ink)] outline-none"
+        class="min-w-0 flex-1 border-0 border-b border-dashed border-[var(--accent-ink)] bg-transparent text-[17px] font-semibold text-[var(--ink)] outline-none"
         @keyup.enter="commitEdit"
         @keyup.esc="editing = false"
         @blur="commitEdit"
       >
       <h3
         v-else
-        class="min-w-0 flex-1 cursor-text truncate text-[17px] font-semibold text-[var(--ink)]"
+        class="min-w-0 flex-1 cursor-pointer truncate text-[17px] font-semibold text-[var(--ink)]"
         @dblclick="startEdit"
       >
         {{ theme.name }}
@@ -100,7 +104,7 @@ function onDropBefore(e: DragEvent, index: number) {
       <button
         v-if="!editing"
         type="button"
-        class="shrink-0 rounded p-1 text-[var(--ink-faint)] opacity-0 transition-opacity hover:text-[var(--accent-ink)] group-hover:opacity-100"
+        class="shrink-0 rounded-none p-1 text-[var(--ink-faint)] opacity-0 transition-opacity hover:text-[var(--accent-ink)] group-hover:opacity-100"
         aria-label="Rename theme"
         @click="startEdit"
       >
@@ -110,7 +114,7 @@ function onDropBefore(e: DragEvent, index: number) {
       </button>
       <button
         type="button"
-        class="shrink-0 rounded p-1 text-[var(--ink-faint)] opacity-0 transition-opacity hover:text-[var(--danger)] group-hover:opacity-100"
+        class="shrink-0 rounded-none p-1 text-[var(--ink-faint)] opacity-0 transition-opacity hover:text-[var(--danger)] group-hover:opacity-100"
         aria-label="Archive theme"
         @click="archive"
       >
@@ -132,20 +136,8 @@ function onDropBefore(e: DragEvent, index: number) {
       />
     </div>
 
-    <div class="mt-2.5 flex flex-col gap-0.5 pl-1">
-      <div
-        v-for="(t, i) in backlog"
-        :key="t.id"
-        @dragover.prevent
-        @drop.prevent.stop="onDropBefore($event, i)"
-      >
-        <TaskChip :task="t" :color="theme.color" />
-      </div>
-      <p v-if="!backlog.length" class="px-1.5 py-1 text-xs italic text-[var(--ink-faint)]">
-        Nothing waiting — drop a task here to unschedule it.
-      </p>
+    <div class="mt-2.5 pl-1">
+      <AddTaskInline :theme-id="theme.id" :color="theme.color" placeholder="Write a task…" />
     </div>
-
-    <AddTaskInline :theme-id="theme.id" placeholder="New backlog task…" @create="onCreate" />
   </div>
 </template>

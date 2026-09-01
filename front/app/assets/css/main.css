@@ -7,23 +7,46 @@
  */
 
 :root {
-  --paper: #f7f3ea;
-  --paper-raised: #fbf8f1;
-  --paper-sunken: #efe8d8;
+  /* Fresh cream paper, lit warm — R > G > B throughout, and the raised card sits clearly
+     brighter than the ground so a card actually looks lifted rather than smeared into it. */
+  --paper: #f9f4e6;
+  --paper-raised: #fffdf6;
+  --paper-sunken: #f1e8d0;
   --ink: #2e2a25;
-  --ink-soft: #6b6355;
-  --ink-faint: #9a9284;
+  --ink-soft: #7a6650;
+  --ink-faint: #a08d6c;
   --line: #ded4bf;
   --line-soft: #e7ded0;
 
-  --accent-ink: #3a5a8c;
-  --accent-ink-dark: #24406b;
-  --accent-ink-soft: #dbe4f0;
+  /* Warm sienna ink — the app's one confident accent. Was a cool ink-blue; swapped so nothing
+     on warm parchment reads cold. Shared token: this cascades to the planner's buttons, links,
+     dashed edit-underlines and text selection too, which is the intended coherent outcome. */
+  --accent-ink: #a85c3b;
+  --accent-ink-dark: #8b4a2e;
+  --accent-ink-soft: #f0ddc9;
 
   --today-wash: #f6e7c9;
-  --gouache-stroke: #c1673c;
+  /* Keep in sync with the hardcoded stroke color inside .gouache-underline's SVG data-uri below
+     (a background-image can't read a CSS var) — this token exists so the palette is documented
+     and any future stroke gets the same ochre, not the old dusty pink-orange. */
+  --gouache-stroke: #b8862f;
 
   --danger: #a8462f;
+
+  /* A warm sepia rule line — the paper-diary ruled lines inside day-strip sections, and the
+     only "border" language left in the app (see the grey-border sweep below: everywhere else
+     a hard edge became a diffuse warm shadow instead). */
+  --rule-line: rgba(120, 84, 40, 0.16);
+
+  /* The Sign In button's own accent — a warm brick/vermillion red, kept deliberately separate
+     from --accent-ink (which still drives underlines, focus states and the today highlight
+     everywhere else) so this one call-to-action reads distinctly without recoloring the app. */
+  --cta-red: #b5382e;
+  --cta-red-dark: #9c2f26;
+
+  /* A soft warm wash for weekend day-cards — ordinary cards, just a shade deeper than paper,
+     no cool grey anywhere near it. */
+  --weekend-wash: #f2e7d2;
 
   /* Curated watercolor palette — seeded themes + the picker offers these. */
   --wc-sky: #8fc1e3;
@@ -49,10 +72,10 @@ body {
   font-size: 15px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  /* A faint paper grain — a tiny inline SVG turbulence filter, tiled. Kept deliberately
-     faint (0.035 opacity) so it reads as texture, not noise. */
+  /* A faint paper grain — a tiny inline SVG turbulence filter, tiled. Kept barely-perceptible
+     (0.03 opacity) so it reads as texture, not grime. */
   background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
   background-repeat: repeat;
 }
 
@@ -60,15 +83,72 @@ body {
   font-family: 'Caveat', 'Segoe Script', cursive;
 }
 
-/* A soft, irregular "deckled edge" card — a hand-cut paper card, not a flat rectangle. */
+/* Clean humanist sans for anything that isn't the hand-lettered wordmark/branding — form
+   fields, buttons, body copy that needs to read as tidy UI rather than storybook lettering. */
+.font-ui {
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Handwritten task text — task chips (day-strip AND sidebar backlog) and the day-strip's
+   write-on-the-line inputs share this class. The app now speaks in exactly one hand
+   (Caveat, the wordmark's own cursive) — .font-write is just .font-hand at a slightly
+   lighter weight, named by intent so call sites read clearly. */
+.font-write {
+  font-family: 'Caveat', 'Segoe Script', cursive;
+  font-weight: 600;
+}
+
+/* Paper doesn't have rounded edges: every surface below is borderless (grey-border sweep —
+   a diffuse warm shadow or a warm sepia rule line stands in for a hard edge everywhere) AND
+   square-cornered (kill-rounded-edges pass — the floating shadows carry the "lifted paper"
+   softness, the geometry itself stays crisp). */
 .paper-card {
   background: var(--paper-raised);
-  border: 1px solid var(--line-soft);
-  border-radius: 14px 16px 14px 17px / 16px 14px 18px 14px;
+  border-radius: 0;
   box-shadow: 0 1px 2px rgba(46, 42, 37, 0.05), 0 4px 14px rgba(46, 42, 37, 0.06);
 }
 
-/* Gouache-pen underline — a hand-drawn stroke under section labels / today's date. */
+/* A standalone sheet resting on the desk (the login card): a soft warm shadow lifting it off
+   the parchment, like paper under a warm lamp. Scoped separately from .paper-card so the
+   planner's day cards and theme cards can carry a lighter lift. */
+.paper-card--floating {
+  background: var(--paper-raised);
+  /* Mark's call: the login paper keeps a tiny corner radius — exempt from the app-wide square-corner rule */
+  border-radius: 5px;
+  box-shadow:
+    0 1px 1px rgba(120, 84, 40, 0.05),
+    0 8px 24px rgba(120, 84, 40, 0.14),
+    0 22px 48px -16px rgba(120, 84, 40, 0.22);
+}
+
+/* A quiet warm-shadow "edge" — the grey-border sweep's replacement for a hard `border-right`/
+   `border-bottom` divider (sidebar/main split, header/content split). Diffuse, not a line. */
+.edge-right {
+  box-shadow: 1px 0 0 rgba(120, 84, 40, 0.10), 6px 0 16px -10px rgba(120, 84, 40, 0.22);
+}
+.edge-bottom {
+  box-shadow: 0 1px 0 rgba(120, 84, 40, 0.10), 0 6px 16px -10px rgba(120, 84, 40, 0.22);
+}
+
+/* A small square, borderless, warm-shadow pill for header actions (Today / Sign out) —
+   replaces the old grey-bordered rounded-full buttons. */
+.pill-btn {
+  border-radius: 0;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: var(--paper-raised);
+  box-shadow: 0 1px 1px rgba(120, 84, 40, 0.06), 0 3px 10px rgba(120, 84, 40, 0.09);
+  transition: color 0.15s ease, box-shadow 0.15s ease;
+}
+.pill-btn:hover {
+  color: var(--accent-ink);
+  box-shadow: 0 1px 1px rgba(120, 84, 40, 0.09), 0 5px 16px rgba(120, 84, 40, 0.16);
+}
+
+/* Gouache-pen underline — one confident, almost-straight brush stroke under section labels /
+   today's date. Muted ochre ink, low amplitude — a single wide-pen pass, not a wiggle. */
 .gouache-underline {
   position: relative;
   display: inline-block;
@@ -78,9 +158,9 @@ body {
   position: absolute;
   left: -2%;
   right: -4%;
-  bottom: -0.22em;
-  height: 0.5em;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M2 9 C 40 4, 80 12, 120 7 S 180 5, 198 9' stroke='%23c1673c' stroke-width='5' fill='none' stroke-linecap='round' opacity='0.55'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+  bottom: -0.2em;
+  height: 0.46em;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M4 9 C 55 5, 145 5, 196 8' stroke='%23b8862f' stroke-width='6' fill='none' stroke-linecap='round' opacity='0.7'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
   pointer-events: none;
 }
 
@@ -113,7 +193,35 @@ body {
   background: var(--accent-ink-soft);
 }
 
-/* Thin, quiet scrollbars for the horizontally-scrolling week rows. */
+/* Kill the browser's cool-yellow/blue autofill paint everywhere an input might get one —
+   inset the field's own warm background instead so a filled field still reads as paper. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--paper-raised) inset;
+  -webkit-text-fill-color: var(--ink);
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Anything clickable shows a hand — including elements that only "act" like buttons/links
+   via @click rather than a native tag (those get an explicit .cursor-pointer / role="button"
+   at the call site; see the components under planner/, sidebar/, shared/). */
+button:not(:disabled),
+a[href],
+[role="button"]:not([aria-disabled="true"]),
+input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled),
+input[type="submit"],
+select:not(:disabled),
+summary,
+label[for] {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: default;
+}
+
+/* Thin, quiet scrollbars for the horizontally-scrolling day strip. */
 .thin-scroll {
   scrollbar-width: thin;
   scrollbar-color: var(--line) transparent;
@@ -125,4 +233,176 @@ body {
 .thin-scroll::-webkit-scrollbar-thumb {
   background: var(--line);
   border-radius: 8px;
+}
+
+/* Scrollable, but no visible scrollbar at all — the sidebar's life-theme list overflows and
+   scrolls on wheel/trackpad same as ever, just without a scrollbar gutter competing with the
+   paper look. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* --- The day strip -------------------------------------------------------------------- */
+
+/* The endless horizontal row of day cards. Deliberately NO CSS scroll-snap — even `proximity`
+   was cutting a flick's momentum short. Native momentum scrolling runs completely untouched;
+   DayStrip.vue watches for the scroll to actually come to rest (the 'scrollend' event, with a
+   debounced-scroll fallback for Safari) and only then smoothly docks the nearest card flush
+   to the left edge in JS. Longest possible glide, same guaranteed-flush-left result. */
+.day-strip {
+  /* Load-bearing: without this, a day-card's `offsetLeft` resolves against <body> (the
+     nearest positioned ancestor) instead of this scroll container, silently baking the
+     sidebar's width into every scrollLeft calculation in DayStrip.vue. That was the actual
+     root cause behind a whole run of "off by a suspiciously specific amount" scroll bugs. */
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  gap: 1.25rem;
+  padding: 0.5rem 1.25rem 1.5rem;
+}
+
+/* Weekends: ordinary cards, just a shade warmer/deeper than plain paper — no collapsing, no
+   special chrome. */
+.weekend-wash {
+  background: var(--weekend-wash);
+}
+
+/* Ruled like a real sheet of lined paper — one continuous set of faint warm baselines every
+   `--line-h`, painted ONCE behind the whole writing area so it never seams or restarts
+   between regions. Shared by the day-strip's whole card body AND the sidebar backlog, so
+   both read as "paper with lines on it" rather than a list-with-a-form-at-the-bottom. */
+.ruled-paper {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--line-h) - 1px),
+    var(--rule-line) calc(var(--line-h) - 1px),
+    var(--rule-line) var(--line-h)
+  );
+  /* No offset: the pattern's origin must coincide with the writing area's own top edge (y=0)
+     so a rule falls exactly on the bottom edge of every `--line-h` row — which is only
+     correct because every row (task, draft, empty filler) is a hard, identical
+     `height: var(--line-h)` with zero extra padding/margin (see .ruled-line). */
+  background-position: 0 0;
+  /* Paint (and anchor) the ruling within the CONTENT box, not the padding box — otherwise the
+     horizontal rule lines bleed into the pl-7/pr-1 inset and show as stray tick-marks to the
+     left of the margin line. */
+  background-origin: content-box;
+  background-clip: content-box;
+}
+
+/* The day card's ruled sheet: a faint warm-red margin line, like a real lined notepad —
+   content starts just to its right (see the pl-7 on the wrapper in DayCard.vue). */
+.day-lines::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 22px;
+  width: 1px;
+  background: rgba(181, 56, 46, 0.22);
+  pointer-events: none;
+}
+
+/* One daypart region of the sheet — not its own box: no background, no border, just a marker
+   for where its watermark sits. The heading itself takes no vertical space at all (see
+   .section-watermark below). */
+.day-section {
+  position: relative;
+  transition: background-color 0.15s ease;
+}
+.day-section--over {
+  background-color: var(--accent-ink-soft);
+}
+
+/* The one immutable grid unit: every row — a saved task, a live draft input, or a decorative
+   empty filler — is EXACTLY this tall, no exceptions, so the ruling never has two competing
+   rhythms. `overflow: hidden` is the enforcement: nothing inside (however it's styled) can
+   push a row taller than the grid. Long task titles truncate to this one line rather than
+   wrapping, so the grid invariant holds unconditionally. */
+/* Bottom-aligns a row's content (flex, align-items: flex-end) so text sits close to the rule
+   at the row's bottom edge, rather than drifting wherever the font's line-height leading
+   happens to centre it — the fixed padding-bottom is what actually controls the gap to the
+   rule, not font metrics (text inside uses a tight, near-natural line-height, not
+   var(--line-h)). */
+.ruled-line {
+  position: relative;
+  height: var(--line-h);
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 4px;
+  box-sizing: border-box;
+}
+/* The ONE line a row of writing gets deepens to the accent colour on focus — never a second,
+   separate underline on the input itself (see .diary-input below, which draws no border of
+   its own). Anchored to this row specifically (not the whole sheet) so only the line under
+   the line you're actually writing on darkens. */
+.ruled-line:focus-within::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--accent-ink);
+  pointer-events: none;
+}
+
+/* The sidebar backlog's own ruled margin — a shade tighter than the day-strip's lines. */
+.backlog-lines {
+  --line-h: 28px;
+}
+
+/* The section's name, rendered big, faint and right-aligned behind the content instead of as
+   a heading row — after a day of use you learn the strip by position, not by label. */
+.section-watermark {
+  position: absolute;
+  right: 0.5rem;
+  bottom: -0.1rem;
+  z-index: 0;
+  font-size: 2.75rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ink);
+  opacity: 0.08;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* A "write on the line" input: visually just the blank ruled line until it's touched — no
+   box, no fill — so clicking anywhere on an empty line feels like starting to write on paper,
+   not opening a form field. Used for both the day-strip's ruled lines and the sidebar
+   backlog's autosaving list. */
+.diary-input {
+  border: 0;
+  background: transparent;
+  outline: none;
+}
+/* Deliberately no :focus style of its own — the ROW (.ruled-line) draws the one line this
+   input sits on, and deepens it on focus (see .ruled-line:focus-within::after above). Two
+   underlines on one line of writing was the bug; there is only ever one now. */
+
+/* A line that failed to save: the row's own line pulses warm-red instead of the sheet's usual
+   ink — same "one line per row" mechanism as focus, just a different colour and a pulse. */
+.ruled-line--unsaved::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--cta-red);
+  pointer-events: none;
+  animation: line-unsaved-pulse 1.5s ease-in-out infinite;
+}
+@keyframes line-unsaved-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.85; }
 }

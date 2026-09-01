@@ -1,0 +1,9 @@
+{
+  "name": "view-website",
+  "private": true,
+  "type": "module",
+  "description": "Paperweek skill: view/learn from a page via headless Chromium (Playwright).",
+  "dependencies": {
+    "playwright": "^1.49.0"
+  }
+}

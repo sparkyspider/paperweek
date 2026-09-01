@@ -13,7 +13,7 @@ import {
 } from 'class-validator';
 import { DATE_ONLY_PATTERN } from '../../common/date-only';
 
-const DAYPARTS = ['morning', 'afternoon', 'evening'] as const;
+const DAYPARTS = ['morning', 'afternoon', 'evening', 'notes'] as const;
 
 export class UpdateTaskDto {
   @IsOptional()
@@ -39,10 +39,10 @@ export class UpdateTaskDto {
   })
   scheduledOn?: string | null;
 
-  /** One of morning/afternoon/evening, or `null` to clear it. */
+  /** One of morning/afternoon/evening/notes, or `null` to clear it. */
   @IsOptional()
   @ValidateIf((o: UpdateTaskDto) => o.daypart !== null)
-  @IsIn(DAYPARTS, { message: 'daypart must be morning, afternoon, evening, or null.' })
+  @IsIn(DAYPARTS, { message: 'daypart must be morning, afternoon, evening, notes, or null.' })
   daypart?: (typeof DAYPARTS)[number] | null;
 
   @IsOptional()

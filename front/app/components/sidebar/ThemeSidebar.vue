@@ -33,7 +33,7 @@ function cancel() {
 </script>
 
 <template>
-  <aside class="thin-scroll flex h-full w-[280px] shrink-0 flex-col gap-3 overflow-y-auto border-r border-[var(--line-soft)] bg-[var(--paper)] p-4">
+  <aside class="edge-right no-scrollbar flex h-full w-[280px] shrink-0 flex-col gap-3 overflow-y-auto bg-[var(--paper)] p-4">
     <h1 class="font-hand px-1 text-[30px] font-bold leading-none text-[var(--ink)]">
       Paperweek
     </h1>
@@ -56,7 +56,7 @@ function cancel() {
         v-model="draftName"
         type="text"
         placeholder="Theme name…"
-        class="w-full border-b border-dashed border-[var(--accent-ink)] bg-transparent text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink-faint)]"
+        class="w-full border-0 border-b border-dashed border-[var(--accent-ink)] bg-transparent text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink-faint)]"
         @keyup.enter="submit"
         @keyup.esc="cancel"
       >
@@ -79,7 +79,7 @@ function cancel() {
     <button
       v-else
       type="button"
-      class="rounded-lg px-2 py-1.5 text-left text-sm font-medium text-[var(--accent-ink)] opacity-80 transition-opacity hover:opacity-100"
+      class="rounded-none px-2 py-1.5 text-left text-sm font-medium text-[var(--accent-ink)] opacity-80 transition-opacity hover:opacity-100"
       @click="reveal"
     >
       + add a theme

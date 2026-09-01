@@ -110,8 +110,10 @@ instance, so the backend checks the password directly via Zitadel's Session API 
   same-origin only.
 - `POST /auth/logout` → `{ok: true}`, revokes the refresh token at Zitadel (best-effort) and
   clears the cookie.
-- `GET /auth/me` → `{sub, email?, displayName?, roles, isAgent}` — the caller's own profile,
-  read off the verified token.
+- `GET /auth/me` → `{sub, email?, displayName?, roles, isAgent}` — the caller's own profile.
+  For human tokens, queries Zitadel's userinfo endpoint to get email and name. `displayName`
+  is the `name` claim, or the email's local part, or `undefined` if neither is available
+  (never the raw `sub`; frontend shows a neutral placeholder when `displayName` is absent).
 
 ### Themes
 
@@ -128,7 +130,7 @@ DELETE /api/themes/:id                                       → soft archive (=
 GET    /api/tasks?from=YYYY-MM-DD&to=YYYY-MM-DD      → non-deleted scheduled tasks in range
 GET    /api/tasks?themeId=<uuid>&backlog=true         → non-deleted unscheduled tasks for a theme
 POST   /api/tasks {themeId, title, notes?}            → creates a backlog task
-PATCH  /api/tasks/:id {title?, notes?, themeId?, scheduledOn?(YYYY-MM-DD|null), daypart?(morning|afternoon|evening|null), position?, done?}
+PATCH  /api/tasks/:id {title?, notes?, themeId?, scheduledOn?(YYYY-MM-DD|null), daypart?(morning|afternoon|evening|notes|null), position?, done?}
 DELETE /api/tasks/:id                                  → soft delete
 ```
 

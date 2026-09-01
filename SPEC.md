@@ -12,15 +12,21 @@ A TeuxDeux-inspired weekly planner. Google Calendar felt messy; this is the calm
 - **Life-themes** — user-defined, not hardcoded. Mark's seeded set: FlyH2, Co-Sy, Positive Polar, RT7 Digital, Life Balance, Admin, Personal. Add / remove / rename — but *softly*: archive with undo, never hard delete.
 - **Theme taxonomy philosophy**: a theme earns its lane when it competes for the week's attention. Exactly **one** friction-free catch-all (Personal) — never several fuzzy buckets. Admin absorbs Budgets & Tax. Findhorn work lives inside Co-Sy until big enough to promote (promotion is cheap: themes are just a field on tasks). Cross-cutting concerns use a free-form `#hashtag` convention in task titles — no schema, no obligation, searchable.
 - **Theme backlogs** — tasks live under a theme in the left sidebar until you're ready, then get **pulled (dragged) into the week**.
-- **Dayparts, not timeslots** — tasks aren't time-bound. Each day offers a few lines for **Morning / Afternoon / Evening**.
+- **Dayparts, not timeslots** — tasks aren't time-bound. Each day offers lines for **Morning / Afternoon / Evening / Notes**.
 
-## The week view
+## The day-strip view (v2 — replaced the two-week grid)
 
-- **Two weeks visible**, one week per row: this week on top, next week below. Weeks start Monday.
-- Generous columns — **never squashed**. Horizontal scroll beats cramming.
-- **Weekends are collapsible**: Sat + Sun fold into a slim expandable stub per week row (state remembered).
+- **One endless horizontal strip of day cards** — flick/scroll left and right to move nearer or further into the future (and back into the recent past). Starts on today; a "Today" affordance jumps back.
+- Day cards take the **full vertical height**. Generous width — never squashed.
+- Each card has four sections: Morning, Afternoon, Evening, Notes. **Section headings take no vertical space**: big, right-aligned, faint watermark text that content is written *over* — after a day of use you know which section is which.
+- No "Add a task" labels: each section shows a few **faint ruled lines**, like a paper diary — click a line and write on it. Task writing uses the handwriting font (Architects Daughter).
+- Weekends are ordinary cards, subtly tinted (no collapsing in the strip).
 - Today is softly highlighted.
-- Complete a task → satisfying ink strikethrough, fades but stays; un-check restores.
+- The header shows who's signed in by name — never a literal "You".
+
+## The governing principle: it IS paper
+
+The UI looks and feels like writing on paper. When something is written, it's on a line. When something is added, it's written on a line. **There are no checkboxes, no chips, no boxes around tasks, no buttons-per-task** — task text is handwriting sitting directly on a ruled line. Completing a task = crossing it out: click/tap the written words and an ink strikethrough draws through them (click again to un-cross). Typing on an empty line writes and autosaves — no Add button. Every control that can be a paper gesture should be one; UI chrome that paper doesn't have must justify itself.
 
 ## Look & feel
 

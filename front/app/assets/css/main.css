@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+/*
+ * Paperweek — the "art paper" design language.
+ * Warm parchment ground, watercolor accents, hand-lettered display type over a calm
+ * readable serif. Light theme only, and deliberate: every color below is explicit.
+ */
+
+:root {
+  --paper: #f7f3ea;
+  --paper-raised: #fbf8f1;
+  --paper-sunken: #efe8d8;
+  --ink: #2e2a25;
+  --ink-soft: #6b6355;
+  --ink-faint: #9a9284;
+  --line: #ded4bf;
+  --line-soft: #e7ded0;
+
+  --accent-ink: #3a5a8c;
+  --accent-ink-dark: #24406b;
+  --accent-ink-soft: #dbe4f0;
+
+  --today-wash: #f6e7c9;
+  --gouache-stroke: #c1673c;
+
+  --danger: #a8462f;
+
+  /* Curated watercolor palette — seeded themes + the picker offers these. */
+  --wc-sky: #8fc1e3;
+  --wc-teal: #6fb3a8;
+  --wc-lavender: #b9a8d9;
+  --wc-ochre: #d9a94f;
+  --wc-rose: #c9a3a0;
+  --wc-moss: #93ab7c;
+  --wc-clay: #cf8a6a;
+  --wc-periwinkle: #97a3d6;
+
+  color-scheme: light;
+}
+
+html, body {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body {
+  margin: 0;
+  font-family: 'Lora', ui-serif, Georgia, 'Times New Roman', serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  /* A faint paper grain — a tiny inline SVG turbulence filter, tiled. Kept deliberately
+     faint (0.035 opacity) so it reads as texture, not noise. */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+.font-hand {
+  font-family: 'Caveat', 'Segoe Script', cursive;
+}
+
+/* A soft, irregular "deckled edge" card — a hand-cut paper card, not a flat rectangle. */
+.paper-card {
+  background: var(--paper-raised);
+  border: 1px solid var(--line-soft);
+  border-radius: 14px 16px 14px 17px / 16px 14px 18px 14px;
+  box-shadow: 0 1px 2px rgba(46, 42, 37, 0.05), 0 4px 14px rgba(46, 42, 37, 0.06);
+}
+
+/* Gouache-pen underline — a hand-drawn stroke under section labels / today's date. */
+.gouache-underline {
+  position: relative;
+  display: inline-block;
+}
+.gouache-underline::after {
+  content: '';
+  position: absolute;
+  left: -2%;
+  right: -4%;
+  bottom: -0.22em;
+  height: 0.5em;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M2 9 C 40 4, 80 12, 120 7 S 180 5, 198 9' stroke='%23c1673c' stroke-width='5' fill='none' stroke-linecap='round' opacity='0.55'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+  pointer-events: none;
+}
+
+/* Hand-drawn strikethrough for completed tasks — an inked stroke, not a flat CSS line. */
+.ink-strike {
+  position: relative;
+}
+.ink-strike::after {
+  content: '';
+  position: absolute;
+  left: -2%;
+  right: -2%;
+  top: 52%;
+  height: 0.16em;
+  transform: translateY(-50%) scaleX(0);
+  transform-origin: left center;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 10' preserveAspectRatio='none'%3E%3Cpath d='M1 5 C 50 2, 100 8, 150 4 S 195 6, 199 5' stroke='%232e2a25' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+  animation: ink-draw 0.45s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+@keyframes ink-draw {
+  to { transform: translateY(-50%) scaleX(1); }
+}
+
+/* Today's date wash — a soft watercolor patch behind the date header, not a hard fill. */
+.today-wash {
+  background: radial-gradient(120% 140% at 30% 20%, var(--today-wash) 0%, transparent 72%);
+}
+
+::selection {
+  background: var(--accent-ink-soft);
+}
+
+/* Thin, quiet scrollbars for the horizontally-scrolling week rows. */
+.thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+.thin-scroll::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 8px;
+}

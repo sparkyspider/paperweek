@@ -1,0 +1,37 @@
+# Secrets / machine credentials — NEVER commit
+.machinekey/
+**/.machinekey/
+*.env
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+**/dist/
+.nuxt/
+**/.nuxt/
+.output/
+**/.output/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Prisma
+back/prisma/migrations/.gitkeep
+
+# Coverage
+coverage/

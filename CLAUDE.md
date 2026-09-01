@@ -1,0 +1,116 @@
+# productivity-tools
+
+**AGENTS: read this file before writing code, creating files, or changing anything.**
+It is the index; the full product spec is [`SPEC.md`](SPEC.md); the engineering
+rules/architecture/decisions live in [`docs/`](docs/), ported and adapted from the
+sibling project `co-sy-v2`, which this project shares its Zitadel instance and most of
+its stack conventions with.
+
+## 1. What this is
+
+A TeuxDeux-inspired weekly planner. Life-**Themes** (user-defined, e.g. "FlyH2",
+"Admin", "Life Balance") hold a **backlog** of Tasks; tasks get dragged from the
+backlog onto a **Mon–Sun week grid** split into **Morning / Afternoon / Evening**
+dayparts, with **two weeks visible at once**. Look and feel: art-paper / watercolor —
+warm paper backgrounds, hand-lettered display type, gouache-pen accents — calm rather
+than corporate. Full detail, including the two named users and the soft-delete
+philosophy: [`SPEC.md`](SPEC.md) (single source of truth for product behaviour — this
+file never repeats it).
+
+**AI agents are first-class users.** A `prod-agent` Zitadel service account can call
+the `back/` API directly on a person's behalf (header `X-On-Behalf-Of`) to manage
+their themes/tasks — see [`rules-agentic.md`](docs/rules-agentic.md) for the
+mechanism and root **`AGENTS.md`** (owned by the back/front build, not this index)
+for the operational how-to once it exists.
+
+## 2. Repository layout
+
+| Path | Stack | Purpose |
+|------|-------|---------|
+| `front/` | Nuxt 4 + Vue 3.5 + Tailwind 4 | Web frontend, port **3100** |
+| `back/`  | NestJS 11 + Prisma 6 + PostgreSQL | API, port **3101**, database `productivity-tools` |
+| `auth/`  | Zitadel (Docker, shared) | Points at co-sy-v2's existing local Zitadel (`localhost:8080`), own org **"Productivity"** — not a separate deployment |
+| `docs/`  | Markdown | Rules, architecture, decisions (this index) |
+| `SPEC.md` | Markdown | The product spec — SSOT for what this app does |
+
+Single repo (unlike co-sy-v2's multi-repo layout) — `front/`, `back/`, `auth/` are
+plain folders, not independent git checkouts (`decisions-system.md` D-sys-016). Root
+stays clean: only `CLAUDE.md`, `SPEC.md`, `README.md`/`AGENTS.md` if/when they exist,
+`docs/`, and the three project folders. No stray scripts or notes at root.
+
+## 3. The key differences from co-sy-v2 — read this before assuming anything carries over
+
+productivity-tools reuses co-sy-v2's plumbing (Zitadel/BFF pattern, Nest/Prisma/Nuxt
+conventions, envelope response shape, logging) but is a **much simpler shape**:
+
+- **Single org ("Productivity"), not multi-org.** No org creation/switching, no
+  `X-Acting-Org`, no per-org Postgres RLS.
+- **Per-user data scoping instead.** `Theme`/`Task` rows carry `ownerId` = the
+  Zitadel JWT `sub`; every query filters by it at the service layer (no RLS enforcing
+  it at the database) — `decisions-database.md` D-db-016.
+- **No invitations module.** Users are provisioned directly into the org.
+- **No forced MFA.**
+- **No agreements, documents, e-signing, or CRM** — none of co-sy-v2's business
+  domain applies here.
+- **New:** the `agent` role + `prod-agent` service account + `X-On-Behalf-Of` header,
+  letting AI agents act on a specific user's data directly via the API —
+  `decisions-agentic.md` D-agentic-002.
+
+Every ported doc below states explicitly, where it matters, what it kept from
+co-sy-v2 and what it cut or replaced because of these differences.
+
+## 4. Doc layers — architecture, rules, decisions
+
+Same three-layer convention as co-sy-v2 (`docs/README.md` there), used here without
+the surrounding task-pipeline apparatus (no `docs/todo/`, no `TODO.md`/`DONE.md` —
+not ported, out of scope for this project so far):
+
+| Layer | File(s) | Question | Holds | A builder... |
+|-------|---------|----------|-------|---------------|
+| Decisions | `decisions-<area>.md` | **WHY** | The settled what-and-why, terse, append-only | skips |
+| Architecture | `architecture-<area>.md` | **WHAT** | The shape: pieces, boundaries, flow | **reads first** |
+| Rules | `rules-<area>.md` | **HOW** | Enforceable rules everyone must follow | **complies with** |
+
+**Build-time reading order: architecture → rules.** Read your area's
+`architecture-*.md` (plus `architecture-system.md`) first, then `rules-*.md` for how.
+Read `decisions-*.md` when you need the *why* or are about to change direction.
+Decision IDs (`D-<area>-NNN`) inherited from co-sy-v2 keep their **original numbers**
+for traceability; new entries for this project start after the highest inherited
+number in each log and are dated 2026-09-01 ("founding decisions"). Every log states
+at its top what was and wasn't carried forward.
+
+**Keep every doc terse** — read on every build; every token spent is context taken
+from the work (`rules-system.md` §3, D-sys-007 single-source-of-truth).
+
+## 5. The rules — one per area
+
+Read [`rules-system.md`](docs/rules-system.md) first (cross-cutting), then your area.
+
+- [`rules-system.md`](docs/rules-system.md) — cross-cutting: root-clean, SSOT, boundaries, config.
+- [`rules-front.md`](docs/rules-front.md) — everything about `front/` (Nuxt, Tailwind, TS, the week-grid/backlog UI).
+- [`rules-back.md`](docs/rules-back.md) — everything about `back/` (NestJS, Prisma).
+- [`rules-auth.md`](docs/rules-auth.md) — everything about `auth/` (Zitadel — shared instance, own org).
+- [`rules-users.md`](docs/rules-users.md) — the (deliberately small) identity model: per-user `ownerId`, no org membership.
+- [`rules-roles.md`](docs/rules-roles.md) — the rights model: ordinary users need no role; `agent` is the one exception.
+- [`rules-database.md`](docs/rules-database.md) — PostgreSQL + Prisma + per-user `ownerId` scoping (no RLS).
+- [`rules-deployment.md`](docs/rules-deployment.md) — packaging, config, running the pieces; ports 3100/3101.
+- [`rules-security.md`](docs/rules-security.md) — secrets & credentials; the agent service-account trust boundary.
+- [`rules-autodoc-logging.md`](docs/rules-autodoc-logging.md) — JSDoc, OpenAPI/Swagger, and logging conventions.
+- [`rules-agentic.md`](docs/rules-agentic.md) — the `agent` role / `prod-agent` / `X-On-Behalf-Of` API-access mechanism.
+
+Matching `architecture-*.md` and `decisions-*.md` exist for every area above, plus
+[`architecture-scaling-up.md`](docs/architecture-scaling-up.md) — the single-instance-assumptions
+registry (no rules/decisions counterpart, same as in co-sy-v2).
+
+If a rule blocks you and you believe it's wrong, don't break it silently — say so and
+leave the rule in place until it's deliberately changed.
+
+## 6. Getting started as an agent
+
+1. Read this file, then [`SPEC.md`](SPEC.md) for the product.
+2. Read `architecture-system.md` + your area's `architecture-<area>.md`, then
+   `rules-system.md` + your area's `rules-<area>.md`.
+3. Calling the API as an agent rather than building it? Read
+   [`rules-agentic.md`](docs/rules-agentic.md) and root `AGENTS.md`.
+4. Do the work inside the correct folder (`front/`, `back/`, `auth/`, or `docs/`). The
+   root stays clean (§2).

@@ -1,0 +1,58 @@
+// Prisma schema for the productivity-tools app database (`productivity`), connected as
+// the dedicated `productivity` Postgres role (never the superuser). Single-org app — no
+// per-tenant RLS; plain tables scoped by nothing but the JWT guard on every route.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Daypart {
+  morning
+  afternoon
+  evening
+}
+
+// Per-user data (SPEC.md: Mark and Tarryn each have their own themes/tasks in the one
+// Productivity org). `ownerId` is the Zitadel user id (JWT `sub`); every query is scoped to
+// the authenticated caller's `ownerId` at the service layer — there is no RLS, this is a
+// single-org app with plain, code-level per-user scoping.
+model Theme {
+  id         String    @id @default(uuid())
+  ownerId    String    @map("owner_id")
+  name       String
+  color      String
+  position   Int
+  archivedAt DateTime? @map("archived_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  tasks      Task[]
+
+  @@index([ownerId])
+  @@map("theme")
+}
+
+model Task {
+  id          String    @id @default(uuid())
+  ownerId     String    @map("owner_id")
+  themeId     String    @map("theme_id")
+  theme       Theme     @relation(fields: [themeId], references: [id])
+  title       String
+  notes       String?
+  scheduledOn DateTime? @map("scheduled_on") @db.Date
+  daypart     Daypart?
+  position    Int
+  doneAt      DateTime? @map("done_at")
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@index([ownerId])
+  @@index([ownerId, scheduledOn])
+  @@index([themeId])
+  @@map("task")
+}

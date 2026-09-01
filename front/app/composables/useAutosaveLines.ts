@@ -21,8 +21,9 @@ import { useToast } from '~/composables/useToast'
 
 const DEBOUNCE_MS = 600
 /** Default minimum rendered lines even when a section is empty/light, so it still reads as
- *  ruled paper rather than a couple of lonely rows. Callers may override (e.g. the sidebar's
- *  many small backlog cards use a smaller floor so the whole list stays scannable). */
+ *  ruled paper rather than a couple of lonely rows. Used by the day-strip sections, which want
+ *  a fixed floor regardless of task count. The sidebar backlog instead uses `dynamicTrailing`
+ *  (below) — it wants exactly one trailing blank line, not a fixed floor. */
 const DEFAULT_MIN_LINES = 6
 
 export interface DraftLine {
@@ -42,6 +43,22 @@ export type LineSlot =
   | { kind: 'draft'; index: number; draft: DraftLine }
   | { kind: 'empty'; index: number }
 
+/** The number of ruled line-slots a task list needs to show every task — the highest occupied
+ *  slot index + 1 (accounting for gaps left by tasks NOT at consecutive positions), or, for
+ *  legacy dense-rank data (see the module doc above), simply the count laid out 0..n-1. Pure
+ *  and side-effect-free so callers outside a section's own composable instance (DayCard.vue's
+ *  line-budget calculation) can ask "how many rows will this list occupy" without standing up a
+ *  whole second `useAutosaveLines` — it mirrors exactly the `normalized` logic below. */
+export function occupiedLineCount(list: Task[]): number {
+  if (!list.length) return 0
+  const sorted = [...list].sort((a, b) => a.position - b.position)
+  const positions = sorted.map(t => t.position)
+  const isSlotModel =
+    positions.every(p => Number.isInteger(p) && p >= 0) &&
+    new Set(positions).size === positions.length
+  return isSlotModel ? Math.max(...positions) + 1 : sorted.length
+}
+
 let uid = 0
 
 export function useAutosaveLines(opts: {
@@ -50,11 +67,20 @@ export function useAutosaveLines(opts: {
   /** Present for a day-strip section (tasks are scheduled here); omitted for a plain backlog. */
   scheduledOn?: () => string
   daypart?: () => Daypart
-  minLines?: number
+  /** A getter (not a plain number) so a caller can drive it from a reactive layout computation
+   *  — DayCard.vue's per-section line budget — and have it actually update. */
+  minLines?: () => number
+  /** Sidebar-backlog mode: instead of a fixed `minLines` floor, always render exactly one
+   *  trailing blank line after the last occupied one — an empty theme shows 1 blank line, N
+   *  tasks show N lines + 1 blank, never more, never a dead end. A line counts as "occupied"
+   *  the moment it has non-empty text (even mid-debounce, before the save round-trips), so the
+   *  next blank appears the instant you start typing on the current last line. */
+  dynamicTrailing?: boolean
 }) {
   const tasks = useTasksStore()
   const { show } = useToast()
-  const minLines = opts.minLines ?? DEFAULT_MIN_LINES
+  const minLines = () => opts.minLines?.() ?? DEFAULT_MIN_LINES
+  const dynamicTrailing = opts.dynamicTrailing ?? false
 
   const activeDrafts = ref<Map<number, DraftLine>>(new Map())
   const timers = new Map<string, ReturnType<typeof setTimeout>>()
@@ -80,7 +106,17 @@ export function useAutosaveLines(opts: {
   })
 
   const maxIndex = computed(() => {
-    let max = minLines - 1
+    if (dynamicTrailing) {
+      let lastOccupied = -1
+      for (const i of normalized.value.keys()) if (i > lastOccupied) lastOccupied = i
+      for (const [i, d] of activeDrafts.value.entries()) {
+        if (d.text.trim() !== '' && i > lastOccupied) lastOccupied = i
+      }
+      let max = lastOccupied + 1
+      for (const i of activeDrafts.value.keys()) if (i > max) max = i
+      return max
+    }
+    let max = minLines() - 1
     for (const i of normalized.value.keys()) if (i > max) max = i
     for (const i of activeDrafts.value.keys()) if (i > max) max = i
     return max

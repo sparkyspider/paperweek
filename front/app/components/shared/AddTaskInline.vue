@@ -2,24 +2,35 @@
 /** A theme's backlog: its saved (unscheduled) tasks laid out on ruled lines, write-anywhere
  *  (useAutosaveLines — click any empty line, including one above existing tasks, and it
  *  autosaves there; writing onto an occupied line pushes it and its followers down one line).
- *  Always shows at least `minLines` lines, even when empty, so every theme card ends in a
- *  blank line ready to write on. Every line (task or empty) is a drop target — dropping a
- *  task from a day cell or another theme lands it there, pushing down whatever was on it. */
+ *  Uses `dynamicTrailing` mode: always exactly N task lines + ONE trailing blank line, never
+ *  more (an empty theme wastes no space) and never fewer (never a dead end with no line left
+ *  to write the next task on). Every line (task or empty) is a drop target — dropping a task
+ *  from a day cell or another theme lands it there, pushing down whatever was on it.
+ *
+ *  Each line's own `@drop` stops propagation (task 23): this list is nested inside ThemeCard's
+ *  root, which is ALSO a drop target (its own append-to-end handler, for drops that miss any
+ *  specific line). Without stopping it, a drop that DOES land on a line would bubble up and
+ *  fire the card's handler too — two competing PATCHes for the same task landing a beat apart
+ *  (one from here setting the precise line position, one from the card appending to the end)
+ *  is exactly the double-write QA caught. */
 import { nextTick, ref } from 'vue'
 import { useTasksStore } from '~/stores/tasks'
 import { useAutosaveLines, type DraftLine } from '~/composables/useAutosaveLines'
 import { taskIdFromDrag } from '~/utils/dnd'
+import { forceHomeEnd } from '~/utils/textInputKeys'
+import { useDragTaught } from '~/composables/useDragTaught'
 
-const props = defineProps<{ themeId: string; color: string; placeholder?: string }>()
+const props = defineProps<{ themeId: string; color: string; themeName?: string; placeholder?: string }>()
 
 const tasks = useTasksStore()
+const dragTaught = useDragTaught()
 const root = ref<HTMLElement | null>(null)
 const dragOverIndex = ref<number | null>(null)
 
 const { slots, activateLine, onInput, onEnter, onBlur, revert, dropTaskAt } = useAutosaveLines({
   savedList: () => tasks.backlogFor(props.themeId),
   defaultThemeId: () => props.themeId,
-  minLines: 2,
+  dynamicTrailing: true,
 })
 
 function focusDraft(index: number): void {
@@ -35,16 +46,24 @@ async function onClickEmpty(index: number) {
   focusDraft(index)
 }
 
+/** Enter must CHAIN to the next line (the trailing blank, in dynamicTrailing mode), not just
+ *  try to refocus something that may not exist yet: once a draft saves, its slot becomes a
+ *  plain 'task' (a TaskChip, no input) and the NEXT slot is still an inert 'empty' one —
+ *  nothing with a `[data-line-index]` to find, so a bare focusDraft() silently found nothing
+ *  and focus fell to <body>, discarding further typing. Route through the same
+ *  activate-then-focus path a click uses instead. */
 async function handleEnter(draft: DraftLine) {
+  const nextIndex = draft.lineIndex + 1
   await onEnter(draft)
   await nextTick()
-  focusDraft(draft.lineIndex + 1)
+  await onClickEmpty(nextIndex)
 }
 
 function onDropAt(e: DragEvent, index: number) {
   dragOverIndex.value = null
   const id = taskIdFromDrag(e)
   if (!id) return
+  dragTaught.markDragged()
   dropTaskAt(id, index)
 }
 </script>
@@ -55,14 +74,14 @@ function onDropAt(e: DragEvent, index: number) {
       v-for="slot in slots"
       :key="slot.index"
       class="ruled-line"
-      :class="[dragOverIndex === slot.index ? 'day-section--over' : '', slot.kind === 'empty' ? 'cursor-text' : '']"
+      :class="[dragOverIndex === slot.index ? 'ruled-line--drop-target' : '', slot.kind === 'empty' ? 'cursor-text' : '']"
       @dragover.prevent
       @dragenter="dragOverIndex = slot.index"
       @dragleave="(e: DragEvent) => { if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node | null)) dragOverIndex = null }"
-      @drop.prevent="onDropAt($event, slot.index)"
+      @drop.prevent.stop="onDropAt($event, slot.index)"
       @click="slot.kind === 'empty' ? onClickEmpty(slot.index) : undefined"
     >
-      <TaskChip v-if="slot.kind === 'task'" :task="slot.task" :color="color" dense />
+      <TaskChip v-if="slot.kind === 'task'" :task="slot.task" :color="color" :theme-name="themeName" dense />
 
       <input
         v-else-if="slot.kind === 'draft'"
@@ -73,6 +92,7 @@ function onDropAt(e: DragEvent, index: number) {
         class="diary-input font-write min-w-0 w-full text-[16px] leading-[20px] text-[var(--ink)] placeholder:font-write placeholder:text-[var(--ink-faint)]"
         @click.stop
         @input="slot.draft.text = ($event.target as HTMLInputElement).value; onInput(slot.draft)"
+        @keydown="forceHomeEnd"
         @keydown.enter.prevent="handleEnter(slot.draft)"
         @keydown.esc="revert(slot.draft); ($event.target as HTMLInputElement).blur()"
         @blur="onBlur(slot.draft)"

@@ -41,5 +41,20 @@ export function useThemeVisibility() {
     persist()
   }
 
-  return { hidden, isVisible, toggle }
+  /** Un-mute a theme if it's currently hidden — idempotent, a no-op (no state churn, no
+   *  persist) if it's already visible. Used when SCHEDULING a muted theme's task onto the week
+   *  (drag to a day line, or writing straight onto one): typing into a muted theme's own
+   *  backlog must NOT change its visibility (that's the placement-vs-capture line — this is
+   *  capture-side, unaffected), but the moment a task actually lands on the visible week strip,
+   *  leaving its theme muted would make the task invisible right where it was just dropped —
+   *  reading as the drop having silently deleted it. */
+  function show(themeId: string): void {
+    if (!hidden.value.has(themeId)) return
+    const next = new Set(hidden.value)
+    next.delete(themeId)
+    hidden.value = next
+    persist()
+  }
+
+  return { hidden, isVisible, toggle, show }
 }

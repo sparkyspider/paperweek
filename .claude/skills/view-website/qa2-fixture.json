@@ -1,0 +1,29 @@
+{
+  "themeId": "5fd7f647-6ea0-42f2-99e9-cc4d6c5a4865",
+  "taskIds": [
+    "3e69bdd7-a903-43b6-a305-e26234b5c0d7",
+    "b3bf75a3-f173-4f7d-a932-2f38ff9ccf1a",
+    "46bb3a3d-cdfa-4e86-af04-58c431136643",
+    "edba7892-e2fa-4c70-ab1a-e64c34d2f609",
+    "20080da2-7f5b-4a8f-b07f-e79b68b774db",
+    "a9d565fd-daa5-4f67-bbde-4530ca9d0931",
+    "5309b2dc-a134-4a24-9c77-8c4a9db5694c",
+    "f84304fa-1dbe-46d8-9626-4591add51c01",
+    "a6f7cd06-21c8-47d0-a8b7-e938641ee4c7",
+    "ddb16e0a-649a-4075-b4da-0492f2aa2392",
+    "e3285bef-751c-4a72-8309-b8e9f8ad6cf0",
+    "e317b3af-13dd-4949-8fec-6e7c1ea7777e",
+    "4017b47c-999d-4ddf-985f-57e47936e6ce",
+    "2d4b6af0-1076-4e7c-80b0-62491ebb9c1e"
+  ],
+  "tasks": {
+    "t1day": "3e69bdd7-a903-43b6-a305-e26234b5c0d7",
+    "t1side": "b3bf75a3-f173-4f7d-a932-2f38ff9ccf1a",
+    "t5": "46bb3a3d-cdfa-4e86-af04-58c431136643",
+    "t7": "edba7892-e2fa-4c70-ab1a-e64c34d2f609",
+    "t9strike": "20080da2-7f5b-4a8f-b07f-e79b68b774db",
+    "t9edit": "a9d565fd-daa5-4f67-bbde-4530ca9d0931",
+    "t10": "5309b2dc-a134-4a24-9c77-8c4a9db5694c",
+    "t4": "f84304fa-1dbe-46d8-9626-4591add51c01"
+  }
+}

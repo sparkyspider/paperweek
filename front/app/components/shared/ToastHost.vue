@@ -10,7 +10,10 @@ function act(t: { id: number; onAction?: () => void }) {
 </script>
 
 <template>
-  <div class="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex flex-col items-center gap-2 px-4">
+  <!-- bottom-14 (not bottom-4): clears Nuxt DevTools' own floating perf pill, which sits
+       bottom-center in dev only (never ships) — nudging the toast up costs nothing in
+       production and keeps the two from ever visually colliding while developing. -->
+  <div class="pointer-events-none fixed inset-x-0 bottom-14 z-50 flex flex-col items-center gap-2 px-4">
     <TransitionGroup name="toast">
       <div
         v-for="t in toasts"

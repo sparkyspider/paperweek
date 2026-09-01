@@ -79,8 +79,24 @@ body {
   background-repeat: repeat;
 }
 
+/* Two voices on the page, and every piece of text belongs deliberately to one — never to
+   whichever font happened to be the default:
+ *   - The STATIONER's voice: pre-printed matter — the ruling itself, dates, structural labels
+ *     like the day-card's "5 September" — set in Lora/Inter, calm and typeset.
+ *   - The WRITER's voice: whatever the person using it writes — tasks, notes, theme names —
+ *     set in Caveat, the hand that fills in the page.
+ *   Day names ("Tuesday") are a deliberate EXCEPTION: technically pre-printed matter, kept
+ *   handwritten anyway as v1's signature look. */
 .font-hand {
   font-family: 'Caveat', 'Segoe Script', cursive;
+}
+
+/* The stationer's voice for small structural chrome that isn't a UI control (contrast
+   .font-ui, which is specifically for buttons/inputs/interactive chrome) — e.g. the day card's
+   date. Same serif as the page's own body copy, just named by intent so call sites read
+   clearly rather than relying on an unstyled element quietly inheriting the body default. */
+.font-stationer {
+  font-family: 'Lora', ui-serif, Georgia, 'Times New Roman', serif;
 }
 
 /* Clean humanist sans for anything that isn't the hand-lettered wordmark/branding — form
@@ -106,6 +122,18 @@ body {
   background: var(--paper-raised);
   border-radius: 0;
   box-shadow: 0 1px 2px rgba(46, 42, 37, 0.05), 0 4px 14px rgba(46, 42, 37, 0.06);
+}
+
+/* Card-level drag-over: the one "drop anywhere on this whole card" affordance (a theme card as
+   a re-file/unschedule zone) — a soft warm wash, same tint/opacity everywhere it appears (see
+   ThemeCard.vue; `.paper-card`'s own transition-all carries the fade). A dedicated class rather
+   than a bare `bg-[var(--accent-ink-soft)]` Tailwind utility: that utility can never actually
+   win here — `.paper-card`'s `background` above is unlayered plain CSS (outside any `@layer`),
+   which the CSS cascade always ranks above ANY Tailwind utility class regardless of specificity
+   or DOM class order, since Tailwind's utilities live inside their own (lower-priority) layer.
+   This bit the original bg-[...] attempt silently: the class was applied, nothing painted. */
+.card-drop-target {
+  background: var(--accent-ink-soft);
 }
 
 /* A standalone sheet resting on the desk (the login card): a soft warm shadow lifting it off
@@ -164,15 +192,77 @@ body {
   pointer-events: none;
 }
 
-/* Hand-drawn strikethrough for completed tasks — an inked stroke, not a flat CSS line. */
+/* Same gouache stroke, but as an INTERACTION affordance rather than a permanent mark — hidden
+   until hover/focus/active. Used by nav-link-shaped text (the header's "Today") that wants to
+   read as ink, not a button-shaped card, while still confirming "yes, this is clickable" on
+   approach. */
+.gouache-underline-hover {
+  position: relative;
+  display: inline-block;
+}
+.gouache-underline-hover::after {
+  content: '';
+  position: absolute;
+  left: -2%;
+  right: -4%;
+  bottom: -0.2em;
+  height: 0.46em;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M4 9 C 55 5, 145 5, 196 8' stroke='%23b8862f' stroke-width='6' fill='none' stroke-linecap='round' opacity='0.7'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.gouache-underline-hover:hover::after,
+.gouache-underline-hover:focus-visible::after,
+.gouache-underline-hover:active::after {
+  opacity: 1;
+}
+
+/* Week-density at a glance (task 24) — the same gouache stroke, family-matched to
+   `.gouache-underline`'s today marker, but its opacity is set per-instance via the
+   `--density-opacity` custom property (DayCard.vue) rather than fixed: 0 for an empty day, so
+   it's fully invisible and costs nothing. Under the DATE number, not the day name (today's own
+   underline lives there, at full fixed strength) — different element, same family, no
+   confusion between "this is today" and "this day is busy." */
+.date-density-underline {
+  position: relative;
+  display: inline-block;
+}
+.date-density-underline::after {
+  content: '';
+  position: absolute;
+  left: -6%;
+  right: -8%;
+  bottom: -0.15em;
+  height: 0.34em;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath d='M4 9 C 55 5, 145 5, 196 8' stroke='%23b8862f' stroke-width='6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+  pointer-events: none;
+  opacity: var(--density-opacity, 0);
+}
+
+/* A slip of paper coming loose — draggable task rows lift subtly on hover, the paper-idiomatic
+   affordance that a row can be picked up and dragged. Restrained on purpose: 1px and a soft
+   warm shadow, not a UI card lifting off the page. */
+.task-row-lift {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.task-row-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(120, 84, 40, 0.16);
+}
+
+/* Hand-drawn strikethrough for completed tasks — an inked stroke, not a flat CSS line. Applied
+   to the INNER text-only span in TaskChip.vue (task 26), not the outer flex-1 row span it sits
+   in — sized to the word(s) it's actually striking (plus a couple px of natural overshoot),
+   never running on past a short title across the rest of the line's width. */
 .ink-strike {
   position: relative;
 }
 .ink-strike::after {
   content: '';
   position: absolute;
-  left: -2%;
-  right: -2%;
+  left: -2px;
+  right: -2px;
   top: 52%;
   height: 0.16em;
   transform: translateY(-50%) scaleX(0);
@@ -273,10 +363,12 @@ button:disabled {
   background: var(--weekend-wash);
 }
 
-/* Ruled like a real sheet of lined paper — one continuous set of faint warm baselines every
-   `--line-h`, painted ONCE behind the whole writing area so it never seams or restarts
-   between regions. Shared by the day-strip's whole card body AND the sidebar backlog, so
-   both read as "paper with lines on it" rather than a list-with-a-form-at-the-bottom. */
+/* Ruled like a real sheet of lined paper — faint warm baselines every `--line-h`, with the
+   pattern's origin pinned to THIS element's own top so it never starts mid-line. Shared by:
+   each day-strip daypart section's `.section-lines` (painted per-section, not once for the
+   whole card — see DaySection.vue — so its own leading label band never throws a later
+   section's rules out of phase with its text) and the sidebar backlog, so all of them read as
+   "paper with lines on it" rather than a list-with-a-form-at-the-bottom. */
 .ruled-paper {
   background-image: repeating-linear-gradient(
     to bottom,
@@ -291,23 +383,98 @@ button:disabled {
      `height: var(--line-h)` with zero extra padding/margin (see .ruled-line). */
   background-position: 0 0;
   /* Paint (and anchor) the ruling within the CONTENT box, not the padding box — otherwise the
-     horizontal rule lines bleed into the pl-7/pr-1 inset and show as stray tick-marks to the
+     horizontal rule lines bleed into the pl-4/pr-1 inset and show as stray tick-marks to the
      left of the margin line. */
   background-origin: content-box;
   background-clip: content-box;
 }
 
-/* The day card's ruled sheet: a faint warm-red margin line, like a real lined notepad —
-   content starts just to its right (see the pl-7 on the wrapper in DayCard.vue). */
-.day-lines::before {
+/* The day card's actual ruled sheet — a plain block INSIDE the `.day-lines` scroll viewport
+   (which stays unpainted, see below), sized to its natural content height and holding the four
+   DaySections. Because it's a normal child of the scrolling container rather than the
+   scrolling element's own background, it — and the margin line painted on it — scroll WITH the
+   content as one sheet. (The classic gotcha this avoids: an element's own background defaults
+   to `background-attachment: scroll`, which for a container that scrolls its OWN overflow means
+   the background stays fixed to the container's box while the content scrolls past it — exactly
+   "ruling stays static while text slides." Painting on a scrolled-content child sidesteps the
+   whole question; no attachment property needed.) */
+.day-sheet {
+  position: relative;
+}
+/* The margin line, like a real lined notepad — content starts just to its right (see the pl-4
+   on `.day-lines` in DayCard.vue). Spans the WHOLE sheet (`.day-sheet`'s full content height,
+   through every section's band and lines) since it's the sheet's edge, not a per-section mark —
+   and scrolls with it for the reason above. A narrow ~16px gutter: each task's theme dot sits
+   left of this line (.row-margin-dot below), content text starts flush at the padding edge to
+   its right. */
+.day-sheet::before {
   content: '';
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 22px;
+  left: 11px;
   width: 1px;
   background: rgba(181, 56, 46, 0.22);
   pointer-events: none;
+}
+/* The scroll viewport itself paints nothing — see `.day-sheet` above for why the ruling and
+   margin line live one level down instead of here. Hidden scrollbar per the app's convention
+   (see `.no-scrollbar`, applied alongside this in DayCard.vue) — the card still scrolls on
+   wheel/trackpad when a very full day exceeds its line budget, just without a gutter. */
+.day-lines {
+  /* (intentionally not painted — see .day-sheet) */
+}
+
+/* The margin now has a job — and, since the task-16 redesign, the ONLY theme gesture: each
+   occupied row's theme-colour DOT lives here, left of the margin line, instead of inline before
+   the text (compare the sidebar backlog, which has no margin line and keeps its dot inline —
+   see TaskChip.vue) or an inline swatch picker (that ate the writing line and jumped the text's
+   left edge between draft and saved — removed). Rendered as a standalone overlay (see
+   .row-margin-dots below and DaySection.vue) rather than nested inside `.ruled-line`, which
+   clips to enforce the one-grid-unit row height — and per the CSS overflow spec, a lone
+   `overflow-x: visible` gets computed up to `auto` the instant the other axis isn't visible
+   too, so it would still clip a dot poking out to the left even with that override. The
+   container stays pointer-events:none (so it never blocks clicks on the ruled-line rows
+   beneath it) but each dot opts back into `auto` — it's a real `<button>`, the trigger for the
+   theme popover. */
+.row-margin-dots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.row-margin-dot {
+  position: absolute;
+  left: -11px;
+  width: 6px;
+  height: 6px;
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  transform: translateY(-50%);
+  pointer-events: auto;
+  cursor: pointer;
+  /* Padding + a matching negative margin + background-clip grows the actual click target well
+     past the tiny 6px dot without changing its visual size or position (the fill only paints
+     the original content-box; the padding ring stays transparent). box-sizing is pinned to
+     content-box here since Tailwind's preflight resets the global default to border-box, which
+     would otherwise make the padding eat into the 6px instead of extending outward. */
+  box-sizing: content-box;
+  padding: 6px;
+  margin: -6px;
+  background-clip: content-box;
+}
+.row-margin-dot:hover,
+.row-margin-dot:focus-visible {
+  transform: translateY(-50%) scale(1.35);
+}
+
+/* A muted theme's scheduled task, still occupying its line but rendering no text (task 25) —
+   the dot is its only visible trace, faded so it clearly reads as "present but hidden," not a
+   normal task. Its own hover/focus still nudges the same way; clicking it un-mutes the theme
+   directly (no popover — there's nothing to choose, the task already has its theme). */
+.row-margin-dot--ghost {
+  opacity: 0.35;
 }
 
 /* One daypart region of the sheet — not its own box: no background, no border, just a marker
@@ -315,10 +482,6 @@ button:disabled {
    .section-watermark below). */
 .day-section {
   position: relative;
-  transition: background-color 0.15s ease;
-}
-.day-section--over {
-  background-color: var(--accent-ink-soft);
 }
 
 /* The one immutable grid unit: every row — a saved task, a live draft input, or a decorative
@@ -343,8 +506,21 @@ button:disabled {
 /* The ONE line a row of writing gets deepens to the accent colour on focus — never a second,
    separate underline on the input itself (see .diary-input below, which draws no border of
    its own). Anchored to this row specifically (not the whole sheet) so only the line under
-   the line you're actually writing on darkens. */
-.ruled-line:focus-within::after {
+   the line you're actually writing on darkens.
+   `:has(input:focus)`, not `:focus-within` (task 26): a saved task's clickable text span is
+   ALSO focusable (`tabindex="0"`, for Enter/Space/F2 keyboard access), and a plain mouse click
+   on any focusable element gives it DOM focus as a side effect — with `:focus-within` that
+   meant every click-to-strike lit this same "you're writing here" rule with no caret in sight,
+   and it never went away until focus moved elsewhere. `:has(input:focus)` only matches a REAL
+   text input actually having focus (the draft compose input, or a task's own dblclick-to-edit
+   input) — exactly "caret, editing/composing," never a bare strike-toggle click.
+   Line-level drag-over reuses this EXACT treatment (`.ruled-line--drop-target`, applied by
+   DaySection.vue/AddTaskInline.vue while a line is a live drop target) — one vocabulary for
+   "this is where it lands," whether you got there by clicking or by dragging. Contrast the
+   card-level wash below (`.paper-card`'s own drag-over background) for "drop anywhere on this
+   whole card," a different affordance for a different kind of target. */
+.ruled-line:has(input:focus)::after,
+.ruled-line--drop-target::after {
   content: '';
   position: absolute;
   left: 0;
@@ -360,20 +536,56 @@ button:disabled {
   --line-h: 28px;
 }
 
-/* The section's name, rendered big, faint and right-aligned behind the content instead of as
-   a heading row — after a day of use you learn the strip by position, not by label. */
+/* The section's label BAND — one full `--line-h` unit of deliberately un-ruled space leading
+   the section (see DaySection.vue): simultaneously the boundary gap from the previous section
+   and this section's ghost label, so no writable line ever renders under label text. Right-
+   aligned, vertically centred within the band via flex — no absolute positioning needed since
+   the band has nothing else in it to share space with. */
+.section-band {
+  height: var(--line-h);
+  display: flex;
+  /* Bottom-anchored, not centered: the label announces the section BELOW it, so its baseline
+     should hug the band's own first rule (a couple px of breathing room, not the ~3.8px/3.8px
+     dead-center split QA measured) — the slack piles up ABOVE instead, toward the previous
+     section, where it reads as part of the gap rather than straddling the boundary. */
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding-right: 0.5rem;
+  padding-bottom: 2px;
+}
+/* The section's name — faint, big enough to read as a watermark but sized to mostly fit its
+   one-line-h band (a couple px of cap-height bleed is fine; multiple lines of bleed is not). */
 .section-watermark {
-  position: absolute;
-  right: 0.5rem;
-  bottom: -0.1rem;
-  z-index: 0;
-  font-size: 2.75rem;
+  font-size: 1.65rem;
   font-weight: 700;
   line-height: 1;
   color: var(--ink);
   opacity: 0.08;
   pointer-events: none;
   white-space: nowrap;
+}
+
+/* The one-time first-drag teaching note (task 22) — ghost-styled like the watermark above (an
+   annotation on the page, not UI chrome), positioned in the margin so its arrow visibly curves
+   off toward the sidebar, the actual source of the thing it's pointing at. Never interactive. */
+.first-drag-note {
+  position: absolute;
+  left: -8px;
+  top: calc(var(--line-h) * 1 + 6px);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0.4;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.first-drag-note-arrow {
+  color: var(--gouache-stroke);
+  flex-shrink: 0;
+}
+.first-drag-note-text {
+  font-size: 15px;
+  color: var(--ink);
 }
 
 /* A "write on the line" input: visually just the blank ruled line until it's touched — no
@@ -385,8 +597,16 @@ button:disabled {
   background: transparent;
   outline: none;
 }
+/* Write-anywhere ruling: a focused line shows nothing but rule + caret, never ghost text under
+   the caret — the placeholder ("Write here…"/"Write a task…") only earns its keep as an idle
+   affordance on a just-activated, not-yet-typed-in line; the moment the caret actually lands
+   there it must get out of the way. Hidden via the placeholder's own color rather than removing
+   the attribute so screen readers keep the field's purpose. */
+.diary-input:focus::placeholder {
+  color: transparent;
+}
 /* Deliberately no :focus style of its own — the ROW (.ruled-line) draws the one line this
-   input sits on, and deepens it on focus (see .ruled-line:focus-within::after above). Two
+   input sits on, and deepens it on focus (see .ruled-line:has(input:focus)::after above). Two
    underlines on one line of writing was the bug; there is only ever one now. */
 
 /* A line that failed to save: the row's own line pulses warm-red instead of the sheet's usual

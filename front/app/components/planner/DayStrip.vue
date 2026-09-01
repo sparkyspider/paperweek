@@ -5,10 +5,11 @@
  *  either edge auto-scrolls the strip so a day off-screen can still be a drop target.
  *
  *  Deliberately no CSS scroll-snap: even `proximity` was cutting a flick's momentum short.
- *  Native momentum runs completely untouched; once the scroll actually comes to rest (native
- *  'scrollend', with a debounced-scroll fallback for browsers that don't fire it — Safari at
- *  time of writing) the nearest card is smoothly docked flush to the left edge in JS. */
-import { ref, onMounted, nextTick } from 'vue'
+ *  Native momentum runs completely untouched WHILE IT'S STILL FAST — see the early-takeover
+ *  physics below for how the dock itself happens; the old settle-then-dock (native 'scrollend',
+ *  with a debounced-scroll fallback for browsers that don't fire it — Safari at time of
+ *  writing) survives as the fallback for whatever takeover misses. */
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { fmtISO } from '~/utils/dates'
 import { useDayStrip } from '~/composables/useDayStrip'
 
@@ -102,6 +103,23 @@ function nearestDockLeft(): number | null {
   return best
 }
 
+/** Same as `nearestDockLeft`, but against an arbitrary reference x rather than the strip's
+ *  CURRENT scrollLeft — used by early-takeover to find the card nearest a PROJECTED endpoint,
+ *  not where the strip happens to be right now. */
+function nearestDockLeftTo(x: number): number | null {
+  const el = container.value
+  if (!el) return null
+  const kids = el.querySelectorAll<HTMLElement>('[data-date]')
+  let best: number | null = null
+  let bestDist = Infinity
+  for (const k of kids) {
+    const candidate = k.offsetLeft - STRIP_INSET_PX
+    const dist = Math.abs(candidate - x)
+    if (dist < bestDist) { bestDist = dist; best = candidate }
+  }
+  return best
+}
+
 function dockToNearest(): void {
   const el = container.value
   if (!el) return
@@ -111,6 +129,102 @@ function dockToNearest(): void {
   if (Math.abs(clamped - el.scrollLeft) < 1) return
   dockInFlight = true
   el.scrollTo({ left: clamped, behavior: 'smooth' })
+}
+
+// --- Early takeover: blend deceleration into docking as one motion, instead of letting native
+// momentum run all the way to a dead stop and THEN animating a correction (the visible seam). --
+
+/** px moved per rAF tick below which native momentum is "slow enough to take over" — tuned by
+ *  feel within the suggested 1.5-3 range: fast enough that we're not fighting the satisfying
+ *  part of a flick, slow enough that the handoff (which matches this exact speed as its
+ *  starting slope) reads as a continuation, not a correction. */
+const TAKEOVER_VELOCITY = 2.2
+/** Below this, treat the glide as already stopped — let the existing scrollend/debounce
+ *  fallback handle it instead (a slow deliberate drag never gets fast enough to cross
+ *  TAKEOVER_VELOCITY at all, so it always ends up here — exactly the "still works" case). */
+const STOPPED_VELOCITY = 0.05
+/** How many rAF ticks' worth of the CURRENT velocity to project forward, to guess which card
+ *  the free glide was heading toward. Deliberately rough — this only has to pick the right
+ *  CARD; nearestDockLeftTo snaps to its exact edge regardless of how close the projection is. */
+const PROJECT_TICKS = 10
+
+let velocityRafId: number | null = null
+let lastScrollLeft = 0
+let takeoverRafId: number | null = null
+let takeoverActive = false
+
+/** Cancel takeover if the user scrolls again mid-animation (spec requirement) — detected via
+ *  real input events (wheel, touch) rather than trying to distinguish "our own scrollLeft
+ *  writes" from "a genuine new scroll" via the scroll event stream itself (which would see
+ *  both indiscriminately). Observation only — neither listener calls preventDefault, so native
+ *  wheel/touch scrolling is never intercepted; this only watches for the NEXT gesture to arrive
+ *  while we're mid-animation. */
+function cancelTakeover(): void {
+  if (takeoverRafId !== null) { cancelAnimationFrame(takeoverRafId); takeoverRafId = null }
+  takeoverActive = false
+}
+function onUserInputDuringTakeover(): void {
+  if (takeoverActive) cancelTakeover()
+}
+
+/** Custom scrollLeft animation, x0 -> target, along an exponential ease-out whose derivative at
+ *  t=0 equals v0 (px/tick, tick ~= 16.67ms) — the SAME rate native momentum was already moving
+ *  at, so there's no visible acceleration/deceleration blip at the handoff. Runs via its own
+ *  rAF loop (not `scrollTo({behavior:'smooth'})`) because that API gives no control over the
+ *  curve's initial slope, only its destination. */
+function runTakeover(el: HTMLElement, target: number, v0: number): void {
+  const x0 = el.scrollLeft
+  const distance = target - x0
+  if (Math.abs(v0) < 0.001 || Math.abs(distance) < 0.5) {
+    if (Math.abs(distance) >= 1) { dockInFlight = true; el.scrollTo({ left: target, behavior: 'smooth' }) }
+    return
+  }
+  const TICK_MS = 1000 / 60
+  const tau = (distance / v0) * TICK_MS
+  if (tau <= 0) { dockInFlight = true; el.scrollTo({ left: target, behavior: 'smooth' }); return }
+  const start = performance.now()
+  takeoverActive = true
+  dockInFlight = true // reuse the existing flag so the eventual native 'scrollend' no-ops
+
+  function step(now: number): void {
+    if (!takeoverActive) return
+    const t = now - start
+    const remaining = distance * Math.exp(-t / tau)
+    if (Math.abs(remaining) < 0.5) {
+      el.scrollLeft = target
+      takeoverActive = false
+      takeoverRafId = null
+      return
+    }
+    el.scrollLeft = target - remaining
+    takeoverRafId = requestAnimationFrame(step)
+  }
+  takeoverRafId = requestAnimationFrame(step)
+}
+
+function maybeTakeOver(el: HTMLElement, v: number): void {
+  const speed = Math.abs(v)
+  if (speed >= TAKEOVER_VELOCITY || speed < STOPPED_VELOCITY) return
+  const projected = el.scrollLeft + v * PROJECT_TICKS
+  const target = nearestDockLeftTo(projected)
+  if (target === null) return
+  const clamped = Math.max(0, Math.min(target, el.scrollWidth - el.clientWidth))
+  if (Math.abs(clamped - el.scrollLeft) < 1) return
+  runTakeover(el, clamped, v)
+}
+
+/** Continuous rAF sampler — cheap (a subtraction and a comparison most frames) and simpler than
+ *  precisely starting/stopping it around scroll activity. `takeoverActive` guards re-entrancy:
+ *  while our own animation is driving scrollLeft, its deltas aren't "native momentum" to react
+ *  to. */
+function velocityTick(): void {
+  const el = container.value
+  if (el) {
+    const v = el.scrollLeft - lastScrollLeft
+    lastScrollLeft = el.scrollLeft
+    if (!takeoverActive) maybeTakeOver(el, v)
+  }
+  velocityRafId = requestAnimationFrame(velocityTick)
 }
 
 /** Safari (and any other browser without 'scrollend') fallback: dock once no further scroll
@@ -132,15 +246,50 @@ function onScrollEndNative(): void {
 let autoScrollTimer: ReturnType<typeof setInterval> | null = null
 function stopAutoScroll(): void {
   if (autoScrollTimer !== null) { clearInterval(autoScrollTimer); autoScrollTimer = null }
+  armDirection = null
 }
+
+/** Dwell required in an edge zone before auto-scroll actually engages — so a drag that merely
+ *  TRANSITS the zone (e.g. dragging between two lines within today's own card, which sits
+ *  flush against the strip's left edge and therefore occupies the same x-range as the left edge
+ *  zone) doesn't trip it; only a drag that's genuinely lingering there, reaching for an
+ *  off-screen day, does. */
+const EDGE_DWELL_MS = 250
+let armDirection: 'left' | 'right' | null = null
+let armSince = 0
+
+/** Auto-scroll toward an off-screen day while dragging near either edge. Two guards fix the
+ *  "ultra-weird" bug where a drag entirely WITHIN today's own docked card (or a transit toward
+ *  the sidebar) would spuriously engage this: (1) never arm a direction there's nothing to
+ *  scroll TOWARD — today docks flush at scrollLeft 0, so the left zone covers today's own card,
+ *  and arming it with no scroll room left would still fire scrollBy/onScroll every 16ms for
+ *  nothing, disrupting elementFromPoint under a stationary cursor; (2) the dwell above, for the
+ *  same failure mode when scrolled forward (any docked day still starts flush at the visible
+ *  left edge). */
 function onDragOverStrip(e: DragEvent): void {
   const el = container.value
   if (!el) return
   const rect = el.getBoundingClientRect()
   const EDGE = 90
-  const step = e.clientX < rect.left + EDGE ? -16 : e.clientX > rect.right - EDGE ? 16 : 0
+  const maxScrollLeft = el.scrollWidth - el.clientWidth
+
+  let step = 0
+  if (e.clientX < rect.left + EDGE && el.scrollLeft > 0) step = -16
+  else if (e.clientX > rect.right - EDGE && el.scrollLeft < maxScrollLeft) step = 16
+
   if (step === 0) { stopAutoScroll(); return }
+
+  const dir: 'left' | 'right' = step < 0 ? 'left' : 'right'
+  if (armDirection !== dir) {
+    // Just entered this zone (or reversed direction) — start the dwell clock, don't engage yet.
+    stopAutoScroll()
+    armDirection = dir
+    armSince = performance.now()
+    return
+  }
   if (autoScrollTimer !== null) return
+  if (performance.now() - armSince < EDGE_DWELL_MS) return
+
   autoScrollTimer = setInterval(() => {
     container.value?.scrollBy({ left: step })
     onScroll()
@@ -185,8 +334,15 @@ onMounted(async () => {
   if (container.value) {
     resizeObserver = new ResizeObserver(scheduleInitialCenter)
     resizeObserver.observe(container.value)
+    lastScrollLeft = container.value.scrollLeft
   }
   scheduleInitialCenter()
+  velocityRafId = requestAnimationFrame(velocityTick)
+})
+
+onBeforeUnmount(() => {
+  if (velocityRafId !== null) cancelAnimationFrame(velocityRafId)
+  cancelTakeover()
 })
 
 defineExpose({ scrollToToday })
@@ -197,6 +353,9 @@ defineExpose({ scrollToToday })
     ref="container"
     class="day-strip thin-scroll"
     @scroll="onScroll"
+    @scrollend="onScrollEndNative"
+    @wheel.passive="onUserInputDuringTakeover"
+    @touchstart.passive="onUserInputDuringTakeover"
     @dragover.prevent="onDragOverStrip"
     @dragleave="stopAutoScroll"
     @drop="stopAutoScroll"

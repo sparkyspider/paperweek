@@ -10,6 +10,7 @@ import { THEME_PALETTE, useThemesStore } from '~/stores/themes'
 import { useTasksStore } from '~/stores/tasks'
 import { useToast } from '~/composables/useToast'
 import { useThemeVisibility } from '~/composables/useThemeVisibility'
+import { useDragTaught } from '~/composables/useDragTaught'
 import { taskIdFromDrag } from '~/utils/dnd'
 
 const props = defineProps<{ theme: Theme }>()
@@ -17,6 +18,7 @@ const props = defineProps<{ theme: Theme }>()
 const themes = useThemesStore()
 const tasks = useTasksStore()
 const visibility = useThemeVisibility()
+const dragTaught = useDragTaught()
 const { show } = useToast()
 
 const editing = ref(false)
@@ -49,12 +51,16 @@ function archive() {
 
 /** Drop anywhere on the card (not on a specific task line) — append after the last occupied
  *  line-slot. Per-line drop targets (which push a line down instead of appending) live inside
- *  AddTaskInline now, since it owns the backlog's task rendering. Works regardless of this
- *  theme's active/inactive filter state — dropping onto a muted theme is allowed. */
+ *  AddTaskInline now, since it owns the backlog's task rendering; AddTaskInline's own `@drop`
+ *  stops propagation so a drop that lands on one of ITS lines never ALSO reaches this handler
+ *  (task 23 — that double-fire was writing two competing PATCHes for the same task, a beat
+ *  apart). Works regardless of this theme's active/inactive filter state — dropping onto a
+ *  muted theme is allowed. */
 function onDropEnd(e: DragEvent) {
   dragOver.value = false
   const id = taskIdFromDrag(e)
   if (!id) return
+  dragTaught.markDragged()
   const list = tasks.backlogFor(props.theme.id)
   const nextIndex = list.length ? Math.max(...list.map(t => t.position)) + 1 : 0
   tasks.patchTask(id, { themeId: props.theme.id, scheduledOn: null, daypart: null, position: nextIndex })
@@ -64,7 +70,7 @@ function onDropEnd(e: DragEvent) {
 <template>
   <div
     class="paper-card p-3 transition-all"
-    :class="[dragOver ? 'bg-[var(--accent-ink-soft)]' : '', visibility.isVisible(theme.id) ? '' : 'opacity-45']"
+    :class="[dragOver ? 'card-drop-target' : '', visibility.isVisible(theme.id) ? '' : 'opacity-45']"
     @dragover.prevent
     @dragenter="dragOver = true"
     @dragleave="(e: DragEvent) => { if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node | null)) dragOver = false }"
@@ -137,7 +143,7 @@ function onDropEnd(e: DragEvent) {
     </div>
 
     <div class="mt-2.5 pl-1">
-      <AddTaskInline :theme-id="theme.id" :color="theme.color" placeholder="Write a task…" />
+      <AddTaskInline :theme-id="theme.id" :color="theme.color" :theme-name="theme.name" placeholder="Write a task…" />
     </div>
   </div>
 </template>

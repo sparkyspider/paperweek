@@ -13,6 +13,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useApi } from '~/composables/useApi'
+import { useThemeVisibility } from '~/composables/useThemeVisibility'
 
 export type Daypart = 'morning' | 'afternoon' | 'evening' | 'notes'
 
@@ -31,7 +32,7 @@ export interface Task {
 }
 
 export const useTasksStore = defineStore('tasks', () => {
-  const { api, messageOf, isUnreachable } = useApi()
+  const { api, messageOf, isUnreachable, session } = useApi()
 
   const byId = ref<Record<string, Task>>({})
   const loading = ref(false)
@@ -39,6 +40,36 @@ export const useTasksStore = defineStore('tasks', () => {
   const unreachable = ref(false)
   const backlogLoaded = ref<Set<string>>(new Set())
   const rangeLoaded = ref<{ from: string; to: string } | null>(null)
+
+  /** Every queued-behind-a-timer write (deleteTaskQueued, toggleDoneDeferred) registers a
+   *  synchronous keepalive-fetch trigger here, keyed by its own id, for as long as it's
+   *  pending. If the tab is closing, `flushPendingCommits` below fires every one of them RIGHT
+   *  NOW with `fetch(..., { keepalive: true })` instead of waiting for its setTimeout — a
+   *  `keepalive` request is explicitly designed to survive the page going away, unlike the
+   *  normal `api()` path (ofetch, token-refresh-aware, async — none of which is safe to lean on
+   *  during unload). Best-effort, not a delivery guarantee: what the user last SAW (the
+   *  optimistic local state) is what gets sent, using whatever access token is in memory right
+   *  now. */
+  const pendingCommits = new Map<string, () => void>()
+
+  function flushPendingCommits(): void {
+    for (const commit of pendingCommits.values()) commit()
+    pendingCommits.clear()
+  }
+
+  if (import.meta.client) {
+    const flush = () => flushPendingCommits()
+    window.addEventListener('pagehide', flush)
+    // Belt-and-braces for platforms (notably iOS Safari) where `pagehide` can be unreliable —
+    // firing again on a tab backgrounding is harmless since the map is drained after each call.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') flush()
+    })
+  }
+
+  function authHeaders(): Record<string, string> {
+    return session.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}
+  }
 
   const all = computed<Task[]>(() => Object.values(byId.value).filter(t => !t.deletedAt))
 
@@ -120,7 +151,13 @@ export const useTasksStore = defineStore('tasks', () => {
     }
   }
 
+  /** Scheduling a muted theme's task onto the week must not leave it invisible right where it
+   *  was just dropped (reads as the drop deleting it) — auto-unmute the theme. Deliberately NOT
+   *  in `patchTask`/`createBacklogTask`: writing into (or editing) a muted theme's OWN backlog
+   *  must never change its visibility — this is capture-side only, scheduling-specific. */
   function schedule(id: string, scheduledOn: string, daypart: Daypart, position: number): Promise<void> {
+    const t = byId.value[id]
+    if (t) useThemeVisibility().show(t.themeId)
     return patchTask(id, { scheduledOn, daypart, position })
   }
 
@@ -148,6 +185,52 @@ export const useTasksStore = defineStore('tasks', () => {
     }
   }
 
+  /** Same optimistic-instant visual as `toggleDone`, but the actual PATCH is deferred `delayMs`
+   *  and cancelable — same delayed-commit shape as `deleteTaskQueued` below. Exists for
+   *  TaskChip's click/dblclick collision handling: the strike fires immediately on a single
+   *  click, but if it turns out to be the first half of a double-click, the caller invokes the
+   *  returned canceller to revert `doneAt` and skip the PATCH entirely — a completed dblclick
+   *  must leave `doneAt` unchanged and send zero PATCHes for the done state. */
+  function toggleDoneDeferred(id: string, done: boolean, delayMs = 300): (() => void) | null {
+    const t = byId.value[id]
+    if (!t) return null
+    const prevDoneAt = t.doneAt
+    t.doneAt = done ? new Date().toISOString() : null
+    const commitKey = `done:${id}`
+
+    async function commitNow(): Promise<void> {
+      pendingCommits.delete(commitKey)
+      try {
+        const updated = await api<Task>(`/api/tasks/${id}`, { method: 'PATCH', body: { done } })
+        byId.value[id] = updated
+      } catch (e) {
+        const cur = byId.value[id]
+        if (cur) cur.doneAt = prevDoneAt
+        error.value = messageOf(e, 'Could not update that task.')
+      }
+    }
+
+    const timer = setTimeout(() => { void commitNow() }, delayMs)
+    pendingCommits.set(commitKey, () => {
+      clearTimeout(timer)
+      pendingCommits.delete(commitKey)
+      fetch(`${session.base()}/api/tasks/${id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        keepalive: true,
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ done }),
+      }).catch(() => {})
+    })
+
+    return () => {
+      clearTimeout(timer)
+      pendingCommits.delete(commitKey)
+      const cur = byId.value[id]
+      if (cur) cur.doneAt = prevDoneAt
+    }
+  }
+
   /** Soft delete, held for `delayMs` behind an Undo — same debounced-commit pattern as
    *  `themes.archiveThemeQueued`, and for the same reason: the API has no separate "restore"
    *  route, so an in-time Undo simply cancels the DELETE before it is ever sent. */
@@ -158,8 +241,11 @@ export const useTasksStore = defineStore('tasks', () => {
     if (!t) return null
     const prevDeletedAt = t.deletedAt
     t.deletedAt = new Date().toISOString()
-    const timer = setTimeout(async () => {
+    const commitKey = `delete:${id}`
+
+    async function commitNow(): Promise<void> {
       pendingDelete.delete(id)
+      pendingCommits.delete(commitKey)
       try {
         await api(`/api/tasks/${id}`, { method: 'DELETE' })
       } catch (e) {
@@ -167,14 +253,28 @@ export const useTasksStore = defineStore('tasks', () => {
         if (cur) cur.deletedAt = prevDeletedAt
         error.value = messageOf(e, 'Could not delete that task.')
       }
-    }, delayMs)
+    }
+
+    const timer = setTimeout(() => { void commitNow() }, delayMs)
     pendingDelete.set(id, { timer })
+    pendingCommits.set(commitKey, () => {
+      clearTimeout(timer)
+      pendingDelete.delete(id)
+      pendingCommits.delete(commitKey)
+      fetch(`${session.base()}/api/tasks/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        keepalive: true,
+        headers: authHeaders(),
+      }).catch(() => {})
+    })
 
     return () => {
       const p = pendingDelete.get(id)
       if (!p) return
       clearTimeout(p.timer)
       pendingDelete.delete(id)
+      pendingCommits.delete(commitKey)
       const cur = byId.value[id]
       if (cur) cur.deletedAt = prevDeletedAt
     }
@@ -183,6 +283,6 @@ export const useTasksStore = defineStore('tasks', () => {
   return {
     byId, all, loading, error, unreachable, backlogLoaded, rangeLoaded,
     forCell, backlogFor, fetchRange, fetchBacklog, createBacklogTask,
-    patchTask, schedule, unschedule, updateTitle, toggleDone, deleteTaskQueued,
+    patchTask, schedule, unschedule, updateTitle, toggleDone, toggleDoneDeferred, deleteTaskQueued,
   }
 })

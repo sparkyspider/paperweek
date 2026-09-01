@@ -28,6 +28,12 @@ A TeuxDeux-inspired weekly planner. Google Calendar felt messy; this is the calm
 
 The UI looks and feels like writing on paper. When something is written, it's on a line. When something is added, it's written on a line. **There are no checkboxes, no chips, no boxes around tasks, no buttons-per-task** — task text is handwriting sitting directly on a ruled line. Completing a task = crossing it out: click/tap the written words and an ink strikethrough draws through them (click again to un-cross). Typing on an empty line writes and autosaves — no Add button. Every control that can be a paper gesture should be one; UI chrome that paper doesn't have must justify itself.
 
+**Two voices** (ruled 2026-09-01): the page has a stationer's voice — everything pre-printed (ruling, dates, structural labels → Lora serif / Inter) — and a writer's voice — everything the user writes (tasks, notes, theme names → Caveat). Day names are a deliberate exception: technically pre-printed, kept handwritten as v1's signature.
+
+**Filters and the capture/placement rule** (ruled 2026-09-01): a theme's swatch toggles its visibility — a per-browser view filter (localStorage). Capture never changes visibility (typing into a muted theme's backlog leaves it muted); placement always does (scheduling a muted theme's task onto the week auto-unmutes it). **Residue rule**: when a muted theme has tasks already scheduled on the week, their lines are not blanked — each keeps its ghosted margin dot (no text, line not writable) so absence reads as "filtered", never as "gone". Silent absence is forbidden anywhere in the app.
+
+Refinement (ruled 2026-09-01): the ban is on **permanent** chrome, not on affordances. Faint ink glyphs (the `×` to delete, the `✎` to edit) may appear **only under the hand that's already reaching** — hover-revealed, at the end of the line, gone otherwise. The gesture budget: the commonest action gets the cheapest gesture (click = cross out), and every state carries the minimum signals that make it unambiguous.
+
 ## Look & feel
 
 Art paper: slight parchment warmth (TeuxDeux-like), watercolor/gouache accents. Watercolor blob swatches per theme, hand-lettered display type (Caveat/Kalam-style) over a clean body font, gouache-pen underlines, subtle paper grain. Elegant and calm — not cartoonish, not cluttered.

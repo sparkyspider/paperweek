@@ -203,6 +203,12 @@ function runTakeover(el: HTMLElement, target: number, v0: number): void {
 }
 
 function maybeTakeOver(el: HTMLElement, v: number): void {
+  // A programmatic dock scroll is already in flight (dockToNearest, scrollToToday — anything
+  // that set `dockInFlight` before calling native `scrollTo({behavior:'smooth'})`) — that's not
+  // a real flick decelerating toward a dock point, it's our own animation, whose slow start/end
+  // reads the same as a flick settling. Without this guard, velocityTick samples that slow
+  // phase and hijacks it via runTakeover, snapping back toward wherever the scroll started.
+  if (dockInFlight) return
   const speed = Math.abs(v)
   if (speed >= TAKEOVER_VELOCITY || speed < STOPPED_VELOCITY) return
   const projected = el.scrollLeft + v * PROJECT_TICKS
@@ -299,13 +305,18 @@ function onDragOverStrip(e: DragEvent): void {
 /** Docks today flush at the strip's left edge — same STRIP_INSET_PX math as dockToNearest,
  *  so "jump to today" and "settle after a flick" always agree on where a docked card sits.
  *  Now that the container carries no CSS scroll-snap at all, a plain scrollLeft assignment is
- *  reliable (it previously wasn't — scroll-snap-type was quietly overriding it). */
+ *  reliable (it previously wasn't — scroll-snap-type was quietly overriding it).
+ *  The smooth branch is a native `scrollTo({behavior:'smooth'})` just like dockToNearest's — it
+ *  needs the same `dockInFlight` guard (see maybeTakeOver's doc comment) so early-takeover can't
+ *  sample its slow start/end and hijack it: a long smooth scroll (docking from far away) spends
+ *  longer in the low-velocity band where an unguarded maybeTakeOver would misfire and snap the
+ *  strip back toward its starting position instead of docking on today. */
 function scrollToToday(smooth = true): void {
   const el = container.value
   const target = dayEl(todayISO)
   if (!el || !target) return
   const left = Math.max(0, target.offsetLeft - STRIP_INSET_PX)
-  if (smooth) el.scrollTo({ left, behavior: 'smooth' })
+  if (smooth) { dockInFlight = true; el.scrollTo({ left, behavior: 'smooth' }) }
   else el.scrollLeft = left
 }
 

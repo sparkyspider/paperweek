@@ -312,6 +312,19 @@ corroborated against direct evidence).
   code work is real and on disk regardless of whether it ever files a report. Not a
   new pattern, just another instance of it.
 
+## INC-14: fifth harness-level agent death this session — Builder I (routine, per adopted rule)
+- **Symptom**: Builder I (phase 6 sexy-branch builder) died at the harness level
+  immediately after filing its iteration-1 report. Fifth such death this session
+  (early design worker, QA sense-tester/INC-9, standby worker/INC-12, QA II/INC-13,
+  now Builder I).
+- **Per the INC-12 rule, not root-caused individually** — this is the expected,
+  routine failure mode of this environment now. Logged for the count, not for a fresh
+  investigation.
+- **Resolution**: Builder II spawned immediately in the same worktree, briefed with
+  the independent FIDELITY JUDGE's ranked fix list from iteration 1 — another clean
+  instance of written-artifact handover (the judge's score/notes, not a resumed
+  transcript) carrying the work forward.
+
 ## Open watch items (not yet incidents — logged so they don't become one silently)
 - **`<scratchpad>/front.log` — sparse-file gap from an uncoordinated truncate, not an
   active disk-fill risk.** Real on-disk usage is low (~12-98KB, root volume has 21Gi

@@ -29,6 +29,7 @@ stays main's/Mark's call, surfaced not enacted).
 | 2026-09-01 19:56 | **ADOPTED** — all 6 fidelity-judge improvements, now with 7 seeded rubric dimensions (paper ground/texture, typography roles, accent discipline, ink quality, artifact restraint, layout metaphor, overall gestalt) and a numeric stop rule (two consecutive ≥4/5-all-dimensions iterations, or <0.5 total gain after iteration 4). Independent-judge and screenshot-parity rules marked load-bearing. Phase 9 wording amended: "v1" clarified as loose shorthand for "the polished current-look build on branch v2, port 3200" — not a separate literal v1. Phase-6 scope (02+04 only, 03 explicitly out) confirmed correct as originally written. | Main/Mark reviewed and adopted all three open items from the 19:53 confirmation message in one pass. |
 | 2026-09-01 20:08 | **ADOPTED** — agent mortality / ledger-survives-the-agent principle (§11 addendum): agent transcripts are mortal, written state isn't; written-state currency is now a liveness signal this monitor checks every cycle, not just process motion. | INC-9 (`LESSONS.md`): QA sense-tester died at the harness level, unresumable — second such death this session (design worker earlier). QA II's entire handover is `qa-ledger.md` + main's retest records, proving the principle. |
 | 2026-09-01 20:10 | **ADOPTED** — run extended past the original ~60-min window; cadence now ~8-10 min during steady build phases, tightened to ~5 min during phase transitions and the QA retest; monitor gives main one cycle's warning if its own context runs thin, so Monitor II can be spawned with a doc-based handover. | Mark left the session on full auto; main's enforcement duties (phase clock, QA-II spawn reminder, backup enforcement) depend on this monitor staying alive through all 9 phases, hours not minutes — a fixed 60-min run would abandon the pipeline mid-flight. |
+| 2026-09-01 21:40 | **RECORDED** — phases 3-6 advanced: clean restart (front.log rotation resolved), v2 committed (8c82189, frozen as contender A), design-sexy branched as a git WORKTREE (not in-place branch switch) enabling the phase-9 side-by-side architecture early, phase 6 sexy builder started. **ADOPTED** — single-writer-per-surface extended to single-writer-per-worktree; the sexy builder's one permitted cross-boundary edit (backend CORS +3202) documented as a sanctioned exception, not a violation pattern. | Pipeline update from main; a genuine architectural note (worktrees, not branches) worth capturing precisely for a future resurrection. |
 | 2026-09-01 21:33 | **RECORDED** — script-survives-the-agent corollary: a dead agent's test scripts/tooling (not just its written findings) are durable, reusable state for a successor. | INC-13: QA II died; QA III spawned narrow-scoped, reusing QA II's `qa2-*.mjs` scripts directly rather than rewriting them. |
 | 2026-09-01 21:10 | **REINFORCED** — three-for-three harness-level agent deaths this session (early design worker, QA sense-tester, phase-1 worker while idle) confirms this is routine/expected, not exceptional — don't try to resume a "no transcript" agent, always hand off from written state. | INC-12: the standby worker died; main spawned a FIXER from QA II's written forensics rather than attempting resume, same clean pattern as INC-9. |
 | 2026-09-01 20:50 | **ADOPTED** — mandatory pre-action check on any stall/escalation report: verify its time claims against a real `date` call / file mtimes before acting (kill/respawn especially). | INC-11: Shepherd IV hallucinated "current time: 21:25" (real time was 20:47) and issued a false CRITICAL stall escalation for QA II + this monitor, both of which were actually active. Caught before any action taken. |
@@ -78,6 +79,20 @@ files); `docs/process/` → process monitor only. A parallel writer on the same 
 risks clobbering newer work with a stale-context overwrite. **Forks are banned for
 side-research** for the same reason — a fork inherits context at fork-time and can
 overwrite work that landed after the fork was spawned.
+
+**Extended 2026-09-01 ~21:40 (phase 5 of the sexy-branch pipeline, §10) to
+single-writer-per-worktree**: once `design-sexy` branched off the phase-4-committed
+`v2` as a **git worktree** (a second full checkout at
+`/Users/sparkyspider/IdeaProjects/productivity-tools-sexy`, not just a branch switch
+in place), the rule generalizes — the sexy builder's surface is that worktree path,
+and the original `productivity-tools/` checkout (holding `v2`, frozen at commit
+`8c82189`) should see no further writes at all, only reads as the comparison
+baseline. A **documented, explicitly permitted exception** exists: the sexy builder
+may make **one** cross-boundary edit to the shared backend (CORS: add the `:3202`
+origin, requiring a backend restart) — this is sanctioned, not a violation, precisely
+because it was named in advance rather than discovered as scope creep after the
+fact. The general lesson: a cross-boundary edit is fine when it's pre-authorized and
+narrow; it's a red flag only when it's neither.
 
 ### Evidence standard — every claim needs witnessed evidence
 "Done" is not a claim main or any agent should accept bare. Evidence means one of:
@@ -284,7 +299,14 @@ from main or whoever owns that file.
 *(Proposals live here, marked PROPOSED, and are also sent to main as advice. Not yet
 adopted — do not treat as binding process until main/Mark confirms.)*
 
-### PROPOSED: rotate or cap `front.log` / `back.log` in the scratchpad — properly
+### RESOLVED 2026-09-01 ~21:40: `front.log`/`back.log` rotation, done properly this time
+The phase-3 clean restart killed the writer processes **before** touching the logs,
+then started fresh ones — exactly the remedy proposed below (not a bare truncate on
+a live writer). Result: fresh ~4KB logs, both servers verified healthy after. Closing
+this proposal as adopted-in-practice; leaving the original write-up below for the
+reasoning, in case a future clean restart is tempted to shortcut it.
+
+### PROPOSED (historical — see RESOLVED note above): rotate or cap `front.log` / `back.log` in the scratchpad — properly
 Observed 2026-09-01 19:10: `<scratchpad>/front.log`'s logical size hit **1.2 GB**
 (dev server stdout, accumulating all session). Someone truncated it around 19:16, but
 **without restarting the writer process** — the writer kept its old ~1.2GB file

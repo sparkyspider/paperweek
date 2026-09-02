@@ -27,7 +27,7 @@ import {
   assessBootConfig,
   formatMissingConfig,
 } from './core/config/boot-config';
-import { frontBaseUrl } from './core/config/front-base-url';
+import { frontBaseUrls } from './core/config/front-base-url';
 
 async function bootstrap() {
   // FAIL-LOUD BOOT VALIDATION: assess the config BEFORE any module is built, so a missing/
@@ -52,7 +52,7 @@ async function bootstrap() {
   app.use(securityHeadersMiddleware);
 
   const configService = app.get(ConfigService);
-  const frontBase = frontBaseUrl(configService);
+  const frontBase = frontBaseUrls(configService);
 
   app.enableCors({ origin: frontBase, credentials: true });
   app.use(cookieParser());

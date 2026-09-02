@@ -127,8 +127,19 @@ export function useAutosaveLines(opts: {
     for (let i = 0; i <= maxIndex.value; i++) {
       const task = normalized.value.get(i)
       const draft = activeDrafts.value.get(i)
-      if (task) out.push({ kind: 'task', index: i, task })
-      else if (draft) out.push({ kind: 'draft', index: i, draft })
+      // A live draft ALWAYS wins its slot over a same-index task, for as long as it's active.
+      // activateLine() refuses to arm a draft over a line a saved task already occupies, so the
+      // only task that can ever appear at a drafted index is the one the draft itself is in the
+      // middle of creating — including the optimistic `tmp_…`-id row `createBacklogTask` puts
+      // in the store BEFORE its network round trip even starts, well before `persist()` gets a
+      // real id back to assign to `draft.taskId`. Falling through to the 'task' branch during
+      // that window (or the ID-matching version of this check tried first, which still failed
+      // during it) used to unmount the focused <input> mid-keystroke the instant the debounced
+      // autosave fired, discarding everything typed after — the reported "debounce eats my
+      // typing" bug. The draft is only ever retired (and the row swapped to a TaskChip) by
+      // `settle()`, on Enter/blur/Escape+blur — never merely because a backing task exists.
+      if (draft) out.push({ kind: 'draft', index: i, draft })
+      else if (task) out.push({ kind: 'task', index: i, task })
       else out.push({ kind: 'empty', index: i })
     }
     return out

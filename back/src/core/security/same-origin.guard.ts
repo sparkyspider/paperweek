@@ -16,7 +16,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Request } from 'express';
-import { frontBaseUrl } from '../config/front-base-url';
+import { frontBaseUrls } from '../config/front-base-url';
 
 @Injectable()
 export class SameOriginGuard implements CanActivate {
@@ -26,7 +26,7 @@ export class SameOriginGuard implements CanActivate {
 
   canActivate(ctx: ExecutionContext): boolean {
     const req = ctx.switchToHttp().getRequest<Request>();
-    const allowed = frontBaseUrl(this.config);
+    const allowed = frontBaseUrls(this.config);
 
     const origin = req.headers.origin;
     const referer = req.headers.referer;
@@ -34,8 +34,8 @@ export class SameOriginGuard implements CanActivate {
     if (!origin && !referer) return true;
 
     if (origin) {
-      if (origin === allowed) return true;
-    } else if (referer && referer.startsWith(`${allowed}/`)) {
+      if (allowed.includes(origin)) return true;
+    } else if (referer && allowed.some((a) => referer.startsWith(`${a}/`))) {
       return true;
     }
 

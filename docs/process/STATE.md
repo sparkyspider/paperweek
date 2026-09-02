@@ -38,25 +38,95 @@ for the process write-up; this block is the live status tracker.
    3200, for Mark's final side-by-side comparison. (Amended 2026-09-01 ~19:56: main's
    original "v1" was loose shorthand for this, not a literal separate v1.)
 
-### Current phase: 3 — FIXER ACTIVE on item 10 (phase 2 retest complete 21:03:59)
-**Update 2026-09-01 ~21:10**: phase 3 was already in motion before this monitor's
-15-min-clock message reached main — **stopping that clock, it was based on stale
-information, not an incident**. What actually happened: (1) **INC-12** — the
-standby worker died (harness-level, third such death this session, see
-`LESSONS.md`); (2) main spawned a **FIXER** (Sonnet) within minutes of the retest
-verdict, briefed with QA II's full item-10 forensics **plus a sharper hypothesis**
-than QA II's own timestamp-guard lead: a **mid-click re-render detaching the
-node** — mousedown triggers a reactive flip (likely the strike-calm blur, or a
-dots-overlay re-key), so by the time the click event would fire, it's targeting a
-DOM node that's already been replaced; `el.click()` skips the mousedown step
-entirely, which is exactly why automation "works" and real humans don't. The FIXER
-also carries the secondary `localStorage` raw-string-vs-JSON gotcha QA II noted.
+### Current phase: 7 — FIDELITY LOOP, iteration 2 in progress (phase 6 build done, judged)
 
-**Phase gating sequence (current)**: FIXER's verified fix → QA II re-verifies item
-10 → phase 3 closes (clean restart) → phase 4 (commit `v2`). **This monitor's clock
-re-arms on the FIXER's completion report** (not on the original 21:03:59 ledger
-timestamp) — if QA II re-verification of item 10 hasn't started within ~15 min of
-that report, remind main by name.
+**PHASE 6 CLOSED / PHASE 7 STARTED**: the builder's iteration 1 was judged by the
+independent FIDELITY JUDGE using this monitor's adopted rubric (`OPERATIONS.md` §10)
+— **score 46/70** (planner 22/35, login 24/35). Per-dimension read: **typography
+roles, accent discipline, and layout metaphor all scored 4/5 on both surfaces** —
+judge's own words: "the skeleton has converged." **Blocked by ink quality (2/5 both
+surfaces)** — uniform vector shapes, no hand-drawn character — plus named weaknesses
+in sticky-note flatness, prop density, and paper grain. Stop rule unchanged (two
+consecutive all-dimensions-≥4 passes) — nowhere close yet, this is exactly what
+iteration cycles are for.
+
+**INC-14 (routine, per the adopted no-root-cause rule)**: Builder I died post-report
+— harness-level, **fifth** transcript death this session. Logged in `LESSONS.md`
+without ceremony, per the standing guidance from INC-12/13.
+
+**Builder II spawned** in the worktree, briefed with the judge's ranked fix list:
+SVG hand-strokes replacing CSS shapes (ink quality), real torn/taped sticky-note
+texture, added login-page props + a "Remember me" ballot-box element, visible paper
+grain. **Expect iteration 2 in ~30-45 min** — another long quiet-build stretch, same
+caution as iteration 1 (don't false-alarm on it). **Shepherd VI continues the content
+watch** through this iteration — no new watcher spawn needed, still within its
+budget.
+
+### Cycle 33 — 2026-09-01 22:23, still on-target
+`grain-test.png`/`.html` (22:22) and a `zoom-*` series (header, today, datenum,
+daycard, wedcard — 22:20-22:22) — Builder II testing paper-grain texture and
+close-inspecting specific UI elements, directly continuing the ink-quality/grain
+thread from the judge's feedback. Shepherd VI still on its original file (5195
+bytes, 21:58) — not yet flagging as a concern; healthy content keeps landing in the
+scratchpad independent of Shepherd's own cadence, and it's within a plausible ~4-min
+poll gap given how recently it last wrote relative to this build's pace. Will check
+its mtime explicitly again next cycle before treating it as a liveness question. No
+v2 checkout drift, nothing actionable.
+
+### Cycle 32 addendum — 2026-09-01 22:14, Builder II on-target
+`gen-rough.mjs` / `gen-torn.mjs` / `gen-torn2.mjs` (22:12-22:13) — scripts generating
+rough/torn-edge texture assets, directly on the judge's ink-quality/sticky-note-
+texture feedback from iteration 1, not a tangent. `baseline-login.png` /
+`baseline-planner.png` (22:09) + `login-dom.html` (22:10) reads as Builder II
+establishing a before-shot for its own comparison. Healthy, on-target progress;
+nothing actionable.
+
+### Superseded — phase 6 record (kept for trend/history, not the live status)
+
+**PHASE 3 CLOSED** (~21:40): clean server restart done properly this time — writers
+killed *before* log removal (closes the `front.log` sparse-file watch item from
+`LESSONS.md` INC-6/`OPERATIONS.md` §9 PROPOSED fix; the PROPOSED remedy was exactly
+this — restart the writer, don't just truncate a live file's log), fresh ~4KB logs,
+both servers verified up.
+
+**PHASE 4 DONE**: commit **`8c82189`** on `v2` — 48 files, 5673 insertions, the whole
+QA wave. **`v2` is now frozen as "contender A"** — per phase 4's own definition, it
+keeps this look-and-feel permanently for the final comparison; no more changes to it
+from here.
+
+**PHASE 5 DONE, architecturally notable**: `design-sexy` branched from the committed
+`v2`, but not as a simple branch-and-switch — **a git WORKTREE** at
+`/Users/sparkyspider/IdeaProjects/productivity-tools-sexy`. This means `v2` keeps
+serving port 3200 the whole time (nothing had to stop), while `design-sexy` serves
+3202 from its own independent working directory — **the phase-9 side-by-side
+architecture is live early**, not something assembled only at the end. Two full
+copies of the working tree now exist on disk; **single-writer-per-surface now reads
+as single-writer-per-worktree** — the sexy builder's surface is the worktree path
+above, not the original `productivity-tools/` checkout, and nothing should touch `v2`
+(the original checkout) from here on except reading it as the frozen comparison
+baseline.
+
+**PHASE 6 STARTED**: the **SEXY BUILDER** (Sonnet) is working in the worktree —
+implementing refs 02 (login) + 04 (planner) as a **behaviour-preserving reskin**, on
+port 3202. **One explicitly permitted cross-boundary edit**: backend CORS gets a
+`+3202` origin added, requiring a backend restart — this is a **documented,
+sanctioned exception** to the "don't touch other surfaces" rule, not a violation to
+flag if seen; noting it here so a future observation cycle doesn't mistake it for
+scope drift. The builder self-assesses its own iteration 1 against the reference
+images, then main spawns the independent **FIDELITY JUDGE** for phase 7 (this
+monitor's adopted rubric: 7 anchored dimensions, blind ordering, independent judge,
+numeric stop rule — `OPERATIONS.md` §10).
+
+**Watch items for phase 6** (per main's own framing):
+- Builder's iteration-1 report — **expect ~30-45 min** (includes an `npm install` in
+  the fresh worktree) — a long quiet stretch here is normal, not a stall; don't
+  false-alarm on it the way Shepherd IV once did (INC-11).
+- Backend stays healthy on 3201 after its CORS-driven restart.
+- `v2` on port 3200 remains untouched by any sexy-branch work — single-writer-per-
+  worktree, watch for any diff/commit activity in the original checkout that isn't
+  read-only.
+- **Shepherd V may be near its budget** — if its lane goes dark during phase 6,
+  that's explicitly a RESPAWN REQUEST situation per §11, not an ambiguous call.
 
 ### Superseded — phase 2 record (kept for trend/history, not the live status)
 **PHASE 1 COMPLETE**: worker reported task 7 (physics) done with full verification
@@ -145,6 +215,46 @@ just the fact that staffing changed.
 
 ### Phase-completion timestamp log (append as observed — needed for the 15-min timer)
 - Phase 1: not yet complete as of cycle 7 (19:45).
+
+---
+
+## Cycle 31 — 2026-09-01 21:56 (meta-lane, phase 6, healthy and ahead of schedule)
+
+**Shepherd VI confirmed alive** (`shepherd6-state.txt`, spawned 21:48:27, 2 cycles
+logged) — the RESPAWN REQUEST from cycle 30 was actioned promptly. Its own baseline
+check independently confirms what I verified last cycle: only the sanctioned CORS
+edits in the main repo, git status clean otherwise, backend/v2-frontend both 200 OK.
+
+**Sexy builder ahead of schedule**: first screenshot (`sexy-iter1-login.png`) landed
+at 21:51 — only ~11 min into the build, well inside the "~30-45 min" estimate, not at
+the end of it. Second screenshot (`sexy-iter1-planner.png`) followed within the same
+4-min cycle. Shepherd VI's read: both show a coherent "ink-on-paper" design language
+(paper-grid texture, hand-lettered type, color-coded theme sidebar) — consistent
+between the two screens, a good sign this isn't disjointed per-page guessing. Port
+3202 not live yet (still building). Diff in the worktree: 11 files, 723+/154-.
+Nothing actionable; no message to main this cycle, just logging healthy progress.
+
+---
+
+## Cycle 30 — 2026-09-01 21:47 — Shepherd V retired (mission complete, not a death); RESPAWN REQUEST sent for phase 6
+
+**Verified the phase-6 setup is exactly as briefed**: `v2`'s checkout shows the one
+permitted cross-boundary edit landed (`back/src/core/config/front-base-url.ts`,
+`back/src/core/security/same-origin.guard.ts`, `back/src/main.ts` all modified — the
+CORS `:3202` change), nothing else touched. `productivity-tools-sexy` worktree
+confirmed on disk (created 21:36, full checkout). Logs confirm the clean restart:
+`front.log` 749 bytes (21:43), `back.log` 9756 bytes (21:40) — both tiny and fresh,
+closing the front.log saga for real this time.
+
+**Shepherd V status**: last write 21:04 (43 min ago). Read its full final entries —
+it ends with "PHASE 2 CLOSURE: Complete... Ready for Phase 3," which reads as a
+**deliberate mission-complete stop** (its own stated mandate was specifically
+"Phase-2 Stall-Recovery Watch," ~45 min budget from ~20:49 — consistent with retiring
+once phase 2 actually closed at 21:03:59), not an abrupt crash. No successor
+`shepherd6-state.txt` exists. **Net effect: the content lane is currently unstaffed**
+for phase 6, which per main's own framing is a RESPAWN REQUEST situation — sending
+one now rather than waiting, since phase 6's builder is mid-`npm install`/first-pass
+right now and deserves content-lane coverage like every other active phase has had.
 
 ---
 

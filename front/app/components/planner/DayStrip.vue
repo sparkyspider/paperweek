@@ -33,11 +33,11 @@
  *  settle-then-dock fallback (native 'scrollend', with a debounced-scroll fallback for browsers
  *  that don't fire it) survives under BOTH paths as the safety net for whatever either one
  *  misses. */
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { fmtISO } from '~/utils/dates'
 import { useDayStrip } from '~/composables/useDayStrip'
 import { decelerationFor, planDock, positionAt, stopTime } from '~/utils/dockPhysics'
-import { createWheelIntentTracker } from '~/utils/wheelIntent'
+import { createWheelIntentTracker, normalizeWheelDelta, type WheelIntent } from '~/utils/wheelIntent'
 
 /** The fallback flag (see file doc comment above): flip to `false` to restore the previous
  *  observe-and-takeover-only design if full wheel ownership ever misbehaves on some device. */
@@ -301,6 +301,40 @@ const WHEEL_TICK_MS = 1000 / 60
  *  whichever dock is already nearest, same as a discrete notch's own settle. */
 const WHEEL_STOPPED_VELOCITY = 0.05
 
+// --- Dev-only wheel debug overlay (?wheeldebug=1) ------------------------------------------
+// Mark can't be watched flicking his own trackpad the way a screen-share session could be, and
+// this whole feature is Firefox-first behaviour that's genuinely hard to verify without his own
+// hand on his own hardware — so the app becomes the instrument instead. `wheelDebugEnabled` is
+// resolved once on mount from the URL query AND `import.meta.dev` (Nuxt's own dev-build compile
+// -time flag — this whole block, template included, is entirely absent from a production
+// build, never just hidden). The state below is only ever written to when the overlay is
+// actually on, so there's zero cost to a normal (non-debug) session either way.
+const wheelDebugEnabled = ref(false)
+interface WheelDebugState {
+  intent: WheelIntent | 'idle'
+  normalizedDelta: number
+  velocity: number
+  ownership: 'native' | 'manual' | 'manoeuvre'
+  plannedTarget: number | null
+  solvedA: number | null
+}
+const wheelDebug = ref<WheelDebugState>({
+  intent: 'idle', normalizedDelta: 0, velocity: 0, ownership: 'native', plannedTarget: null, solvedA: null,
+})
+const wheelDebugText = computed(() => {
+  const d = wheelDebug.value
+  const fmt = (n: number | null) => (n === null ? '—' : n.toFixed(2))
+  return [
+    `wheel debug  (A0=${TAKEOVER_A0.toFixed(4)})`,
+    `intent:      ${d.intent}`,
+    `delta:       ${fmt(d.normalizedDelta)} px`,
+    `velocity:    ${fmt(d.velocity)} px/tick`,
+    `ownership:   ${d.ownership}`,
+    `target:      ${fmt(d.plannedTarget)}`,
+    `solved a*:   ${fmt(d.solvedA)}`,
+  ].join('\n')
+})
+
 function clearWheelReleaseTimer(): void {
   if (wheelReleaseTimer !== null) { clearTimeout(wheelReleaseTimer); wheelReleaseTimer = null }
 }
@@ -314,9 +348,18 @@ function handleFingerRelease(): void {
   clearWheelReleaseTimer()
   const el = container.value
   if (!el) return
-  if (Math.abs(wheelVelocity) < WHEEL_STOPPED_VELOCITY) { dockToNearest(); return }
+  if (Math.abs(wheelVelocity) < WHEEL_STOPPED_VELOCITY) {
+    if (wheelDebugEnabled.value) wheelDebug.value = { ...wheelDebug.value, ownership: 'native', plannedTarget: null, solvedA: null }
+    dockToNearest()
+    return
+  }
   const plan = clampedPlan(el, wheelVelocity)
-  if (plan === null) { dockToNearest(); return }
+  if (plan === null) {
+    if (wheelDebugEnabled.value) wheelDebug.value = { ...wheelDebug.value, ownership: 'native', plannedTarget: null, solvedA: null }
+    dockToNearest()
+    return
+  }
+  if (wheelDebugEnabled.value) wheelDebug.value = { ...wheelDebug.value, ownership: 'manoeuvre', plannedTarget: plan.target, solvedA: plan.a }
   if (Math.abs(plan.target - el.scrollLeft) < 1) return
   runTakeover(el, plan.target, wheelVelocity, plan.a, plan.onDock)
 }
@@ -327,6 +370,7 @@ function handleFingerRelease(): void {
 function handleDiscreteSettle(): void {
   wheelReleasedThisGesture = true
   clearWheelReleaseTimer()
+  if (wheelDebugEnabled.value) wheelDebug.value = { ...wheelDebug.value, ownership: 'native', plannedTarget: null, solvedA: null }
   dockToNearest()
 }
 
@@ -339,7 +383,16 @@ function handleDiscreteSettle(): void {
  *  glide is ours now, not the browser's), or DISCRETE (apply, then settle without a glide). A
  *  vertical-intent wheel event over the strip is left completely alone (no preventDefault, no
  *  handling at all) — this strip only ever scrolls horizontally, so vertical input here isn't
- *  this component's to take. */
+ *  this component's to take.
+ *
+ *  Raw event deltas are normalized by `deltaMode` FIRST, before anything else sees them —
+ *  Firefox frequently reports DOM_DELTA_LINE (small integers, "N lines") for gestures Chromium
+ *  reports as DOM_DELTA_PIXEL for; every threshold downstream (wheelIntent.ts's cadence-in-ms
+ *  and sample-to-sample RATIOS, this handler's own velocity math) assumes one consistent pixel
+ *  unit, and normalizing here is the one place that has to hold for both to agree. See
+ *  wheelIntent.ts's own doc comment on `normalizeWheelDelta` for why the classifier itself needs
+ *  no further changes for this — its thresholds are either time-based or scale-invariant
+ *  ratios. */
 function onWheel(e: WheelEvent): void {
   if (!WHEEL_OWNERSHIP) { onUserInputDuringTakeover(); return }
 
@@ -350,9 +403,11 @@ function onWheel(e: WheelEvent): void {
   const el = container.value
   if (!el) return
 
-  const dx = Math.abs(e.deltaX) >= Math.abs(e.deltaY) ? e.deltaX : e.deltaY
+  const rawDx = Math.abs(e.deltaX) >= Math.abs(e.deltaY) ? e.deltaX : e.deltaY
+  const dx = normalizeWheelDelta(rawDx, e.deltaMode, el.clientWidth)
   const now = performance.now()
   const intent = wheelTracker.push({ dx, t: now })
+  if (wheelDebugEnabled.value) wheelDebug.value = { ...wheelDebug.value, intent, normalizedDelta: dx }
 
   if (intent === 'momentum') {
     // Discard entirely — never applied to scrollLeft. This IS the release signal (see the file
@@ -374,6 +429,10 @@ function onWheel(e: WheelEvent): void {
   wheelLastT = now
   const instantV = dx / (dt / WHEEL_TICK_MS)
   wheelVelocity = intent === 'discrete' ? instantV : wheelVelocity * 0.5 + instantV * 0.5
+
+  if (wheelDebugEnabled.value) {
+    wheelDebug.value = { ...wheelDebug.value, ownership: 'manual', velocity: wheelVelocity, plannedTarget: null, solvedA: null }
+  }
 
   clearWheelReleaseTimer()
   wheelReleaseTimer = setTimeout(intent === 'discrete' ? handleDiscreteSettle : handleFingerRelease, WHEEL_RELEASE_GAP_MS)
@@ -515,6 +574,12 @@ function scheduleInitialCenter(): void {
 }
 
 onMounted(async () => {
+  // Dev-only wheel debug overlay — `import.meta.dev` is Nuxt's own compile-time flag (false,
+  // and this whole branch dead-code-eliminated, in a production build; never merely hidden by
+  // runtime state in prod). `?wheeldebug=1` opts in per-session on top of that.
+  if (import.meta.dev) {
+    wheelDebugEnabled.value = new URLSearchParams(window.location.search).get('wheeldebug') === '1'
+  }
   await initialFetch()
   await nextTick()
   if (container.value) {
@@ -560,4 +625,14 @@ defineExpose({ scrollToToday })
       :is-today="fmtISO(d) === todayISO"
     />
   </div>
+
+  <!-- Dev-only wheel debug overlay — see the onMounted doc comment above for the two gates
+       (import.meta.dev at BUILD time, ?wheeldebug=1 per-session on top). Deliberately plain,
+       technical HUD styling (monospace, dark, top-left) rather than anything matching the app's
+       own paper look — it should read unmistakably as instrumentation, not UI. -->
+  <div
+    v-if="wheelDebugEnabled"
+    class="pointer-events-none fixed left-2 top-2 z-50 whitespace-pre rounded-none bg-black/80 px-2 py-1.5 font-mono text-[11px] leading-[15px] text-lime-300"
+    aria-hidden="true"
+  >{{ wheelDebugText }}</div>
 </template>

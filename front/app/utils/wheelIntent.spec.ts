@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { createWheelIntentTracker, type WheelIntent } from './wheelIntent'
+import {
+  createWheelIntentTracker,
+  DOM_DELTA_LINE,
+  DOM_DELTA_PAGE,
+  DOM_DELTA_PIXEL,
+  LINE_HEIGHT_PX,
+  normalizeWheelDelta,
+  type WheelIntent,
+} from './wheelIntent'
 
 /** Feeds a whole synthetic sequence through a fresh tracker and returns the classification for
  *  every sample, in order — the shape every test below asserts against. */
@@ -131,5 +139,79 @@ describe('wheelIntent — burst boundaries and tracker state', () => {
   it('a single sample is always discrete — nothing to compare it against yet', () => {
     const tracker = createWheelIntentTracker()
     expect(tracker.push({ dx: 42, t: 0 })).toBe('discrete')
+  })
+})
+
+describe('normalizeWheelDelta', () => {
+  it('passes DOM_DELTA_PIXEL through unchanged', () => {
+    expect(normalizeWheelDelta(37, DOM_DELTA_PIXEL, 800)).toBe(37)
+    expect(normalizeWheelDelta(-12.5, DOM_DELTA_PIXEL, 800)).toBe(-12.5)
+  })
+
+  it('scales DOM_DELTA_LINE by the px-per-line constant, sign preserved', () => {
+    expect(normalizeWheelDelta(3, DOM_DELTA_LINE, 800)).toBe(3 * LINE_HEIGHT_PX)
+    expect(normalizeWheelDelta(-2, DOM_DELTA_LINE, 800)).toBe(-2 * LINE_HEIGHT_PX)
+  })
+
+  it('scales DOM_DELTA_PAGE by the caller-supplied page size', () => {
+    expect(normalizeWheelDelta(1, DOM_DELTA_PAGE, 640)).toBe(640)
+    expect(normalizeWheelDelta(-0.5, DOM_DELTA_PAGE, 640)).toBe(-320)
+  })
+
+  it('treats an unrecognised mode as pixel (defensive default)', () => {
+    expect(normalizeWheelDelta(9, 99, 800)).toBe(9)
+  })
+})
+
+/** Firefox commonly reports DOM_DELTA_LINE (small integers, "N lines") where Chromium reports
+ *  DOM_DELTA_PIXEL for the same gesture — the classifier itself never sees the difference once
+ *  normalizeWheelDelta runs first, because every threshold it uses is either a TIME (mode-
+ *  independent) or a RATIO between consecutive samples (scale-invariant: a scale-invariant
+ *  comparison gives the identical answer whether the underlying unit is raw pixels or
+ *  pixels-per-line-scaled line counts). These re-run the same four required scenarios through
+ *  normalization first, on genuinely coarse integer line deltas, to prove that pipeline stage
+ *  doesn't quietly break the classification it's feeding. */
+describe('wheelIntent — DOM_DELTA_LINE (Firefox-style) sequences', () => {
+  function normalizedTight(lineDeltas: number[], startT = 0, stepMs = 16) {
+    return lineDeltas.map((raw, i) => ({
+      dx: normalizeWheelDelta(raw, DOM_DELTA_LINE, 800),
+      t: startT + i * stepMs,
+    }))
+  }
+
+  it('finger burst → momentum tail, in coarse integer line units', () => {
+    const growing = normalizedTight([1, 2, 4])
+    const decaying = normalizedTight([3, 2, 1], 3 * 16)
+    const intents = classifyAll([...growing, ...decaying])
+    expect(intents.slice(0, 3)).toEqual(['discrete', 'finger', 'finger'])
+    // 3 -> 2 -> 1 is three consecutive decays after a confirmed (growing) finger phase.
+    expect(intents.slice(3)).toEqual(['finger', 'finger', 'momentum'])
+  })
+
+  it('pure discrete notches, in line units (the classic physical-mouse-wheel case)', () => {
+    const notches = [0, 180, 360, 540].map(t => ({ dx: normalizeWheelDelta(-3, DOM_DELTA_LINE, 800), t }))
+    const intents = classifyAll(notches)
+    expect(intents).toEqual(['discrete', 'discrete', 'discrete', 'discrete'])
+  })
+
+  it('a direction reversal in line units is still read as finger immediately', () => {
+    const samples = normalizedTight([1, 2, 3, -2, -3])
+    const intents = classifyAll(samples)
+    expect(intents[3]).toBe('finger')
+    expect(intents).not.toContain('momentum')
+  })
+
+  it('a slow drag in line units (mostly ±1 line per sample) never misreads as momentum', () => {
+    const samples = normalizedTight([1, 1, 2, 1, 1, 2, 1], 0, 30)
+    const intents = classifyAll(samples)
+    expect(intents).not.toContain('momentum')
+  })
+
+  it('produces the exact same classification sequence as the equivalent pixel-mode stream', () => {
+    // 16 px/line means these line deltas normalize to EXACTLY the pixel sequence used in the
+    // very first pixel-mode test above — the two pipelines must agree bit-for-bit downstream.
+    const pixelStyle = tight([16, 32, 80, 224, 320, 288, 224, 160, 112, 80, 48, 32])
+    const lineStyle = normalizedTight([1, 2, 5, 14, 20, 18, 14, 10, 7, 5, 3, 2])
+    expect(classifyAll(lineStyle)).toEqual(classifyAll(pixelStyle))
   })
 })

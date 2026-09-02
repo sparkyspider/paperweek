@@ -44,6 +44,35 @@ export interface WheelSample {
   t: number
 }
 
+/** `WheelEvent.deltaMode` values (the DOM spec's own constants — not exposed as a global by
+ *  every engine, so named locally rather than relying on `WheelEvent.DOM_DELTA_LINE` existing). */
+export const DOM_DELTA_PIXEL = 0
+export const DOM_DELTA_LINE = 1
+export const DOM_DELTA_PAGE = 2
+
+/** px-per-line used to normalize DOM_DELTA_LINE deltas — Firefox's own convention (line mode
+ *  deltas are small integers, "N lines"), matching a typical CSS line-height. Chromium/Safari
+ *  report DOM_DELTA_PIXEL for the same trackpad gestures and never hit this path at all; this
+ *  constant only matters for engines (Firefox, and classic notch-style mouse wheels on any
+ *  engine) that report line-mode. A single named constant rather than a magic number scattered
+ *  through the normalizer, so retuning it later is a one-line change. */
+export const LINE_HEIGHT_PX = 16
+
+/** Converts a raw wheel-event delta (one axis) to px, given its event's `deltaMode` — the FIRST
+ *  thing that must happen to a raw delta before it reaches anything else (the classifier above,
+ *  or a caller applying it to `scrollLeft`): every threshold downstream (cadence in ms is
+ *  mode-independent already, but the growth/decay RATIOS still need every sample in one
+ *  consistent unit to compare meaningfully) assumes px. `pageSizePx` is whatever "one page"
+ *  means for the caller's own scroll container (its own clientWidth for a horizontal strip) —
+ *  DOM_DELTA_PAGE is rare for a wheel/trackpad gesture but cheap to handle correctly. Pixel mode
+ *  (by far the common case — every gesture Chromium/Safari ever report, and probably most of
+ *  Firefox's own trackpad-originated events too) passes through unchanged. */
+export function normalizeWheelDelta(raw: number, deltaMode: number, pageSizePx: number): number {
+  if (deltaMode === DOM_DELTA_LINE) return raw * LINE_HEIGHT_PX
+  if (deltaMode === DOM_DELTA_PAGE) return raw * pageSizePx
+  return raw
+}
+
 /** How long a gap since the previous sample before the stream is treated as a brand new burst —
  *  whatever came before (including any momentum tail) is fully forgotten, `sawFingerThisBurst`
  *  included. Comfortably above a trackpad's own event cadence (rarely exceeds ~30-40ms between

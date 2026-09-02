@@ -93,7 +93,7 @@ function onDropEnd(e: DragEvent) {
 
 <template>
   <div
-    class="paper-card p-3 transition-all"
+    class="paper-card paper-card--soft p-3 transition-all"
     :class="[dragOver ? 'card-drop-target' : '', visibility.isVisible(theme.id) ? '' : 'opacity-45']"
     @dragover.prevent="markCardOver(true)"
     @drop.prevent="onDropEnd"

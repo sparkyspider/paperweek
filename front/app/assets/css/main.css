@@ -134,6 +134,15 @@ body {
   --rule-mask: var(--paper-raised);
 }
 
+/* Mark's call (2026-09-02): with the page frame and day cards gone, the theme cards'
+   near-white read too stark against the unified ground. Softer tone, barely lifted off
+   --paper; the floating popovers keep the brighter .paper-card. The rule mask follows
+   the tone so dashed edit-rows inside these cards mask with the right colour. */
+.paper-card--soft {
+  background: #fbf6e9;
+  --rule-mask: #fbf6e9;
+}
+
 /* Card-level drag-over: the one "drop anywhere on this whole card" affordance (a theme card as
    a re-file/unschedule zone) — a soft warm wash, same tint/opacity everywhere it appears (see
    ThemeCard.vue; `.paper-card`'s own transition-all carries the fade). A dedicated class rather

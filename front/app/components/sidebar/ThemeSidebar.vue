@@ -50,7 +50,7 @@ function cancel() {
 
     <ThemeCard v-for="t in themes.active" :key="t.id" :theme="t" />
 
-    <div v-if="adding" class="paper-card flex flex-col gap-2 p-3">
+    <div v-if="adding" class="paper-card paper-card--soft flex flex-col gap-2 p-3">
       <input
         ref="nameInput"
         v-model="draftName"

@@ -19,9 +19,13 @@ incident-derived rules.)*
 
 ## THE OPEN THREAD — first thing next session
 
-**Trackpad feel-calibration of the scroll-ownership physics.** The full pipeline is built,
-Firefox-verified (deltaMode normalisation; 42 unit tests), committed. Mark had NOT yet
-felt-tested it when the session closed. Next session: have him hard-refresh :3200, flick,
+**⚠️ MARK'S CLOSING VERDICT (his words): "the scrolling is a disaster and we fix it tomorrow."**
+Not a calibration nicety — the scroll-ownership physics FAILS his real-Firefox trackpad feel
+test despite passing all synthetic verification (42 tests, both engines, flush landings).
+Treat as: synthetic-verified ≠ feels-right; the whole feel needs diagnosis with Mark present,
+using the `?wheeldebug=1` HUD as the shared instrument. `WHEEL_OWNERSHIP = false` in
+DayStrip.vue is the one-line fallback to native scrolling + tail-dock if he wants relief
+before the fix. The pipeline is built and Firefox-verified mechanically; Next session: have him hard-refresh :3200, flick,
 and/or open `:3200/?wheeldebug=1` (dev-only HUD: intent classification, velocity, ownership
 state, planned target + solved a*). Map his feel-words to constants: `TAKEOVER_A0` (canvas
 friction — fast flicks currently expected to feel FLOATY, known gap), classifier sensitivity,

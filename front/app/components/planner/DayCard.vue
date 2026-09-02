@@ -40,17 +40,20 @@ const dragTaught = useDragTaught()
 const LINE_H = 34
 /** Never render a section thinner than this, even wafer-empty. */
 const FLOOR = 3
-/** Morning/Afternoon/Evening/Notes each lead with one label band (see DaySection.vue). */
-const BANDS = 4
 
 const linesEl = ref<HTMLElement | null>(null)
 /** Sane pre-measurement default (four floor-sized sections) so nothing renders at zero height
  *  before the first ResizeObserver callback fires. */
 const budgetLines = ref(FLOOR * 4)
 
+/** No more `BANDS` subtraction (label-geometry rework): each section's un-ruled label band
+ *  collapsed — the ghost label now lives inside the section's own first row (see
+ *  DaySection.vue / .section-watermark in main.css) instead of displacing a row of its own — so
+ *  every `--line-h` of the card's actual height converts straight into a usable line, four rows
+ *  more per card than before. */
 function measure(): void {
   const h = linesEl.value?.clientHeight ?? 0
-  budgetLines.value = Math.max(0, Math.floor((h - BANDS * LINE_H) / LINE_H))
+  budgetLines.value = Math.max(0, Math.floor(h / LINE_H))
 }
 
 let ro: ResizeObserver | null = null
@@ -63,15 +66,24 @@ onBeforeUnmount(() => ro?.disconnect())
 
 /** How many rows a section needs to show every one of its own tasks plus a trailing blank —
  *  same "occupied + 1" shape as the sidebar's dynamicTrailing, just with a floor instead of
- *  always exactly one blank (a day section keeps some breathing room even near-empty). */
-function need(daypart: Daypart): number {
+ *  always exactly one blank (a day section keeps some breathing room even near-empty). `floor`
+ *  is a param, not always the bare constant, so Morning/Afternoon/Evening can carry one more
+ *  line of it than Notes does — see SECTION_FLOOR below. */
+function need(daypart: Daypart, floor: number = FLOOR): number {
   const list = tasks.forCell(dateISO, daypart).filter(t => visibility.isVisible(t.themeId))
-  return Math.max(occupiedLineCount(list) + 1, list.length + 1, FLOOR)
+  return Math.max(occupiedLineCount(list) + 1, list.length + 1, floor)
 }
 
-const morningLines = computed(() => need('morning'))
-const afternoonLines = computed(() => need('afternoon'))
-const eveningLines = computed(() => need('evening'))
+/** Morning/Afternoon/Evening each carry one extra line of breathing room under their label zone
+ *  (Mark's call) — Notes keeps the bare FLOOR. Still one ordinary RULED line, not an un-ruled
+ *  gap (lined paper has no unruled gaps): the grid rhythm is exact either way, this just changes
+ *  how many of those rows a lightly-filled section gets before Notes starts absorbing the
+ *  remainder. */
+const SECTION_FLOOR = FLOOR + 1
+
+const morningLines = computed(() => need('morning', SECTION_FLOOR))
+const afternoonLines = computed(() => need('afternoon', SECTION_FLOOR))
+const eveningLines = computed(() => need('evening', SECTION_FLOOR))
 /** Notes gets its own minimum need, but grows to fill whatever's left of the budget. */
 const notesLines = computed(() => {
   const used = morningLines.value + afternoonLines.value + eveningLines.value
@@ -111,10 +123,7 @@ const densityOpacity = computed(() => {
 </script>
 
 <template>
-  <div
-    class="day-card paper-card flex h-full w-[380px] shrink-0 flex-col p-4"
-    :class="[isToday ? 'today-wash' : '', !isToday && isWeekend ? 'weekend-wash' : '']"
-  >
+  <div class="day-card flex h-full w-[380px] shrink-0 flex-col p-4">
     <header class="mb-1 flex shrink-0 items-baseline justify-between gap-2 px-1">
       <h3
         class="font-hand text-[26px] font-semibold leading-none text-[var(--ink)]"
@@ -130,8 +139,10 @@ const densityOpacity = computed(() => {
 
     <!-- The scroll viewport: fixed to the card's own rendered height, never itself painted
          (see main.css) — `.day-sheet` inside it is the actual ruled sheet, sized to its natural
-         content height, so ruling/margin/content all scroll together as one. -->
-    <div ref="linesEl" class="day-lines relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden no-scrollbar pl-4 pr-1 [--line-h:34px]">
+         content height, so ruling/content all scroll together as one. `pl-1` matches the
+         header's own `px-1` above exactly — the ruled lines' left edge lines up with the day
+         name's, per the margin-line removal (no more separate gutter inset). -->
+    <div ref="linesEl" class="day-lines relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden no-scrollbar pl-1 pr-1 [--line-h:34px]">
       <div class="day-sheet">
         <DaySection
           :date-i-s-o="dateISO"

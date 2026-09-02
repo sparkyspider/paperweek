@@ -12,6 +12,7 @@
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { fmtISO } from '~/utils/dates'
 import { useDayStrip } from '~/composables/useDayStrip'
+import { decelerationFor, planDock, positionAt, stopTime } from '~/utils/dockPhysics'
 
 const { days, todayISO, initialFetch, extendFuture, extendPast } = useDayStrip()
 
@@ -103,21 +104,13 @@ function nearestDockLeft(): number | null {
   return best
 }
 
-/** Same as `nearestDockLeft`, but against an arbitrary reference x rather than the strip's
- *  CURRENT scrollLeft — used by early-takeover to find the card nearest a PROJECTED endpoint,
- *  not where the strip happens to be right now. */
-function nearestDockLeftTo(x: number): number | null {
-  const el = container.value
-  if (!el) return null
+/** Every card's own docked scrollLeft (offsetLeft, corrected by the strip's own inset) — the
+ *  full candidate set `planDock` picks from. Plain array, not a single "nearest" answer: the
+ *  physics needs to see every dock to run its own nearest-then-clamp-then-step policy, not just
+ *  whichever one a simpler linear projection would have guessed. */
+function allDockLefts(el: HTMLElement): number[] {
   const kids = el.querySelectorAll<HTMLElement>('[data-date]')
-  let best: number | null = null
-  let bestDist = Infinity
-  for (const k of kids) {
-    const candidate = k.offsetLeft - STRIP_INSET_PX
-    const dist = Math.abs(candidate - x)
-    if (dist < bestDist) { bestDist = dist; best = candidate }
-  }
-  return best
+  return Array.from(kids, k => k.offsetLeft - STRIP_INSET_PX)
 }
 
 function dockToNearest(): void {
@@ -137,16 +130,27 @@ function dockToNearest(): void {
 /** px moved per rAF tick below which native momentum is "slow enough to take over" — tuned by
  *  feel within the suggested 1.5-3 range: fast enough that we're not fighting the satisfying
  *  part of a flick, slow enough that the handoff (which matches this exact speed as its
- *  starting slope) reads as a continuation, not a correction. */
+ *  starting slope) reads as a continuation, not a correction. This is also, necessarily, the
+ *  EARLIEST point we can legally take over at all: macOS (and most trackpad/OS momentum
+ *  implementations) owns the scroll outright for the fast part of a flick — there is no hook to
+ *  intervene sooner, so "early takeover" means "as early as physically possible," not "as early
+ *  as we'd like." */
 const TAKEOVER_VELOCITY = 2.2
 /** Below this, treat the glide as already stopped — let the existing scrollend/debounce
  *  fallback handle it instead (a slow deliberate drag never gets fast enough to cross
  *  TAKEOVER_VELOCITY at all, so it always ends up here — exactly the "still works" case). */
 const STOPPED_VELOCITY = 0.05
-/** How many rAF ticks' worth of the CURRENT velocity to project forward, to guess which card
- *  the free glide was heading toward. Deliberately rough — this only has to pick the right
- *  CARD; nearestDockLeftTo snaps to its exact edge regardless of how close the projection is. */
+/** The canvas's own natural deceleration, in px/tick² (tick ≈ 16.67ms, matching how velocity is
+ *  sampled below) — see dockPhysics.ts's file doc comment for the full algorithm this drives.
+ *  Derived from the takeover system's OLD linear projection constant (`PROJECT_TICKS = 10`,
+ *  "assume the glide travels `v * 10` more ticks' worth of distance") as the starting point the
+ *  spec asked for: solving `travelDistance(v, A0) = v * PROJECT_TICKS` for A0 gives
+ *  `A0 = v / (2 * PROJECT_TICKS)`, evaluated at the takeover threshold itself (the fastest a
+ *  handoff ever happens, so the most representative single point to anchor the constant on).
+ *  Tunable by feel from here; this is deliberately just the seed, not a physically measured
+ *  number. */
 const PROJECT_TICKS = 10
+const TAKEOVER_A0 = TAKEOVER_VELOCITY / (2 * PROJECT_TICKS)
 
 let velocityRafId: number | null = null
 let lastScrollLeft = 0
@@ -167,39 +171,73 @@ function onUserInputDuringTakeover(): void {
   if (takeoverActive) cancelTakeover()
 }
 
-/** Custom scrollLeft animation, x0 -> target, along an exponential ease-out whose derivative at
- *  t=0 equals v0 (px/tick, tick ~= 16.67ms) — the SAME rate native momentum was already moving
- *  at, so there's no visible acceleration/deceleration blip at the handoff. Runs via its own
- *  rAF loop (not `scrollTo({behavior:'smooth'})`) because that API gives no control over the
- *  curve's initial slope, only its destination. */
-function runTakeover(el: HTMLElement, target: number, v0: number): void {
+/** Closed-form constant-deceleration drive, x0 -> target, at exactly the deceleration `a`
+ *  dockPhysics.ts solved for — NOT an exponential ease (the old approach): a single continuous
+ *  deceleration is what makes the manoeuvre read as one motion rather than a glide-then-correct.
+ *  Runs via its own rAF loop (not `scrollTo({behavior:'smooth'})`) because that API gives no
+ *  control over the curve's initial slope, only its destination — the whole point here is that
+ *  the curve's slope at t=0 has to equal v0, the rate native momentum was already moving at, so
+ *  there's no visible blip at the handoff. */
+function runTakeover(el: HTMLElement, target: number, v0: number, a: number, onDock: boolean): void {
   const x0 = el.scrollLeft
-  const distance = target - x0
-  if (Math.abs(v0) < 0.001 || Math.abs(distance) < 0.5) {
-    if (Math.abs(distance) >= 1) { dockInFlight = true; el.scrollTo({ left: target, behavior: 'smooth' }) }
+  const st = stopTime(v0, a)
+
+  // The manoeuvre landed somewhere that ISN'T a real dock — planDock's own documented "give up,
+  // use A0" case ("if none fits ... the settle-fallback docks the remainder"). Relying on the
+  // AMBIENT scroll/scrollend listeners for that remainder turned out fragile in practice:
+  // Chromium can fire 'scrollend' after almost every discrete per-frame scrollLeft write during
+  // this very manoeuvre (not just once at the true end), which consumes `dockInFlight` early and
+  // can leave the 140ms debounce fallback racing this animation instead of running cleanly after
+  // it. Calling `dockToNearest()` explicitly, synchronously, the instant we KNOW the manoeuvre is
+  // over is deterministic and doesn't depend on that event timing at all.
+  function finish(): void {
+    if (!onDock) dockToNearest()
+  }
+
+  if (!Number.isFinite(st) || st <= 0) {
+    if (Math.abs(target - x0) >= 1) { dockInFlight = true; el.scrollTo({ left: target, behavior: 'smooth' }) }
+    finish()
     return
   }
   const TICK_MS = 1000 / 60
-  const tau = (distance / v0) * TICK_MS
-  if (tau <= 0) { dockInFlight = true; el.scrollTo({ left: target, behavior: 'smooth' }); return }
   const start = performance.now()
   takeoverActive = true
   dockInFlight = true // reuse the existing flag so the eventual native 'scrollend' no-ops
 
   function step(now: number): void {
     if (!takeoverActive) return
-    const t = now - start
-    const remaining = distance * Math.exp(-t / tau)
-    if (Math.abs(remaining) < 0.5) {
+    const tTicks = (now - start) / TICK_MS
+    if (tTicks >= st) {
       el.scrollLeft = target
       takeoverActive = false
       takeoverRafId = null
+      finish()
       return
     }
-    el.scrollLeft = target - remaining
+    el.scrollLeft = positionAt(tTicks, x0, v0, a)
     takeoverRafId = requestAnimationFrame(step)
   }
   takeoverRafId = requestAnimationFrame(step)
+}
+
+/** `planDock`'s docks, clamped to the strip's actual scrollable range — and, when clamping
+ *  changes the chosen target, `a` re-solved for the clamped target rather than reused (the
+ *  original `a` was solved for a different distance; driving `positionAt` with it toward a
+ *  DIFFERENT target would over/undershoot). Falls back to `null` (no takeover, let the existing
+ *  settle-then-dock fallback handle it) on the rare edge where even the clamped target can't be
+ *  reached by decelerating from here (e.g. it's now behind the direction of travel). `onDock`
+ *  tells the caller whether `target` is actually one of the real dock points, or planDock's own
+ *  "gave up" natural-landing point — see runTakeover's `finish()`. */
+function clampedPlan(el: HTMLElement, v: number): { target: number; a: number; onDock: boolean } | null {
+  const maxScrollLeft = Math.max(0, el.scrollWidth - el.clientWidth)
+  const docks = allDockLefts(el).map(d => Math.max(0, Math.min(d, maxScrollLeft)))
+  const plan = planDock(el.scrollLeft, v, docks, TAKEOVER_A0)
+  if (!plan) return null
+  const onDock = docks.some(d => Math.abs(d - plan.target) < 0.5)
+  const target = Math.max(0, Math.min(plan.target, maxScrollLeft))
+  if (target === plan.target) return { ...plan, onDock }
+  const a = decelerationFor(el.scrollLeft, v, target)
+  return a === null ? null : { target, a, onDock }
 }
 
 function maybeTakeOver(el: HTMLElement, v: number): void {
@@ -211,12 +249,10 @@ function maybeTakeOver(el: HTMLElement, v: number): void {
   if (dockInFlight) return
   const speed = Math.abs(v)
   if (speed >= TAKEOVER_VELOCITY || speed < STOPPED_VELOCITY) return
-  const projected = el.scrollLeft + v * PROJECT_TICKS
-  const target = nearestDockLeftTo(projected)
-  if (target === null) return
-  const clamped = Math.max(0, Math.min(target, el.scrollWidth - el.clientWidth))
-  if (Math.abs(clamped - el.scrollLeft) < 1) return
-  runTakeover(el, clamped, v)
+  const plan = clampedPlan(el, v)
+  if (plan === null) return
+  if (Math.abs(plan.target - el.scrollLeft) < 1) return
+  runTakeover(el, plan.target, v, plan.a, plan.onDock)
 }
 
 /** Continuous rAF sampler — cheap (a subtraction and a comparison most frames) and simpler than

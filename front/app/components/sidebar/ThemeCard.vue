@@ -4,13 +4,14 @@
  *  undo), and its backlog of unscheduled tasks — the drag SOURCE for scheduling, and a drop
  *  TARGET for unscheduling (drag a task back here from any day cell, or re-theme it by
  *  dropping on a different theme's card). */
-import { ref, nextTick, onMounted } from 'vue'
+import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import type { Theme } from '~/stores/themes'
 import { THEME_PALETTE, useThemesStore } from '~/stores/themes'
 import { useTasksStore } from '~/stores/tasks'
 import { useToast } from '~/composables/useToast'
 import { useThemeVisibility } from '~/composables/useThemeVisibility'
 import { useDragTaught } from '~/composables/useDragTaught'
+import { useDragOverTracking } from '~/composables/useDragOverTracking'
 import { taskIdFromDrag } from '~/utils/dnd'
 
 const props = defineProps<{ theme: Theme }>()
@@ -24,18 +25,41 @@ const { show } = useToast()
 const editing = ref(false)
 const draft = ref(props.theme.name)
 const nameInput = ref<HTMLInputElement | null>(null)
-const dragOver = ref(false)
+/** Timestamp-decay tracking (useDragOverTracking), not enter/leave counting — see that
+ *  composable's doc comment for the fuller story. This card in particular is exactly the shape
+ *  that broke the counter twice over: it has plenty of descendants (swatch/rename/archive
+ *  buttons, and the WHOLE nested AddTaskInline line list) any of which bubbling a stray
+ *  dragenter/dragleave could desync a count from reality, AND it's a drag SOURCE itself — drag
+ *  one of its OWN backlog rows out to reschedule it, and that row unmounts mid-drag the instant
+ *  the task lands elsewhere, with no matching dragleave ever able to fire for whatever count it
+ *  contributed. A stuck wash ("the theme goes red and I can't un-red it") followed both times.
+ *  The decay-based tracker has no such state to leak: `dragOver` is just "did a dragover land on
+ *  this card (or bubble from a descendant) in roughly the last 150ms," self-correcting the
+ *  instant those events stop, for ANY reason, unmount included. */
+const { current: dragOverSignal, markOver: markCardOver, clear: clearDragOver } = useDragOverTracking<true>()
+const dragOver = computed(() => dragOverSignal.value === true)
 
 onMounted(() => {
   if (!tasks.backlogLoaded.has(props.theme.id)) tasks.fetchBacklog(props.theme.id)
 })
 
+/** Instant clear on `dragend` — a fast path on top of the decay above, for zero visible lag on
+ *  the common paths (drop, Escape-cancel); `dragend` fires on the drag SOURCE regardless of
+ *  where the drop landed or whether some `drop` event's propagation was stopped along the way. */
+onMounted(() => document.addEventListener('dragend', clearDragOver))
+onBeforeUnmount(() => document.removeEventListener('dragend', clearDragOver))
+
 async function startEdit() {
   draft.value = props.theme.name
   editing.value = true
   await nextTick()
-  nameInput.value?.focus()
-  nameInput.value?.select()
+  const el = nameInput.value
+  el?.focus()
+  el?.select()
+  // Same fix as TaskChip's edit entry: select() alone can leave the view scrolled to the END
+  // of a long name — anchor it back at the start (see TaskChip.vue's startEdit for the fuller
+  // explanation).
+  if (el) el.scrollLeft = 0
 }
 
 function commitEdit() {
@@ -57,7 +81,7 @@ function archive() {
  *  apart). Works regardless of this theme's active/inactive filter state — dropping onto a
  *  muted theme is allowed. */
 function onDropEnd(e: DragEvent) {
-  dragOver.value = false
+  clearDragOver()
   const id = taskIdFromDrag(e)
   if (!id) return
   dragTaught.markDragged()
@@ -71,9 +95,7 @@ function onDropEnd(e: DragEvent) {
   <div
     class="paper-card p-3 transition-all"
     :class="[dragOver ? 'card-drop-target' : '', visibility.isVisible(theme.id) ? '' : 'opacity-45']"
-    @dragover.prevent
-    @dragenter="dragOver = true"
-    @dragleave="(e: DragEvent) => { if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node | null)) dragOver = false }"
+    @dragover.prevent="markCardOver(true)"
     @drop.prevent="onDropEnd"
   >
     <div class="group flex items-center gap-2">

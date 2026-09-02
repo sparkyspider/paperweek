@@ -1,16 +1,11 @@
 <script setup lang="ts">
-/** One daypart REGION of the day card — Morning / Afternoon / Evening / Notes. Two parts, each
- *  exactly `--line-h` rhythm units tall:
- *   1. `.section-band` — ONE full ruling-unit of deliberately UN-RULED space leading the
- *      section, holding its ghost label (right-aligned, vertically centred, faint) — this is
- *      simultaneously the boundary gap from the previous section AND this section's label, so
- *      no writable line ever has ghost text under it. All four sections (Morning included) lead
- *      with one, so they behave identically.
- *   2. `.section-lines` — the actual ruled rows, painted with its OWN fresh `.ruled-paper`
- *      pattern (starting at ITS top, not the card's), so the band above it never throws the
- *      rule/text phase off. How many rows it renders is driven by `minLines`, a prop DayCard.vue
- *      computes from the card's actual rendered height (its line-budget policy) rather than a
- *      fixed constant — see useAutosaveLines' `minLines` getter option.
+/** One daypart REGION of the day card — Morning / Afternoon / Evening / Notes. Its ruled rows
+ *  (`.section-lines`, painted with its OWN fresh `.ruled-paper` pattern starting at ITS top) are
+ *  the whole section — no separate un-ruled label band any more (collapsed; the ghost label now
+ *  lives inside row 0's own space, see `.section-watermark` in main.css). How many rows render
+ *  is driven by `minLines`, a prop DayCard.vue computes from the card's actual rendered height
+ *  (its line-budget policy) rather than a fixed constant — see useAutosaveLines' `minLines`
+ *  getter option.
  *
  *  Write anywhere: every empty line is individually clickable and writable (useAutosaveLines
  *  — no Add button; typing autosaves; the task lands ON the line you clicked, not appended to
@@ -24,6 +19,7 @@ import { useAutosaveLines, type DraftLine } from '~/composables/useAutosaveLines
 import { useThemeVisibility } from '~/composables/useThemeVisibility'
 import { useLastUsedTheme } from '~/composables/useLastUsedTheme'
 import { useDragTaught } from '~/composables/useDragTaught'
+import { useDragOverTracking } from '~/composables/useDragOverTracking'
 import { taskIdFromDrag } from '~/utils/dnd'
 import { forceHomeEnd } from '~/utils/textInputKeys'
 
@@ -41,7 +37,7 @@ const themes = useThemesStore()
 const visibility = useThemeVisibility()
 const lastUsedTheme = useLastUsedTheme()
 const dragTaught = useDragTaught()
-const dragOverIndex = ref<number | null>(null)
+const { current: dragOverIndex, markOver: onRowDragOver, clear: clearDragOverIndex } = useDragOverTracking<number>()
 
 /** Only VISIBLE themes' swatches on the typing picker — but never a dead end: if every theme
  *  is hidden, fall back to offering them all. */
@@ -124,7 +120,7 @@ async function handleBlur(draft: DraftLine) {
 }
 
 function onDropAt(e: DragEvent, index: number) {
-  dragOverIndex.value = null
+  clearDragOverIndex()
   const id = taskIdFromDrag(e)
   if (!id) return
   dragTaught.markDragged()
@@ -232,15 +228,27 @@ function onDocClick(e: MouseEvent): void {
 }
 onMounted(() => document.addEventListener('click', onDocClick))
 onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
+
+/** Instant clear on `dragend` (fires regardless of where/whether the drop landed, or whether the
+ *  dragged row itself just unmounted) — a fast path on top of useDragOverTracking's own ~150ms
+ *  self-healing decay, not a replacement for it: this is for zero visible lag on the common
+ *  paths (drop, Escape-cancel), the decay is the guarantee for everything else. */
+onMounted(() => document.addEventListener('dragend', clearDragOverIndex))
+onBeforeUnmount(() => document.removeEventListener('dragend', clearDragOverIndex))
 </script>
 
 <template>
   <div ref="root" class="day-section">
-    <div class="section-band">
-      <span class="section-watermark font-hand" aria-hidden="true">{{ label }}</span>
-    </div>
-
     <div class="section-lines ruled-paper relative">
+      <!-- The section's ghost label — no longer a dedicated un-ruled band above the rules
+           (collapsed, per the label-geometry rework): the section's first rule now renders AT
+           the section's own top (nothing un-ruled precedes it any more), and this label hangs
+           just below that boundary, living inside the section's FIRST writable row rather than
+           displacing it. Absolutely positioned (not a layout participant) so line 1 stays fully
+           writable underneath/behind it — see .section-watermark in main.css for the exact
+           offset and the z-order that lets written text read cleanly over it. -->
+      <span class="section-watermark font-hand" aria-hidden="true">{{ label }}</span>
+
       <!-- One-time first-drag teaching note (task 22) — ghost-styled like the watermark, never
            interactive, gone for good the instant any drag lands anywhere in the app (see
            useDragTaught). All its OTHER preconditions (today, nothing scheduled yet, some
@@ -254,61 +262,6 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
         <span class="font-hand first-drag-note-text">pull a task into your week…</span>
       </div>
 
-      <!-- Each occupied row's theme dot, out in the margin gutter — a separate
-           absolutely-positioned overlay rather than a child of its `.ruled-line` (which clips: a
-           row must clip overflow vertically to hold the one-grid-unit height invariant, and CSS
-           computes a lone `overflow-x: visible` up to `auto` the moment the other axis isn't
-           visible too — so a dot living inside the row and poking out to its left would silently
-           get clipped anyway; see main.css's `.row-margin-dot` positioning). Now doubles as the
-           WHOLE theme gesture (task 16 redesign): it's a real button, clickable on a draft row
-           (previewing the quiet default before the task even exists) exactly the same as on a
-           saved task row — opening the swatch+name popover to set or change it. A draft with no
-           text yet shows no dot: nothing to categorise before there's anything written. One
-           position per occupied slot, computed from the same line-slot index the row itself
-           renders at, relative to THIS wrapper's own top (row 0), not the section's (which would
-           be one band-height off). Anchored near the row's BOTTOM, not its middle — the task
-           text itself is bottom-aligned (`.ruled-line`'s flex-end + 4px padding-bottom), so a
-           mid-row dot rides visibly high above the words it marks. 9px above the rule ≈ the 4px
-           text padding-bottom plus ~0.3× the 16px task-text font-size, landing the dot on the
-           text's x-height. -->
-      <div class="row-margin-dots">
-        <template v-for="slot in slots" :key="'dot-' + slot.index">
-          <!-- Ghost residue (task 25): a scheduled task whose theme is muted keeps its line
-               occupied (see `savedList` above) but renders no text — the dot is its ONLY visible
-               trace, faded, doubling as the un-mute control instead of the theme-picker trigger
-               (clicking a normal dot opens the picker; clicking a ghost dot just shows the
-               theme again — there's nothing to categorise, it already has one). -->
-          <button
-            v-if="slot.kind === 'task' && !visibility.isVisible(slot.task.themeId)"
-            type="button"
-            class="row-margin-dot row-margin-dot--ghost"
-            :title="`${themeNameFor(slot.task.themeId)} task hidden — click to show`"
-            :aria-label="`${themeNameFor(slot.task.themeId)} task hidden — click to show`"
-            :style="{
-              top: `calc(var(--line-h) * ${slot.index + 1} - 9px)`,
-              background: colorFor(slot.task.themeId),
-            }"
-            @mousedown.prevent
-            @click="visibility.show(slot.task.themeId)"
-          />
-          <button
-            v-else-if="slot.kind === 'task' || (slot.kind === 'draft' && slot.draft.text.trim())"
-            type="button"
-            class="row-margin-dot"
-            :title="themeNameFor(slot.kind === 'task' ? slot.task.themeId : slot.draft.themeId)"
-            :aria-label="`Task theme: ${themeNameFor(slot.kind === 'task' ? slot.task.themeId : slot.draft.themeId)}. Change theme`"
-            aria-haspopup="listbox"
-            :aria-expanded="pickerOpenFor === (slot.kind === 'task' ? `task:${slot.task.id}` : `draft:${slot.draft.key}`)"
-            :style="{
-              top: `calc(var(--line-h) * ${slot.index + 1} - 9px)`,
-              background: colorFor(slot.kind === 'task' ? slot.task.themeId : slot.draft.themeId),
-            }"
-            @mousedown.prevent
-            @click="togglePicker(slot.kind === 'task' ? `task:${slot.task.id}` : `draft:${slot.draft.key}`, $event)"
-          />
-        </template>
-      </div>
-
       <div class="relative z-[1]">
         <div
           v-for="slot in slots"
@@ -318,41 +271,85 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
             dragOverIndex === slot.index ? 'ruled-line--drop-target' : '',
             slot.kind === 'empty' ? 'cursor-text' : '',
           ]"
-          @dragover.prevent
-          @dragenter="dragOverIndex = slot.index"
-          @dragleave="(e: DragEvent) => { if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node | null)) dragOverIndex = null }"
+          @dragover.prevent="onRowDragOver(slot.index)"
           @drop.prevent="onDropAt($event, slot.index)"
           @click="slot.kind === 'empty' ? onClickEmpty(slot.index) : undefined"
         >
-          <!-- A muted theme's scheduled task renders NO text here — the line stays occupied
-               (not writable) but shows nothing beyond its ghost margin dot (task 25). -->
-          <TaskChip
-            v-if="slot.kind === 'task' && visibility.isVisible(slot.task.themeId)"
-            :task="slot.task"
-            :color="colorFor(slot.task.themeId)"
-            dense
-            dot-in-margin
+          <!-- The theme dot, INLINE now (redesign: no more margin line/gutter) — a bullet that
+               reads as part of the writing, not a UI control bolted beside it (task 16 redesign,
+               relocated per the margin-line removal). Still the WHOLE theme gesture: a real
+               button, clickable on a draft row (previewing the quiet default before the task
+               even exists) exactly the same as on a saved task row — opening the swatch+name
+               popover. Its box is deliberately WIDER than the visible 6px circle
+               (`.line-dot`'s own padding, see main.css) so it (a) reserves a fixed slot in the
+               row's flex flow — present for every draft/task row whether or not a dot is
+               actually painted yet, so text never jumps left when the dot appears — and (b)
+               carries a generous click target without needing to poke outside `.ruled-line`
+               (which still clips vertically to hold the row-height invariant; a plain flex child
+               never needs to escape that the way the old absolutely-positioned margin dot did). -->
+          <button
+            v-if="slot.kind === 'task' && !visibility.isVisible(slot.task.themeId)"
+            type="button"
+            class="line-dot line-dot--ghost"
+            :title="`${themeNameFor(slot.task.themeId)} task hidden — click to show`"
+            :aria-label="`${themeNameFor(slot.task.themeId)} task hidden — click to show`"
+            :style="{ backgroundColor: colorFor(slot.task.themeId) }"
+            @mousedown.prevent
+            @click="visibility.show(slot.task.themeId)"
           />
-
-          <!-- Full-width, immediately — no inline picker eating the line (that grew linearly
-               worse with theme count and jumped the text's left edge on save; see the margin
-               dot above instead). Draft text sits at the exact same x/width a saved TaskChip's
-               text will. -->
-          <input
-            v-else-if="slot.kind === 'draft'"
-            :data-line-index="slot.index"
-            type="text"
-            :value="slot.draft.text"
-            placeholder="Write here…"
-            class="diary-input font-write min-w-0 w-full text-[16px] leading-[20px] text-[var(--ink)]"
-            @click.stop
-            @input="slot.draft.text = ($event.target as HTMLInputElement).value; onInput(slot.draft)"
-            @focus="activeKey = slot.draft.key"
-            @keydown="forceHomeEnd"
-            @keydown.enter.prevent="handleEnter(slot.draft)"
-            @keydown.esc="revert(slot.draft); ($event.target as HTMLInputElement).blur()"
-            @blur="activeKey = null; handleBlur(slot.draft)"
-          >
+          <template v-else-if="slot.kind === 'task'">
+            <button
+              type="button"
+              class="line-dot"
+              :title="themeNameFor(slot.task.themeId)"
+              :aria-label="`Task theme: ${themeNameFor(slot.task.themeId)}. Change theme`"
+              aria-haspopup="listbox"
+              :aria-expanded="pickerOpenFor === `task:${slot.task.id}`"
+              :style="{ backgroundColor: colorFor(slot.task.themeId) }"
+              @mousedown.prevent
+              @click="togglePicker(`task:${slot.task.id}`, $event)"
+            />
+            <!-- A muted theme's scheduled task renders NO text here — the line stays occupied
+                 (not writable) but shows nothing beyond its ghost dot above (task 25). -->
+            <TaskChip :task="slot.task" :color="colorFor(slot.task.themeId)" dense dot-in-margin />
+          </template>
+          <template v-else-if="slot.kind === 'draft'">
+            <!-- Reserves the identical slot even before there's anything to categorise — a
+               `disabled`, transparent placeholder rather than conditionally omitting the button,
+               so the input's own left edge never shifts when the first character makes the real
+               dot appear (or on save, when this becomes a TaskChip's row above). -->
+            <button
+              type="button"
+              class="line-dot"
+              :class="{ 'line-dot--empty': !slot.draft.text.trim() }"
+              :disabled="!slot.draft.text.trim()"
+              :title="slot.draft.text.trim() ? themeNameFor(slot.draft.themeId) : undefined"
+              :aria-label="slot.draft.text.trim() ? `Task theme: ${themeNameFor(slot.draft.themeId)}. Change theme` : undefined"
+              :aria-hidden="!slot.draft.text.trim()"
+              aria-haspopup="listbox"
+              :aria-expanded="pickerOpenFor === `draft:${slot.draft.key}`"
+              :style="slot.draft.text.trim() ? { backgroundColor: colorFor(slot.draft.themeId) } : undefined"
+              @mousedown.prevent
+              @click="togglePicker(`draft:${slot.draft.key}`, $event)"
+            />
+            <!-- No inline picker eating the line (that grew linearly worse with theme count and
+                 jumped the text's left edge on save; see the dot button above instead). Draft
+                 text sits at the exact same x/width a saved TaskChip's text will. -->
+            <input
+              :data-line-index="slot.index"
+              type="text"
+              :value="slot.draft.text"
+              placeholder="Write here…"
+              class="diary-input font-write min-w-0 flex-1 text-[18px] leading-[22px] text-[var(--ink)]"
+              @click.stop
+              @input="slot.draft.text = ($event.target as HTMLInputElement).value; onInput(slot.draft)"
+              @focus="activeKey = slot.draft.key"
+              @keydown="forceHomeEnd"
+              @keydown.enter.prevent="handleEnter(slot.draft)"
+              @keydown.esc="revert(slot.draft); ($event.target as HTMLInputElement).blur()"
+              @blur="activeKey = null; handleBlur(slot.draft)"
+            >
+          </template>
         </div>
       </div>
     </div>

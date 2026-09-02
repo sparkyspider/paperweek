@@ -13,19 +13,20 @@
  *  fire the card's handler too — two competing PATCHes for the same task landing a beat apart
  *  (one from here setting the precise line position, one from the card appending to the end)
  *  is exactly the double-write QA caught. */
-import { nextTick, ref } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useTasksStore } from '~/stores/tasks'
 import { useAutosaveLines, type DraftLine } from '~/composables/useAutosaveLines'
 import { taskIdFromDrag } from '~/utils/dnd'
 import { forceHomeEnd } from '~/utils/textInputKeys'
 import { useDragTaught } from '~/composables/useDragTaught'
+import { useDragOverTracking } from '~/composables/useDragOverTracking'
 
 const props = defineProps<{ themeId: string; color: string; themeName?: string; placeholder?: string }>()
 
 const tasks = useTasksStore()
 const dragTaught = useDragTaught()
 const root = ref<HTMLElement | null>(null)
-const dragOverIndex = ref<number | null>(null)
+const { current: dragOverIndex, markOver: onRowDragOver, clear: clearDragOverIndex } = useDragOverTracking<number>()
 
 const { slots, activateLine, onInput, onEnter, onBlur, revert, dropTaskAt } = useAutosaveLines({
   savedList: () => tasks.backlogFor(props.themeId),
@@ -60,12 +61,18 @@ async function handleEnter(draft: DraftLine) {
 }
 
 function onDropAt(e: DragEvent, index: number) {
-  dragOverIndex.value = null
+  clearDragOverIndex()
   const id = taskIdFromDrag(e)
   if (!id) return
   dragTaught.markDragged()
   dropTaskAt(id, index)
 }
+
+/** Instant clear on `dragend` — a fast path on top of useDragOverTracking's own ~150ms
+ *  self-healing decay (see that composable's doc comment for the fuller "why not enter/leave
+ *  counting" story), for zero visible lag on the common paths (drop, Escape-cancel). */
+onMounted(() => document.addEventListener('dragend', clearDragOverIndex))
+onBeforeUnmount(() => document.removeEventListener('dragend', clearDragOverIndex))
 </script>
 
 <template>
@@ -75,9 +82,7 @@ function onDropAt(e: DragEvent, index: number) {
       :key="slot.index"
       class="ruled-line"
       :class="[dragOverIndex === slot.index ? 'ruled-line--drop-target' : '', slot.kind === 'empty' ? 'cursor-text' : '']"
-      @dragover.prevent
-      @dragenter="dragOverIndex = slot.index"
-      @dragleave="(e: DragEvent) => { if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node | null)) dragOverIndex = null }"
+      @dragover.prevent="onRowDragOver(slot.index)"
       @drop.prevent.stop="onDropAt($event, slot.index)"
       @click="slot.kind === 'empty' ? onClickEmpty(slot.index) : undefined"
     >
@@ -89,7 +94,7 @@ function onDropAt(e: DragEvent, index: number) {
         type="text"
         :value="slot.draft.text"
         :placeholder="placeholder ?? 'Write a task…'"
-        class="diary-input font-write min-w-0 w-full text-[16px] leading-[20px] text-[var(--ink)] placeholder:font-write placeholder:text-[var(--ink-faint)]"
+        class="diary-input font-write min-w-0 w-full text-[18px] leading-[22px] text-[var(--ink)] placeholder:font-write placeholder:text-[var(--ink-faint)]"
         @click.stop
         @input="slot.draft.text = ($event.target as HTMLInputElement).value; onInput(slot.draft)"
         @keydown="forceHomeEnd"

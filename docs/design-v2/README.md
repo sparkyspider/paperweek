@@ -1,5 +1,7 @@
 # Design V2 — parked feedback
 
+**OUTCOME (Mark, 2026-09-02): the comparison happened.** The ink-on-paper build (branch `design-sexy`, commit `2536eae`, judge-passed at 29/35 both surfaces, fully QA'd) ran side-by-side against the parchment v1 (branch `v2`), and **Mark chose the older, simpler parchment look & feel**. `design-sexy` is preserved — branch + worktree kept, server stopped — as a finished alternative, not deleted. These references remain for any future revisit.
+
 This folder holds design feedback **deliberately parked for a future V2 design branch**.
 
 Rules of this folder (Mark's instruction, 2026-09-01):

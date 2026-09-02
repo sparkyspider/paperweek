@@ -33,7 +33,7 @@ function cancel() {
 </script>
 
 <template>
-  <aside class="edge-right no-scrollbar flex h-full w-[280px] shrink-0 flex-col gap-3 overflow-y-auto bg-[var(--paper)] p-4">
+  <aside class="no-scrollbar flex h-full w-[280px] shrink-0 flex-col gap-3 overflow-y-auto bg-[var(--paper)] p-4">
     <h1 class="font-hand px-1 text-[30px] font-bold leading-none text-[var(--ink)]">
       Paperweek
     </h1>

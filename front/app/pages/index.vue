@@ -46,7 +46,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
     <ThemeSidebar />
 
     <main class="flex h-full flex-1 flex-col overflow-hidden">
-      <header class="edge-bottom z-10 flex shrink-0 items-center justify-between bg-[var(--paper)]/95 px-6 py-3 backdrop-blur">
+      <header class="z-10 flex shrink-0 items-center justify-between bg-[var(--paper)]/95 px-6 py-3 backdrop-blur">
         <p v-if="loadIssue" class="text-sm text-[var(--danger)]">{{ loadIssue }}</p>
         <p v-else class="text-sm text-[var(--ink-soft)]">Your week, one gentle page at a time.</p>
 

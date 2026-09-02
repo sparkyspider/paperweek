@@ -5,14 +5,43 @@
  *  either edge auto-scrolls the strip so a day off-screen can still be a drop target.
  *
  *  Deliberately no CSS scroll-snap: even `proximity` was cutting a flick's momentum short.
- *  Native momentum runs completely untouched WHILE IT'S STILL FAST — see the early-takeover
- *  physics below for how the dock itself happens; the old settle-then-dock (native 'scrollend',
- *  with a debounced-scroll fallback for browsers that don't fire it — Safari at time of
- *  writing) survives as the fallback for whatever takeover misses. */
+ *
+ *  SCROLL OWNERSHIP (WHEEL_OWNERSHIP = true, the default): the strip owns wheel-driven scrolling
+ *  outright rather than observing native momentum and grabbing it partway through. A single
+ *  non-passive `wheel` listener (`onWheel`) `preventDefault()`s every horizontal-intent event
+ *  and drives `scrollLeft` by hand — during the actual touch, `wheelIntent.ts` classifies each
+ *  delta as FINGER (apply it directly, same as before) or MOMENTUM (the browser's own synthetic
+ *  tail after lift-off — IGNORED entirely, never applied); the moment a genuine release is
+ *  detected (a confirmed MOMENTUM sample, or silence past RELEASE_GAP_MS), `handleFingerRelease`
+ *  runs dockPhysics's closed-form manoeuvre from the TRUE last finger velocity — one continuous
+ *  glide from the exact instant of release, not from wherever native momentum happened to have
+ *  decayed to by the time an observer could react. A DISCRETE sample (an isolated mouse-wheel
+ *  notch) gets its own small immediate scroll + settle, no glide. New finger input arriving
+ *  mid-manoeuvre cancels it and resumes hands-on driving instantly (see `onWheel`).
+ *
+ *  Keyboard arrows, scrollbar dragging, drag-edge auto-scroll (`onDragOverStrip`), and every
+ *  programmatic scroll (week-nav, Today, docking itself) are native/programmatic throughout and
+ *  entirely unaffected — only the wheel/trackpad input CHANNEL is intercepted.
+ *
+ *  FALLBACK (WHEEL_OWNERSHIP = false): the previous design — native momentum runs completely
+ *  untouched while it's still fast, a continuous rAF sampler (`velocityTick`/`maybeTakeOver`)
+ *  watches scrollLeft and grabs the manoeuvre once its velocity decays into a takeover window
+ *  (the earliest point a mere OBSERVER can legally intervene, since it can't preventDefault
+ *  anything). Flip the flag back to this if wheel ownership ever misbehaves on some device/
+ *  browser; both paths share the exact same dockPhysics-driven `runTakeover`/`clampedPlan`
+ *  machinery below, only how (and how early) a manoeuvre gets triggered differs. The old
+ *  settle-then-dock fallback (native 'scrollend', with a debounced-scroll fallback for browsers
+ *  that don't fire it) survives under BOTH paths as the safety net for whatever either one
+ *  misses. */
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { fmtISO } from '~/utils/dates'
 import { useDayStrip } from '~/composables/useDayStrip'
 import { decelerationFor, planDock, positionAt, stopTime } from '~/utils/dockPhysics'
+import { createWheelIntentTracker } from '~/utils/wheelIntent'
+
+/** The fallback flag (see file doc comment above): flip to `false` to restore the previous
+ *  observe-and-takeover-only design if full wheel ownership ever misbehaves on some device. */
+const WHEEL_OWNERSHIP = true
 
 const { days, todayISO, initialFetch, extendFuture, extendPast } = useDayStrip()
 
@@ -240,6 +269,116 @@ function clampedPlan(el: HTMLElement, v: number): { target: number; a: number; o
   return a === null ? null : { target, a, onDock }
 }
 
+// --- Full scroll ownership (WHEEL_OWNERSHIP): a non-passive wheel listener owns horizontal
+// wheel/trackpad input outright — preventDefault on every such event, drive scrollLeft by hand
+// during the touch, and run the SAME dockPhysics manoeuvre (clampedPlan/runTakeover above) from
+// the true release velocity the instant a release is detected. See the file doc comment for the
+// full picture; wheelIntent.ts does the FINGER/MOMENTUM/DISCRETE classification this depends on.
+// -------------------------------------------------------------------------------------------
+
+const wheelTracker = createWheelIntentTracker()
+/** tick-normalised (px/tick, tick ≈ 16.67ms — the same unit dockPhysics assumes throughout) EMA
+ *  of recent FINGER-sample velocity. Blended, not the bare last-sample rate, so one unusually
+ *  large or small inter-event gap right at release doesn't single-handedly set the manoeuvre's
+ *  whole starting speed. */
+let wheelVelocity = 0
+let wheelLastT = 0
+let wheelReleaseTimer: ReturnType<typeof setTimeout> | null = null
+/** Guards `handleFingerRelease` against running twice for the same lift-off: a confirmed
+ *  MOMENTUM sample and the silence timer below are two independent triggers racing to detect
+ *  the SAME release, and only the first to arrive should actually start a manoeuvre. Reset the
+ *  moment fresh finger input arrives (a new gesture — or new input cancelling an in-flight
+ *  manoeuvre — always gets to release again). */
+let wheelReleasedThisGesture = false
+
+/** Silence past this long, with no further wheel event at all, reads as a release even on a
+ *  device/browser that never sends synthetic momentum events after lift-off — the fallback
+ *  trigger alongside a confirmed MOMENTUM classification (whichever fires first wins, see
+ *  `wheelReleasedThisGesture`). */
+const WHEEL_RELEASE_GAP_MS = 80
+const WHEEL_TICK_MS = 1000 / 60
+/** Below this (px/tick) at release, there's nothing worth gliding for — just settle onto
+ *  whichever dock is already nearest, same as a discrete notch's own settle. */
+const WHEEL_STOPPED_VELOCITY = 0.05
+
+function clearWheelReleaseTimer(): void {
+  if (wheelReleaseTimer !== null) { clearTimeout(wheelReleaseTimer); wheelReleaseTimer = null }
+}
+
+/** Runs the ONE manoeuvre from the true release state — the user's original algorithm in full,
+ *  triggered from an actual measured finger velocity instead of a later, already-decayed
+ *  observation of native momentum. Idempotent per gesture (see `wheelReleasedThisGesture`). */
+function handleFingerRelease(): void {
+  if (wheelReleasedThisGesture) return
+  wheelReleasedThisGesture = true
+  clearWheelReleaseTimer()
+  const el = container.value
+  if (!el) return
+  if (Math.abs(wheelVelocity) < WHEEL_STOPPED_VELOCITY) { dockToNearest(); return }
+  const plan = clampedPlan(el, wheelVelocity)
+  if (plan === null) { dockToNearest(); return }
+  if (Math.abs(plan.target - el.scrollLeft) < 1) return
+  runTakeover(el, plan.target, wheelVelocity, plan.a, plan.onDock)
+}
+
+/** A discrete notch has no meaningful "release velocity" to carry into a glide the way a
+ *  finger-flick does — after a short idle with no further notch, it just settles onto the
+ *  nearest dock directly, no closed-form deceleration. */
+function handleDiscreteSettle(): void {
+  wheelReleasedThisGesture = true
+  clearWheelReleaseTimer()
+  dockToNearest()
+}
+
+/** The strip's own wheel listener when WHEEL_OWNERSHIP is on — bound WITHOUT `.passive` (Vue's
+ *  default for a plain `@wheel` binding) specifically so `preventDefault()` is legal here. Every
+ *  horizontal-intent event (dominant deltaX, or shift+wheel — the standard convention for "make
+ *  this vertical wheel motion scroll horizontally") is owned outright: native scrolling for it
+ *  is fully suppressed, and this drives `scrollLeft` itself instead, sourced from the SAME wheel
+ *  stream `wheelIntent.ts` classifies into FINGER (apply directly), MOMENTUM (discard — the
+ *  glide is ours now, not the browser's), or DISCRETE (apply, then settle without a glide). A
+ *  vertical-intent wheel event over the strip is left completely alone (no preventDefault, no
+ *  handling at all) — this strip only ever scrolls horizontally, so vertical input here isn't
+ *  this component's to take. */
+function onWheel(e: WheelEvent): void {
+  if (!WHEEL_OWNERSHIP) { onUserInputDuringTakeover(); return }
+
+  const horizontal = Math.abs(e.deltaX) >= Math.abs(e.deltaY) || e.shiftKey
+  if (!horizontal) return
+
+  e.preventDefault()
+  const el = container.value
+  if (!el) return
+
+  const dx = Math.abs(e.deltaX) >= Math.abs(e.deltaY) ? e.deltaX : e.deltaY
+  const now = performance.now()
+  const intent = wheelTracker.push({ dx, t: now })
+
+  if (intent === 'momentum') {
+    // Discard entirely — never applied to scrollLeft. This IS the release signal (see the file
+    // doc comment): run the manoeuvre now, from the velocity already measured during the finger
+    // phase, not from whatever this (or any later) momentum sample happens to say.
+    handleFingerRelease()
+    return
+  }
+
+  // New real input (finger or discrete) always wins over anything in flight — cancel any
+  // manoeuvre already running and hand control straight back to direct manual driving.
+  if (takeoverActive) cancelTakeover()
+  wheelReleasedThisGesture = false
+
+  const maxScrollLeft = Math.max(0, el.scrollWidth - el.clientWidth)
+  el.scrollLeft = Math.max(0, Math.min(el.scrollLeft + dx, maxScrollLeft))
+
+  const dt = wheelLastT ? now - wheelLastT : WHEEL_TICK_MS
+  wheelLastT = now
+  const instantV = dx / (dt / WHEEL_TICK_MS)
+  wheelVelocity = intent === 'discrete' ? instantV : wheelVelocity * 0.5 + instantV * 0.5
+
+  clearWheelReleaseTimer()
+  wheelReleaseTimer = setTimeout(intent === 'discrete' ? handleDiscreteSettle : handleFingerRelease, WHEEL_RELEASE_GAP_MS)
+}
+
 function maybeTakeOver(el: HTMLElement, v: number): void {
   // A programmatic dock scroll is already in flight (dockToNearest, scrollToToday — anything
   // that set `dockInFlight` before calling native `scrollTo({behavior:'smooth'})`) — that's not
@@ -384,7 +523,13 @@ onMounted(async () => {
     lastScrollLeft = container.value.scrollLeft
   }
   scheduleInitialCenter()
-  velocityRafId = requestAnimationFrame(velocityTick)
+  // The rAF velocity sampler only has a job under the FALLBACK path — under full wheel
+  // ownership, scrollLeft is never driven by anything this sampler would need to observe
+  // (native wheel momentum never runs at all, since every horizontal wheel event is
+  // preventDefault'd; the ownership path triggers its own manoeuvre directly from the wheel
+  // stream instead, see onWheel). Leaving it running under ownership would just have it watch
+  // OUR OWN scrollLeft writes and risk a redundant/competing takeover attempt.
+  if (!WHEEL_OWNERSHIP) velocityRafId = requestAnimationFrame(velocityTick)
 })
 
 onBeforeUnmount(() => {
@@ -401,7 +546,7 @@ defineExpose({ scrollToToday })
     class="day-strip thin-scroll"
     @scroll="onScroll"
     @scrollend="onScrollEndNative"
-    @wheel.passive="onUserInputDuringTakeover"
+    @wheel="onWheel"
     @touchstart.passive="onUserInputDuringTakeover"
     @dragover.prevent="onDragOverStrip"
     @dragleave="stopAutoScroll"

@@ -1,0 +1,1700 @@
+{
+  "writes": [
+    {
+      "t": 52,
+      "from": 12000,
+      "to": 12004,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 86,
+      "from": 12004,
+      "to": 12010.117647058823,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 114,
+      "from": 12010,
+      "to": 12018.235294117647,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 145,
+      "from": 12018,
+      "to": 12028.35294117647,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 176,
+      "from": 12028,
+      "to": 12040.470588235294,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 204,
+      "from": 12040,
+      "to": 12054.588235294117,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 234,
+      "from": 12055,
+      "to": 12071.70588235294,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 264,
+      "from": 12072,
+      "to": 12090.823529411764,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 294,
+      "from": 12091,
+      "to": 12111.941176470587,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 325,
+      "from": 12112,
+      "to": 12135.058823529413,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 353,
+      "from": 12135,
+      "to": 12160.176470588236,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 383,
+      "from": 12160,
+      "to": 12187.29411764706,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 414,
+      "from": 12187,
+      "to": 12216.411764705883,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 447,
+      "from": 12216,
+      "to": 12247.529411764706,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 479,
+      "from": 12248,
+      "to": 12281.64705882353,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 511,
+      "from": 12282,
+      "to": 12317.764705882353,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 546,
+      "from": 12318,
+      "to": 12355.882352941177,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 575,
+      "from": 12356,
+      "to": 12396,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 607,
+      "from": 12396,
+      "to": 12432,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 636,
+      "from": 12432,
+      "to": 12464.4,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 728,
+      "from": 12451,
+      "to": 12522.450234128371,
+      "caller": "step<FrameRequestCallback*runTakeover<handleFingerRelease"
+    },
+    {
+      "t": 793,
+      "from": 12522,
+      "to": 12596.416403199444,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*runTakeover"
+    },
+    {
+      "t": 861,
+      "from": 12596,
+      "to": 12668.462024782059,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 959,
+      "from": 12668,
+      "to": 12772.981800575857,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1050,
+      "from": 12773,
+      "to": 12856.686871086356,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1141,
+      "from": 12857,
+      "to": 12953.49467430739,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1225,
+      "from": 12953,
+      "to": 13030.793910590113,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1310,
+      "from": 13031,
+      "to": 13105.14524394055,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1395,
+      "from": 13105,
+      "to": 13176.512988573557,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1481,
+      "from": 13177,
+      "to": 13244.931406488475,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1566,
+      "from": 13245,
+      "to": 13310.39836175031,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1652,
+      "from": 13310,
+      "to": 13384.988446014086,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1668,
+      "from": 13385,
+      "to": 13397.019526009659,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1703,
+      "from": 13397,
+      "to": 13420.697016185457,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1736,
+      "from": 13421,
+      "to": 13443.91405683651,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1751,
+      "from": 13444,
+      "to": 13455.3377042903,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1801,
+      "from": 13455,
+      "to": 13488.910510328613,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1818,
+      "from": 13489,
+      "to": 13499.872853952005,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1866,
+      "from": 13500,
+      "to": 13521.4154343004,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1867,
+      "from": 13521,
+      "to": 13532.008886485975,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1927,
+      "from": 13532,
+      "to": 13563.090110086667,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1934,
+      "from": 13563,
+      "to": 13573.209185308593,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1989,
+      "from": 13573,
+      "to": 13602.86670853819,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2001,
+      "from": 13603,
+      "to": 13612.522913816592,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2053,
+      "from": 13613,
+      "to": 13640.756309522267,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2068,
+      "from": 13641,
+      "to": 13649.871799081076,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2117,
+      "from": 13650,
+      "to": 13667.911170446941,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2118,
+      "from": 13668,
+      "to": 13676.736183824154,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2182,
+      "from": 13677,
+      "to": 13702.467913857883,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2185,
+      "from": 13702,
+      "to": 13710.817980791297,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2217,
+      "from": 13711,
+      "to": 13719.039405831305,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2218,
+      "from": 13719,
+      "to": 13727.142272212233,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2282,
+      "from": 13727,
+      "to": 13750.748748500057,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2284,
+      "from": 13751,
+      "to": 13758.386324518682,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2317,
+      "from": 13758,
+      "to": 13765.896112949558,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2318,
+      "from": 13766,
+      "to": 13773.28734272135,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2382,
+      "from": 13773,
+      "to": 13794.758054876118,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2385,
+      "from": 13795,
+      "to": 13801.67490768426,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2419,
+      "from": 13802,
+      "to": 13815.168832434547,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2434,
+      "from": 13815,
+      "to": 13821.721919467933,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2483,
+      "from": 13822,
+      "to": 13834.503353303431,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2484,
+      "from": 13834,
+      "to": 13840.70842717512,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2548,
+      "from": 13841,
+      "to": 13858.612296835692,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2551,
+      "from": 13859,
+      "to": 13864.343136071055,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2613,
+      "from": 13864,
+      "to": 13880.830683350576,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2618,
+      "from": 13881,
+      "to": 13886.093384652035,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2677,
+      "from": 13886,
+      "to": 13901.156804407634,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2685,
+      "from": 13901,
+      "to": 13905.94441676711,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2740,
+      "from": 13906,
+      "to": 13919.578466772879,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2751,
+      "from": 13920,
+      "to": 13923.891132688559,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2803,
+      "from": 13924,
+      "to": 13936.106724549141,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2818,
+      "from": 13936,
+      "to": 13939.939771275265,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2867,
+      "from": 13940,
+      "to": 13947.250188750262,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2868,
+      "from": 13947,
+      "to": 13950.731662764752,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2929,
+      "from": 13951,
+      "to": 13960.451996074926,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2959,
+      "from": 13960,
+      "to": 13966.183233210848,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2991,
+      "from": 13966,
+      "to": 13971.755726064845,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3023,
+      "from": 13972,
+      "to": 13976.700044834048,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3057,
+      "from": 13977,
+      "to": 13981.163915872508,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3090,
+      "from": 13981,
+      "to": 13985.153552274644,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3121,
+      "from": 13985,
+      "to": 13988.672889214273,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3153,
+      "from": 13989,
+      "to": 13991.71180418763,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3186,
+      "from": 13992,
+      "to": 13994.281248239664,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3218,
+      "from": 13994,
+      "to": 13995.331037344593,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3252,
+      "from": 13995,
+      "to": 13997.241176090383,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3283,
+      "from": 13997,
+      "to": 13998.605147637778,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3317,
+      "from": 13999,
+      "to": 13999.528326890084,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3349,
+      "from": 14000,
+      "to": 13999.960181634902,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3384,
+      "from": 14000,
+      "to": 14000,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    }
+  ],
+  "calls": [
+    {
+      "t": 83,
+      "fn": "scrollTo",
+      "left": 12000,
+      "behavior": "smooth",
+      "at": 12004,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 144,
+      "fn": "scrollTo",
+      "left": 12000,
+      "behavior": "smooth",
+      "at": 12018,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 232,
+      "fn": "scrollTo",
+      "left": 12000,
+      "behavior": "smooth",
+      "at": 12055,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 293,
+      "fn": "scrollTo",
+      "left": 12000,
+      "behavior": "smooth",
+      "at": 12091,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 382,
+      "fn": "scrollTo",
+      "left": 12000,
+      "behavior": "smooth",
+      "at": 12160,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 444,
+      "fn": "scrollTo",
+      "left": 12400,
+      "behavior": "smooth",
+      "at": 12216,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 544,
+      "fn": "scrollTo",
+      "left": 12400,
+      "behavior": "smooth",
+      "at": 12318,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 665,
+      "fn": "scrollTo",
+      "left": 12400,
+      "behavior": "smooth",
+      "at": 12464,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 861,
+      "fn": "scrollTo",
+      "left": 12400,
+      "behavior": "smooth",
+      "at": 12596,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1050,
+      "fn": "scrollTo",
+      "left": 12800,
+      "behavior": "smooth",
+      "at": 12773,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1225,
+      "fn": "scrollTo",
+      "left": 12800,
+      "behavior": "smooth",
+      "at": 12953,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1395,
+      "fn": "scrollTo",
+      "left": 13200,
+      "behavior": "smooth",
+      "at": 13105,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1566,
+      "fn": "scrollTo",
+      "left": 13200,
+      "behavior": "smooth",
+      "at": 13245,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1668,
+      "fn": "scrollTo",
+      "left": 13200,
+      "behavior": "smooth",
+      "at": 13385,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1736,
+      "fn": "scrollTo",
+      "left": 13600,
+      "behavior": "smooth",
+      "at": 13421,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1801,
+      "fn": "scrollTo",
+      "left": 13600,
+      "behavior": "smooth",
+      "at": 13455,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1865,
+      "fn": "scrollTo",
+      "left": 13600,
+      "behavior": "smooth",
+      "at": 13500,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1927,
+      "fn": "scrollTo",
+      "left": 13600,
+      "behavior": "smooth",
+      "at": 13532,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1989,
+      "fn": "scrollTo",
+      "left": 13600,
+      "behavior": "smooth",
+      "at": 13573,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 2053,
+      "fn": "scrollTo",
+      "left": 13600,
+      "behavior": "smooth",
+      "at": 13613,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 2117,
+      "fn": "scrollTo",
+      "left": 13600,
+      "behavior": "smooth",
+      "at": 13650,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 2182,
+      "fn": "scrollTo",
+      "left": 13600,
+      "behavior": "smooth",
+      "at": 13677,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 2217,
+      "fn": "scrollTo",
+      "left": 13600,
+      "behavior": "smooth",
+      "at": 13711,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 2282,
+      "fn": "scrollTo",
+      "left": 13600,
+      "behavior": "smooth",
+      "at": 13727,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 2317,
+      "fn": "scrollTo",
+      "left": 13600,
+      "behavior": "smooth",
+      "at": 13758,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 2382,
+      "fn": "scrollTo",
+      "left": 13600,
+      "behavior": "smooth",
+      "at": 13773,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 2419,
+      "fn": "scrollTo",
+      "left": 14000,
+      "behavior": "smooth",
+      "at": 13802,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 2483,
+      "fn": "scrollTo",
+      "left": 14000,
+      "behavior": "smooth",
+      "at": 13822,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 2548,
+      "fn": "scrollTo",
+      "left": 14000,
+      "behavior": "smooth",
+      "at": 13841,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 2612,
+      "fn": "scrollTo",
+      "left": 14000,
+      "behavior": "smooth",
+      "at": 13864,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 2677,
+      "fn": "scrollTo",
+      "left": 14000,
+      "behavior": "smooth",
+      "at": 13886,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 2740,
+      "fn": "scrollTo",
+      "left": 14000,
+      "behavior": "smooth",
+      "at": 13906,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 2803,
+      "fn": "scrollTo",
+      "left": 14000,
+      "behavior": "smooth",
+      "at": 13924,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 2866,
+      "fn": "scrollTo",
+      "left": 14000,
+      "behavior": "smooth",
+      "at": 13940,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 2929,
+      "fn": "scrollTo",
+      "left": 14000,
+      "behavior": "smooth",
+      "at": 13951,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 2990,
+      "fn": "scrollTo",
+      "left": 14000,
+      "behavior": "smooth",
+      "at": 13966,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 3056,
+      "fn": "scrollTo",
+      "left": 14000,
+      "behavior": "smooth",
+      "at": 13977,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 3121,
+      "fn": "scrollTo",
+      "left": 14000,
+      "behavior": "smooth",
+      "at": 13985,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 3186,
+      "fn": "scrollTo",
+      "left": 14000,
+      "behavior": "smooth",
+      "at": 13992,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 3251,
+      "fn": "scrollTo",
+      "left": 14000,
+      "behavior": "smooth",
+      "at": 13995,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 3317,
+      "fn": "scrollTo",
+      "left": 14000,
+      "behavior": "smooth",
+      "at": 13999,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    }
+  ],
+  "events": [
+    {
+      "t": 83,
+      "type": "scroll",
+      "at": 12004
+    },
+    {
+      "t": 84,
+      "type": "scrollend",
+      "at": 12004
+    },
+    {
+      "t": 113,
+      "type": "scroll",
+      "at": 12010
+    },
+    {
+      "t": 113,
+      "type": "scrollend",
+      "at": 12010
+    },
+    {
+      "t": 144,
+      "type": "scroll",
+      "at": 12018
+    },
+    {
+      "t": 144,
+      "type": "scrollend",
+      "at": 12018
+    },
+    {
+      "t": 174,
+      "type": "scroll",
+      "at": 12028
+    },
+    {
+      "t": 174,
+      "type": "scrollend",
+      "at": 12028
+    },
+    {
+      "t": 232,
+      "type": "scroll",
+      "at": 12055
+    },
+    {
+      "t": 233,
+      "type": "scrollend",
+      "at": 12055
+    },
+    {
+      "t": 262,
+      "type": "scroll",
+      "at": 12072
+    },
+    {
+      "t": 262,
+      "type": "scrollend",
+      "at": 12072
+    },
+    {
+      "t": 293,
+      "type": "scroll",
+      "at": 12091
+    },
+    {
+      "t": 293,
+      "type": "scrollend",
+      "at": 12091
+    },
+    {
+      "t": 323,
+      "type": "scroll",
+      "at": 12112
+    },
+    {
+      "t": 323,
+      "type": "scrollend",
+      "at": 12112
+    },
+    {
+      "t": 382,
+      "type": "scroll",
+      "at": 12160
+    },
+    {
+      "t": 382,
+      "type": "scrollend",
+      "at": 12160
+    },
+    {
+      "t": 412,
+      "type": "scroll",
+      "at": 12187
+    },
+    {
+      "t": 412,
+      "type": "scrollend",
+      "at": 12187
+    },
+    {
+      "t": 444,
+      "type": "scroll",
+      "at": 12216
+    },
+    {
+      "t": 444,
+      "type": "scrollend",
+      "at": 12216
+    },
+    {
+      "t": 477,
+      "type": "scroll",
+      "at": 12248
+    },
+    {
+      "t": 477,
+      "type": "scrollend",
+      "at": 12248
+    },
+    {
+      "t": 544,
+      "type": "scroll",
+      "at": 12318
+    },
+    {
+      "t": 544,
+      "type": "scrollend",
+      "at": 12318
+    },
+    {
+      "t": 605,
+      "type": "scroll",
+      "at": 12396
+    },
+    {
+      "t": 605,
+      "type": "scrollend",
+      "at": 12396
+    },
+    {
+      "t": 665,
+      "type": "scroll",
+      "at": 12464
+    },
+    {
+      "t": 665,
+      "type": "scrollend",
+      "at": 12464
+    },
+    {
+      "t": 728,
+      "type": "scroll",
+      "at": 12451
+    },
+    {
+      "t": 793,
+      "type": "scroll",
+      "at": 12522
+    },
+    {
+      "t": 793,
+      "type": "scrollend",
+      "at": 12522
+    },
+    {
+      "t": 861,
+      "type": "scroll",
+      "at": 12596
+    },
+    {
+      "t": 861,
+      "type": "scrollend",
+      "at": 12596
+    },
+    {
+      "t": 959,
+      "type": "scroll",
+      "at": 12668
+    },
+    {
+      "t": 959,
+      "type": "scrollend",
+      "at": 12668
+    },
+    {
+      "t": 1050,
+      "type": "scroll",
+      "at": 12773
+    },
+    {
+      "t": 1050,
+      "type": "scrollend",
+      "at": 12773
+    },
+    {
+      "t": 1141,
+      "type": "scroll",
+      "at": 12857
+    },
+    {
+      "t": 1141,
+      "type": "scrollend",
+      "at": 12857
+    },
+    {
+      "t": 1225,
+      "type": "scroll",
+      "at": 12953
+    },
+    {
+      "t": 1225,
+      "type": "scrollend",
+      "at": 12953
+    },
+    {
+      "t": 1310,
+      "type": "scroll",
+      "at": 13031
+    },
+    {
+      "t": 1310,
+      "type": "scrollend",
+      "at": 13031
+    },
+    {
+      "t": 1395,
+      "type": "scroll",
+      "at": 13105
+    },
+    {
+      "t": 1395,
+      "type": "scrollend",
+      "at": 13105
+    },
+    {
+      "t": 1481,
+      "type": "scroll",
+      "at": 13177
+    },
+    {
+      "t": 1481,
+      "type": "scrollend",
+      "at": 13177
+    },
+    {
+      "t": 1566,
+      "type": "scroll",
+      "at": 13245
+    },
+    {
+      "t": 1566,
+      "type": "scrollend",
+      "at": 13245
+    },
+    {
+      "t": 1652,
+      "type": "scroll",
+      "at": 13310
+    },
+    {
+      "t": 1652,
+      "type": "scrollend",
+      "at": 13310
+    },
+    {
+      "t": 1667,
+      "type": "scroll",
+      "at": 13385
+    },
+    {
+      "t": 1668,
+      "type": "scrollend",
+      "at": 13385
+    },
+    {
+      "t": 1702,
+      "type": "scroll",
+      "at": 13397
+    },
+    {
+      "t": 1702,
+      "type": "scrollend",
+      "at": 13397
+    },
+    {
+      "t": 1736,
+      "type": "scroll",
+      "at": 13421
+    },
+    {
+      "t": 1736,
+      "type": "scrollend",
+      "at": 13421
+    },
+    {
+      "t": 1751,
+      "type": "scroll",
+      "at": 13444
+    },
+    {
+      "t": 1751,
+      "type": "scrollend",
+      "at": 13444
+    },
+    {
+      "t": 1801,
+      "type": "scroll",
+      "at": 13455
+    },
+    {
+      "t": 1801,
+      "type": "scrollend",
+      "at": 13455
+    },
+    {
+      "t": 1818,
+      "type": "scroll",
+      "at": 13489
+    },
+    {
+      "t": 1818,
+      "type": "scrollend",
+      "at": 13489
+    },
+    {
+      "t": 1865,
+      "type": "scroll",
+      "at": 13500
+    },
+    {
+      "t": 1865,
+      "type": "scrollend",
+      "at": 13500
+    },
+    {
+      "t": 1867,
+      "type": "scroll",
+      "at": 13521
+    },
+    {
+      "t": 1867,
+      "type": "scrollend",
+      "at": 13521
+    },
+    {
+      "t": 1927,
+      "type": "scroll",
+      "at": 13532
+    },
+    {
+      "t": 1927,
+      "type": "scrollend",
+      "at": 13532
+    },
+    {
+      "t": 1934,
+      "type": "scroll",
+      "at": 13563
+    },
+    {
+      "t": 1934,
+      "type": "scrollend",
+      "at": 13563
+    },
+    {
+      "t": 1989,
+      "type": "scroll",
+      "at": 13573
+    },
+    {
+      "t": 1989,
+      "type": "scrollend",
+      "at": 13573
+    },
+    {
+      "t": 2001,
+      "type": "scroll",
+      "at": 13603
+    },
+    {
+      "t": 2001,
+      "type": "scrollend",
+      "at": 13603
+    },
+    {
+      "t": 2053,
+      "type": "scroll",
+      "at": 13613
+    },
+    {
+      "t": 2053,
+      "type": "scrollend",
+      "at": 13613
+    },
+    {
+      "t": 2068,
+      "type": "scroll",
+      "at": 13641
+    },
+    {
+      "t": 2068,
+      "type": "scrollend",
+      "at": 13641
+    },
+    {
+      "t": 2117,
+      "type": "scroll",
+      "at": 13650
+    },
+    {
+      "t": 2117,
+      "type": "scrollend",
+      "at": 13650
+    },
+    {
+      "t": 2118,
+      "type": "scroll",
+      "at": 13668
+    },
+    {
+      "t": 2118,
+      "type": "scrollend",
+      "at": 13668
+    },
+    {
+      "t": 2182,
+      "type": "scroll",
+      "at": 13677
+    },
+    {
+      "t": 2182,
+      "type": "scrollend",
+      "at": 13677
+    },
+    {
+      "t": 2185,
+      "type": "scroll",
+      "at": 13702
+    },
+    {
+      "t": 2185,
+      "type": "scrollend",
+      "at": 13702
+    },
+    {
+      "t": 2217,
+      "type": "scroll",
+      "at": 13711
+    },
+    {
+      "t": 2217,
+      "type": "scrollend",
+      "at": 13711
+    },
+    {
+      "t": 2218,
+      "type": "scroll",
+      "at": 13719
+    },
+    {
+      "t": 2218,
+      "type": "scrollend",
+      "at": 13719
+    },
+    {
+      "t": 2282,
+      "type": "scroll",
+      "at": 13727
+    },
+    {
+      "t": 2282,
+      "type": "scrollend",
+      "at": 13727
+    },
+    {
+      "t": 2284,
+      "type": "scroll",
+      "at": 13751
+    },
+    {
+      "t": 2284,
+      "type": "scrollend",
+      "at": 13751
+    },
+    {
+      "t": 2317,
+      "type": "scroll",
+      "at": 13758
+    },
+    {
+      "t": 2317,
+      "type": "scrollend",
+      "at": 13758
+    },
+    {
+      "t": 2318,
+      "type": "scroll",
+      "at": 13766
+    },
+    {
+      "t": 2318,
+      "type": "scrollend",
+      "at": 13766
+    },
+    {
+      "t": 2382,
+      "type": "scroll",
+      "at": 13773
+    },
+    {
+      "t": 2382,
+      "type": "scrollend",
+      "at": 13773
+    },
+    {
+      "t": 2385,
+      "type": "scroll",
+      "at": 13795
+    },
+    {
+      "t": 2385,
+      "type": "scrollend",
+      "at": 13795
+    },
+    {
+      "t": 2418,
+      "type": "scroll",
+      "at": 13802
+    },
+    {
+      "t": 2419,
+      "type": "scrollend",
+      "at": 13802
+    },
+    {
+      "t": 2434,
+      "type": "scroll",
+      "at": 13815
+    },
+    {
+      "t": 2434,
+      "type": "scrollend",
+      "at": 13815
+    },
+    {
+      "t": 2483,
+      "type": "scroll",
+      "at": 13822
+    },
+    {
+      "t": 2483,
+      "type": "scrollend",
+      "at": 13822
+    },
+    {
+      "t": 2484,
+      "type": "scroll",
+      "at": 13834
+    },
+    {
+      "t": 2484,
+      "type": "scrollend",
+      "at": 13834
+    },
+    {
+      "t": 2548,
+      "type": "scroll",
+      "at": 13841
+    },
+    {
+      "t": 2548,
+      "type": "scrollend",
+      "at": 13841
+    },
+    {
+      "t": 2551,
+      "type": "scroll",
+      "at": 13859
+    },
+    {
+      "t": 2551,
+      "type": "scrollend",
+      "at": 13859
+    },
+    {
+      "t": 2612,
+      "type": "scroll",
+      "at": 13864
+    },
+    {
+      "t": 2612,
+      "type": "scrollend",
+      "at": 13864
+    },
+    {
+      "t": 2618,
+      "type": "scroll",
+      "at": 13881
+    },
+    {
+      "t": 2618,
+      "type": "scrollend",
+      "at": 13881
+    },
+    {
+      "t": 2677,
+      "type": "scroll",
+      "at": 13886
+    },
+    {
+      "t": 2677,
+      "type": "scrollend",
+      "at": 13886
+    },
+    {
+      "t": 2684,
+      "type": "scroll",
+      "at": 13901
+    },
+    {
+      "t": 2684,
+      "type": "scrollend",
+      "at": 13901
+    },
+    {
+      "t": 2740,
+      "type": "scroll",
+      "at": 13906
+    },
+    {
+      "t": 2740,
+      "type": "scrollend",
+      "at": 13906
+    },
+    {
+      "t": 2751,
+      "type": "scroll",
+      "at": 13920
+    },
+    {
+      "t": 2751,
+      "type": "scrollend",
+      "at": 13920
+    },
+    {
+      "t": 2802,
+      "type": "scroll",
+      "at": 13924
+    },
+    {
+      "t": 2803,
+      "type": "scrollend",
+      "at": 13924
+    },
+    {
+      "t": 2818,
+      "type": "scroll",
+      "at": 13936
+    },
+    {
+      "t": 2818,
+      "type": "scrollend",
+      "at": 13936
+    },
+    {
+      "t": 2866,
+      "type": "scroll",
+      "at": 13940
+    },
+    {
+      "t": 2867,
+      "type": "scrollend",
+      "at": 13940
+    },
+    {
+      "t": 2868,
+      "type": "scroll",
+      "at": 13947
+    },
+    {
+      "t": 2868,
+      "type": "scrollend",
+      "at": 13947
+    },
+    {
+      "t": 2928,
+      "type": "scroll",
+      "at": 13951
+    },
+    {
+      "t": 2929,
+      "type": "scrollend",
+      "at": 13951
+    },
+    {
+      "t": 2959,
+      "type": "scroll",
+      "at": 13960
+    },
+    {
+      "t": 2959,
+      "type": "scrollend",
+      "at": 13960
+    },
+    {
+      "t": 2990,
+      "type": "scroll",
+      "at": 13966
+    },
+    {
+      "t": 2990,
+      "type": "scrollend",
+      "at": 13966
+    },
+    {
+      "t": 3023,
+      "type": "scroll",
+      "at": 13972
+    },
+    {
+      "t": 3023,
+      "type": "scrollend",
+      "at": 13972
+    },
+    {
+      "t": 3056,
+      "type": "scroll",
+      "at": 13977
+    },
+    {
+      "t": 3056,
+      "type": "scrollend",
+      "at": 13977
+    },
+    {
+      "t": 3089,
+      "type": "scroll",
+      "at": 13981
+    },
+    {
+      "t": 3089,
+      "type": "scrollend",
+      "at": 13981
+    },
+    {
+      "t": 3121,
+      "type": "scroll",
+      "at": 13985
+    },
+    {
+      "t": 3121,
+      "type": "scrollend",
+      "at": 13985
+    },
+    {
+      "t": 3153,
+      "type": "scroll",
+      "at": 13989
+    },
+    {
+      "t": 3153,
+      "type": "scrollend",
+      "at": 13989
+    },
+    {
+      "t": 3186,
+      "type": "scroll",
+      "at": 13992
+    },
+    {
+      "t": 3186,
+      "type": "scrollend",
+      "at": 13992
+    },
+    {
+      "t": 3218,
+      "type": "scroll",
+      "at": 13994
+    },
+    {
+      "t": 3218,
+      "type": "scrollend",
+      "at": 13994
+    },
+    {
+      "t": 3251,
+      "type": "scroll",
+      "at": 13995
+    },
+    {
+      "t": 3251,
+      "type": "scrollend",
+      "at": 13995
+    },
+    {
+      "t": 3283,
+      "type": "scroll",
+      "at": 13997
+    },
+    {
+      "t": 3283,
+      "type": "scrollend",
+      "at": 13997
+    },
+    {
+      "t": 3317,
+      "type": "scroll",
+      "at": 13999
+    },
+    {
+      "t": 3317,
+      "type": "scrollend",
+      "at": 13999
+    },
+    {
+      "t": 3349,
+      "type": "scroll",
+      "at": 14000
+    },
+    {
+      "t": 3349,
+      "type": "scrollend",
+      "at": 14000
+    },
+    {
+      "t": 3384,
+      "type": "scrollend",
+      "at": 14000
+    }
+  ]
+}

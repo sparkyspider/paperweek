@@ -1,0 +1,915 @@
+{
+  "writes": [
+    {
+      "t": 51.1,
+      "from": 12000,
+      "to": 12002,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 101.6,
+      "from": 12002,
+      "to": 12005,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 141.5,
+      "from": 12005,
+      "to": 12008,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 182.7,
+      "from": 12008,
+      "to": 12012,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 223.2,
+      "from": 12012,
+      "to": 12016,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 263.8,
+      "from": 12016,
+      "to": 12021,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 304.5,
+      "from": 12021,
+      "to": 12027,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 345.6,
+      "from": 12027,
+      "to": 12033,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 386,
+      "from": 12033,
+      "to": 12040,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 426.9,
+      "from": 12040,
+      "to": 12047,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 465.8,
+      "from": 12047,
+      "to": 12055,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 505.6,
+      "from": 12055,
+      "to": 12063,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 544.3,
+      "from": 12063,
+      "to": 12072,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 583.6,
+      "from": 12072,
+      "to": 12082,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 622.5,
+      "from": 12082,
+      "to": 12092,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 661.8,
+      "from": 12092,
+      "to": 12103,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 700.8,
+      "from": 12103,
+      "to": 12114,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 740.1,
+      "from": 12114,
+      "to": 12126,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 778.8,
+      "from": 12126,
+      "to": 12137,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 817.6,
+      "from": 12137,
+      "to": 12147,
+      "caller": "HTMLDivElement.set<onWheel<callWithErrorHandling"
+    },
+    {
+      "t": 895.3,
+      "from": 12147,
+      "to": 12147,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 935.6,
+      "from": 12147,
+      "to": 12163.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1015.3,
+      "from": 12164,
+      "to": 12193,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1017,
+      "from": 12193,
+      "to": 12229.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1062.3,
+      "from": 12230,
+      "to": 12246.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1063.4,
+      "from": 12247,
+      "to": 12254.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1109.8,
+      "from": 12255,
+      "to": 12261.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1110.6,
+      "from": 12262,
+      "to": 12277.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1115.9,
+      "from": 12278,
+      "to": 12284.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1156.5,
+      "from": 12285,
+      "to": 12292,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1157.6,
+      "from": 12292,
+      "to": 12298.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1166.9,
+      "from": 12299,
+      "to": 12305.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1206.7,
+      "from": 12306,
+      "to": 12311.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1207.9,
+      "from": 12312,
+      "to": 12318,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1216.8,
+      "from": 12318,
+      "to": 12324,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1259.1,
+      "from": 12324,
+      "to": 12329.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1260.2,
+      "from": 12330,
+      "to": 12335,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1265.7,
+      "from": 12335,
+      "to": 12340,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1321.3,
+      "from": 12340,
+      "to": 12345,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1322.7,
+      "from": 12345,
+      "to": 12354.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1333.7,
+      "from": 12355,
+      "to": 12359,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1350.1,
+      "from": 12359,
+      "to": 12363,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1401.3,
+      "from": 12363,
+      "to": 12367,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1402.6,
+      "from": 12367,
+      "to": 12374,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1416.4,
+      "from": 12374,
+      "to": 12377.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1433.8,
+      "from": 12378,
+      "to": 12380.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1450.5,
+      "from": 12381,
+      "to": 12383.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1467.1,
+      "from": 12384,
+      "to": 12386,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1483.9,
+      "from": 12386,
+      "to": 12388.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1500.1,
+      "from": 12389,
+      "to": 12390.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1517.1,
+      "from": 12391,
+      "to": 12392.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1533.9,
+      "from": 12393,
+      "to": 12394,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1549.4,
+      "from": 12394,
+      "to": 12395.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1567.2,
+      "from": 12396,
+      "to": 12397,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1583.2,
+      "from": 12397,
+      "to": 12398,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1600.5,
+      "from": 12398,
+      "to": 12399,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1615.8,
+      "from": 12399,
+      "to": 12399.5,
+      "caller": "HTMLDivElement.set<step"
+    },
+    {
+      "t": 1634.3,
+      "from": 12400,
+      "to": 12400,
+      "caller": "HTMLDivElement.set<step"
+    }
+  ],
+  "calls": [],
+  "events": [
+    {
+      "t": 100.6,
+      "type": "scroll",
+      "at": 12002
+    },
+    {
+      "t": 100.6,
+      "type": "scrollend",
+      "at": 12002
+    },
+    {
+      "t": 140.5,
+      "type": "scroll",
+      "at": 12005
+    },
+    {
+      "t": 140.5,
+      "type": "scrollend",
+      "at": 12005
+    },
+    {
+      "t": 181.8,
+      "type": "scroll",
+      "at": 12008
+    },
+    {
+      "t": 181.8,
+      "type": "scrollend",
+      "at": 12008
+    },
+    {
+      "t": 222.3,
+      "type": "scroll",
+      "at": 12012
+    },
+    {
+      "t": 222.3,
+      "type": "scrollend",
+      "at": 12012
+    },
+    {
+      "t": 263,
+      "type": "scroll",
+      "at": 12016
+    },
+    {
+      "t": 263,
+      "type": "scrollend",
+      "at": 12016
+    },
+    {
+      "t": 303.6,
+      "type": "scroll",
+      "at": 12021
+    },
+    {
+      "t": 303.6,
+      "type": "scrollend",
+      "at": 12021
+    },
+    {
+      "t": 344.7,
+      "type": "scroll",
+      "at": 12027
+    },
+    {
+      "t": 344.7,
+      "type": "scrollend",
+      "at": 12027
+    },
+    {
+      "t": 385.2,
+      "type": "scroll",
+      "at": 12033
+    },
+    {
+      "t": 385.2,
+      "type": "scrollend",
+      "at": 12033
+    },
+    {
+      "t": 426.1,
+      "type": "scroll",
+      "at": 12040
+    },
+    {
+      "t": 426.1,
+      "type": "scrollend",
+      "at": 12040
+    },
+    {
+      "t": 465,
+      "type": "scroll",
+      "at": 12047
+    },
+    {
+      "t": 465,
+      "type": "scrollend",
+      "at": 12047
+    },
+    {
+      "t": 504.9,
+      "type": "scroll",
+      "at": 12055
+    },
+    {
+      "t": 505,
+      "type": "scrollend",
+      "at": 12055
+    },
+    {
+      "t": 543.6,
+      "type": "scroll",
+      "at": 12063
+    },
+    {
+      "t": 543.6,
+      "type": "scrollend",
+      "at": 12063
+    },
+    {
+      "t": 582.9,
+      "type": "scroll",
+      "at": 12072
+    },
+    {
+      "t": 582.9,
+      "type": "scrollend",
+      "at": 12072
+    },
+    {
+      "t": 621.7,
+      "type": "scroll",
+      "at": 12082
+    },
+    {
+      "t": 621.7,
+      "type": "scrollend",
+      "at": 12082
+    },
+    {
+      "t": 661.1,
+      "type": "scroll",
+      "at": 12092
+    },
+    {
+      "t": 661.1,
+      "type": "scrollend",
+      "at": 12092
+    },
+    {
+      "t": 700,
+      "type": "scroll",
+      "at": 12103
+    },
+    {
+      "t": 700,
+      "type": "scrollend",
+      "at": 12103
+    },
+    {
+      "t": 739.4,
+      "type": "scroll",
+      "at": 12114
+    },
+    {
+      "t": 739.4,
+      "type": "scrollend",
+      "at": 12114
+    },
+    {
+      "t": 778.1,
+      "type": "scroll",
+      "at": 12126
+    },
+    {
+      "t": 778.1,
+      "type": "scrollend",
+      "at": 12126
+    },
+    {
+      "t": 816.9,
+      "type": "scroll",
+      "at": 12137
+    },
+    {
+      "t": 816.9,
+      "type": "scrollend",
+      "at": 12137
+    },
+    {
+      "t": 855.6,
+      "type": "scroll",
+      "at": 12147
+    },
+    {
+      "t": 855.6,
+      "type": "scrollend",
+      "at": 12147
+    },
+    {
+      "t": 1015.2,
+      "type": "scroll",
+      "at": 12164
+    },
+    {
+      "t": 1015.2,
+      "type": "scrollend",
+      "at": 12164
+    },
+    {
+      "t": 1016.9,
+      "type": "scroll",
+      "at": 12193
+    },
+    {
+      "t": 1016.9,
+      "type": "scrollend",
+      "at": 12193
+    },
+    {
+      "t": 1062.2,
+      "type": "scroll",
+      "at": 12230
+    },
+    {
+      "t": 1062.2,
+      "type": "scrollend",
+      "at": 12230
+    },
+    {
+      "t": 1063.3,
+      "type": "scroll",
+      "at": 12247
+    },
+    {
+      "t": 1063.3,
+      "type": "scrollend",
+      "at": 12247
+    },
+    {
+      "t": 1109.7,
+      "type": "scroll",
+      "at": 12255
+    },
+    {
+      "t": 1109.7,
+      "type": "scrollend",
+      "at": 12255
+    },
+    {
+      "t": 1110.6,
+      "type": "scroll",
+      "at": 12262
+    },
+    {
+      "t": 1110.6,
+      "type": "scrollend",
+      "at": 12262
+    },
+    {
+      "t": 1115.9,
+      "type": "scroll",
+      "at": 12278
+    },
+    {
+      "t": 1115.9,
+      "type": "scrollend",
+      "at": 12278
+    },
+    {
+      "t": 1156.4,
+      "type": "scroll",
+      "at": 12285
+    },
+    {
+      "t": 1156.4,
+      "type": "scrollend",
+      "at": 12285
+    },
+    {
+      "t": 1157.6,
+      "type": "scroll",
+      "at": 12292
+    },
+    {
+      "t": 1157.6,
+      "type": "scrollend",
+      "at": 12292
+    },
+    {
+      "t": 1166.8,
+      "type": "scroll",
+      "at": 12299
+    },
+    {
+      "t": 1166.8,
+      "type": "scrollend",
+      "at": 12299
+    },
+    {
+      "t": 1206.6,
+      "type": "scroll",
+      "at": 12306
+    },
+    {
+      "t": 1206.6,
+      "type": "scrollend",
+      "at": 12306
+    },
+    {
+      "t": 1207.9,
+      "type": "scroll",
+      "at": 12312
+    },
+    {
+      "t": 1207.9,
+      "type": "scrollend",
+      "at": 12312
+    },
+    {
+      "t": 1216.8,
+      "type": "scroll",
+      "at": 12318
+    },
+    {
+      "t": 1216.8,
+      "type": "scrollend",
+      "at": 12318
+    },
+    {
+      "t": 1259,
+      "type": "scroll",
+      "at": 12324
+    },
+    {
+      "t": 1259,
+      "type": "scrollend",
+      "at": 12324
+    },
+    {
+      "t": 1260.1,
+      "type": "scroll",
+      "at": 12330
+    },
+    {
+      "t": 1260.1,
+      "type": "scrollend",
+      "at": 12330
+    },
+    {
+      "t": 1265.7,
+      "type": "scroll",
+      "at": 12335
+    },
+    {
+      "t": 1265.7,
+      "type": "scrollend",
+      "at": 12335
+    },
+    {
+      "t": 1321.2,
+      "type": "scroll",
+      "at": 12340
+    },
+    {
+      "t": 1321.2,
+      "type": "scrollend",
+      "at": 12340
+    },
+    {
+      "t": 1322.6,
+      "type": "scroll",
+      "at": 12345
+    },
+    {
+      "t": 1322.7,
+      "type": "scrollend",
+      "at": 12345
+    },
+    {
+      "t": 1333.7,
+      "type": "scroll",
+      "at": 12355
+    },
+    {
+      "t": 1333.7,
+      "type": "scrollend",
+      "at": 12355
+    },
+    {
+      "t": 1350.1,
+      "type": "scroll",
+      "at": 12359
+    },
+    {
+      "t": 1350.1,
+      "type": "scrollend",
+      "at": 12359
+    },
+    {
+      "t": 1401.2,
+      "type": "scroll",
+      "at": 12363
+    },
+    {
+      "t": 1401.2,
+      "type": "scrollend",
+      "at": 12363
+    },
+    {
+      "t": 1402.5,
+      "type": "scroll",
+      "at": 12367
+    },
+    {
+      "t": 1402.6,
+      "type": "scrollend",
+      "at": 12367
+    },
+    {
+      "t": 1416.3,
+      "type": "scroll",
+      "at": 12374
+    },
+    {
+      "t": 1416.3,
+      "type": "scrollend",
+      "at": 12374
+    },
+    {
+      "t": 1433.8,
+      "type": "scroll",
+      "at": 12378
+    },
+    {
+      "t": 1433.8,
+      "type": "scrollend",
+      "at": 12378
+    },
+    {
+      "t": 1450.4,
+      "type": "scroll",
+      "at": 12381
+    },
+    {
+      "t": 1450.4,
+      "type": "scrollend",
+      "at": 12381
+    },
+    {
+      "t": 1467.1,
+      "type": "scroll",
+      "at": 12384
+    },
+    {
+      "t": 1467.1,
+      "type": "scrollend",
+      "at": 12384
+    },
+    {
+      "t": 1483.8,
+      "type": "scroll",
+      "at": 12386
+    },
+    {
+      "t": 1483.8,
+      "type": "scrollend",
+      "at": 12386
+    },
+    {
+      "t": 1500,
+      "type": "scroll",
+      "at": 12389
+    },
+    {
+      "t": 1500,
+      "type": "scrollend",
+      "at": 12389
+    },
+    {
+      "t": 1517,
+      "type": "scroll",
+      "at": 12391
+    },
+    {
+      "t": 1517.1,
+      "type": "scrollend",
+      "at": 12391
+    },
+    {
+      "t": 1533.8,
+      "type": "scroll",
+      "at": 12393
+    },
+    {
+      "t": 1533.8,
+      "type": "scrollend",
+      "at": 12393
+    },
+    {
+      "t": 1549.3,
+      "type": "scroll",
+      "at": 12394
+    },
+    {
+      "t": 1549.3,
+      "type": "scrollend",
+      "at": 12394
+    },
+    {
+      "t": 1567.2,
+      "type": "scroll",
+      "at": 12396
+    },
+    {
+      "t": 1567.2,
+      "type": "scrollend",
+      "at": 12396
+    },
+    {
+      "t": 1583.1,
+      "type": "scroll",
+      "at": 12397
+    },
+    {
+      "t": 1583.2,
+      "type": "scrollend",
+      "at": 12397
+    },
+    {
+      "t": 1600.4,
+      "type": "scroll",
+      "at": 12398
+    },
+    {
+      "t": 1600.4,
+      "type": "scrollend",
+      "at": 12398
+    },
+    {
+      "t": 1615.8,
+      "type": "scroll",
+      "at": 12399
+    },
+    {
+      "t": 1615.8,
+      "type": "scrollend",
+      "at": 12399
+    },
+    {
+      "t": 1634.3,
+      "type": "scroll",
+      "at": 12400
+    },
+    {
+      "t": 1634.3,
+      "type": "scrollend",
+      "at": 12400
+    }
+  ]
+}

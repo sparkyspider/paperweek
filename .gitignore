@@ -35,3 +35,6 @@ back/prisma/migrations/.gitkeep
 
 # Coverage
 coverage/
+
+# Scroll-diagnosis screen recordings (tens of MB) — keep local only
+docs/process/evidence/**/video/

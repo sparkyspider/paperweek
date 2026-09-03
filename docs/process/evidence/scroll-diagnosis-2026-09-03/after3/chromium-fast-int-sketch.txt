@@ -1,0 +1,59 @@
+# chromium-fast-int: per-frame scrollLeft delta (px). '>' right, '<' left. Caller: W=onWheel S=runTakeover.step T=scrollTo(smooth, native) A=withAnchor
+   18.2ms  12000    0.0                                                
+   34.8ms  12000    0.0                                                
+  103.1ms  12004    4.0 ?HTMLDivElement.set >>>>                                       f:4->idle
+  142.8ms  12010    6.0 ?HTMLDivElement.set >>>>>>                                     f:6->discrete
+  183.2ms  12018    8.0 ?HTMLDivElement.set >>>>>>>>                                   f:8->finger
+  223.5ms  12028   10.0 ?HTMLDivElement.set >>>>>>>>>>                                 f:10->finger
+  263.8ms  12040   12.0 ?HTMLDivElement.set >>>>>>>>>>>>                               f:12->finger
+  304.3ms  12055   15.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>                            f:15->finger
+  344.9ms  12072   17.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>                          f:17->finger
+  385.2ms  12091   19.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>                        f:19->finger
+    425ms  12112   21.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>                      f:21->finger
+    464ms  12135   23.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>                    f:23->finger
+    503ms  12160   25.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>                  f:25->finger
+  541.9ms  12187   27.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>                f:27->finger
+  580.3ms  12216   29.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>              f:29->finger
+    619ms  12248   32.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>           f:32->finger
+  657.5ms  12282   34.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>         f:34->finger
+    696ms  12318   36.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>       f:36->finger
+    736ms  12356   38.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>     f:38->finger
+    776ms  12396   40.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>   f:40->finger
+  816.2ms  12432   36.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>       i:36->finger
+  857.1ms  12432    0.0                                                i:32->finger
+  897.7ms  12432    0.0 ?HTMLDivElement.set                                            i:29->momentum
+  973.9ms  12505   73.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> i:26->momentum
+ 1014.5ms  12574   69.0     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> i:24->momentum
+   1055ms  12730  156.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> i:21->momentum
+ 1094.6ms  12786   56.0     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> i:19->momentum
+ 1134.6ms  12863   77.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> i:17->momentum
+ 1175.3ms  12910   47.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> i:15->momentum
+ 1216.4ms  12975   65.0     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> i:14->momentum
+ 1256.6ms  13013   38.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>     i:13->momentum
+ 1296.1ms  13048   35.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>        i:11->momentum
+ 1336.3ms  13093   45.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> i:10->momentum
+ 1376.1ms  13119   26.0     >>>>>>>>>>>>>>>>>>>>>>>>>>                 i:9->momentum
+ 1414.9ms  13151   32.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>           i:8->momentum
+ 1454.6ms  13168   17.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>                          i:7->momentum
+ 1455.5ms  13181   13.0 ?HTMLDivElement.set >>>>>>>>>>>>>                              i:7->momentum
+ 1499.5ms  13195   14.0     >>>>>>>>>>>>>>                             i:6->momentum
+ 1539.6ms  13197    2.0 ?HTMLDivElement.set >>                                         i:5->momentum
+ 1540.8ms  13199    2.0 ?HTMLDivElement.set >>                                         i:5->momentum
+   1619ms  13200    1.0     >                                          i:4->momentum
+ 1619.9ms  13200    0.0                                                i:4->momentum
+   1669ms  13200    0.0                                                i:4->momentum i:3->momentum
+ 1669.9ms  13200    0.0                                                i:3->momentum
+   1719ms  13200    0.0                                                i:3->momentum i:2->momentum
+   1720ms  13200    0.0                                                i:2->momentum
+ 1734.8ms  13200    0.0                                                i:2->momentum i:2->momentum
+ 1779.9ms  13200    0.0                                                i:2->momentum i:1->momentum
+ 1780.9ms  13200    0.0                                                i:1->momentum
+ 1784.7ms  13200    0.0                                                
+ 1801.4ms  13200    0.0                                                i:1->momentum i:1->momentum
+ 1818.1ms  13200    0.0                                                
+ 1834.7ms  13200    0.0                                                
+ 1851.5ms  13200    0.0                                                
+   1868ms  13200    0.0                                                
+ 1884.8ms  13200    0.0                                                
+ 1901.3ms  13200    0.0                                                
+   1918ms  13200    0.0                                                

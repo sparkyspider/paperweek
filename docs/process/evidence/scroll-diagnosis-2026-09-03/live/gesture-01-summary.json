@@ -1,0 +1,457 @@
+{
+  "tag": "gesture-01",
+  "savedAt": "2026-09-03T11:20:16.312Z",
+  "selftest": false,
+  "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+  "absT0": 49977.3,
+  "prerollMs": 400,
+  "firstWheelT": 400,
+  "wheelEvents": 27,
+  "wheelSpanMs": 1003,
+  "deltaModes": [
+    0
+  ],
+  "syntheticEvents": 0,
+  "startPos": 14800,
+  "endPos": 16800,
+  "totalTravel": 2000,
+  "nearestDock": 16800,
+  "dockError": 0,
+  "dockCount": 61,
+  "viewportW": 1120,
+  "scrollW": 24420,
+  "phases": [
+    {
+      "startT": 384.5,
+      "startPos": 14800,
+      "minD": 2,
+      "maxD": 358,
+      "reversals": 0,
+      "endT": 1440.1,
+      "endPos": 16674,
+      "writers": {
+        "HTMLDivElement.set<onWheel<callWithErrorHandling": 17,
+        "HTMLDivElement.set<step": 10
+      },
+      "scrollToCalls": [],
+      "travel": 1874,
+      "durationMs": 1056,
+      "direction": "right",
+      "wheelEventsDuring": 27,
+      "startsAfterLastWheel": false
+    },
+    {
+      "startT": 1521.7,
+      "startPos": 16674,
+      "minD": 0.5,
+      "maxD": 28.5,
+      "reversals": 0,
+      "endT": 1983.4,
+      "endPos": 16800,
+      "writers": {
+        "HTMLDivElement.set<step": 15
+      },
+      "scrollToCalls": [
+        "scrollTo(16800,smooth) @1734.9ms by el.scrollTo<dockToNearest<finish"
+      ],
+      "travel": 126,
+      "durationMs": 462,
+      "direction": "right",
+      "wheelEventsDuring": 0,
+      "startsAfterLastWheel": true
+    }
+  ],
+  "gapsBetweenPhasesMs": [
+    82
+  ],
+  "motionReverses": false,
+  "pauseThenMove": false,
+  "peakVelocityPxPerS": 19800,
+  "peakVelocityAtMs": 1240,
+  "peakFrameDeltaPx": 358,
+  "glideDistancePx": 130,
+  "glideDurationMs": 581,
+  "lastWheelT": 1402.7,
+  "lastMoveT": 1983.4,
+  "posAtLastWheel": 16670,
+  "scrollToSmoothCalls": [
+    {
+      "t": 1734.9,
+      "fn": "scrollTo",
+      "left": 16800,
+      "behavior": "smooth",
+      "at": 16698,
+      "caller": "el.scrollTo<dockToNearest<finish"
+    }
+  ],
+  "scrollToCalls": [
+    {
+      "t": 1734.9,
+      "fn": "scrollTo",
+      "left": 16800,
+      "behavior": "smooth",
+      "at": 16698,
+      "caller": "el.scrollTo<dockToNearest<finish"
+    }
+  ],
+  "writesByCaller": {
+    "HTMLDivElement.set<onWheel<callWithErrorHandling": 17,
+    "HTMLDivElement.set<step": 25
+  },
+  "scrollendEvents": [
+    "452.4ms@14802",
+    "495.4ms@14864",
+    "535.7ms@14956",
+    "574.5ms@15008",
+    "613.9ms@15070",
+    "653.1ms@15428",
+    "691.5ms@15580",
+    "731.4ms@15772",
+    "771.5ms@15872",
+    "809.3ms@15956",
+    "848.3ms@16060",
+    "886ms@16114",
+    "925.1ms@16160",
+    "1044.9ms@16225.5",
+    "1083.8ms@16279.5",
+    "1121.6ms@16332.5",
+    "1159.4ms@16411",
+    "1198.7ms@16461",
+    "1237.5ms@16512",
+    "1240ms@16561.5",
+    "1287.4ms@16634",
+    "1324.1ms@16662",
+    "1362.5ms@16666",
+    "1401.6ms@16670",
+    "1440.1ms@16674",
+    "1523ms@16677",
+    "1533.7ms@16680",
+    "1549.4ms@16682.5",
+    "1567.2ms@16685",
+    "1582.8ms@16687.5",
+    "1600.4ms@16689.5",
+    "1617.1ms@16691.5",
+    "1633.8ms@16693",
+    "1650.3ms@16694.5",
+    "1666.9ms@16695.5",
+    "1683.7ms@16696.5",
+    "1700.6ms@16697",
+    "1717.1ms@16697.5",
+    "1734.2ms@16698",
+    "2017ms@16800"
+  ],
+  "scrollEventCount": 53,
+  "hudFinal": {
+    "raw": "wheel debug (A0=0.2200) rev latched-tail intent: finger delta: 4.00 px velocity: 3.25 px/tick ownership: manoeuvre target: 16698.04 solved a*: 0.22",
+    "intent": "finger",
+    "ownership": "manoeuvre",
+    "velocity": "3.25",
+    "target": "16698.04"
+  },
+  "fired": [
+    {
+      "t": 400,
+      "phase": "finger",
+      "dx": 2,
+      "dy": 0,
+      "mode": 0,
+      "intent": "discrete",
+      "ownership": "manual",
+      "velocity": "0.00",
+      "pos": 14800
+    },
+    {
+      "t": 453.6,
+      "phase": "finger",
+      "dx": 62,
+      "dy": -6,
+      "mode": 0,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "9.68",
+      "pos": 14802
+    },
+    {
+      "t": 496.4,
+      "phase": "finger",
+      "dx": 92,
+      "dy": -4,
+      "mode": 0,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "22.75",
+      "pos": 14864
+    },
+    {
+      "t": 537.2,
+      "phase": "finger",
+      "dx": 52,
+      "dy": -2,
+      "mode": 0,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "22.00",
+      "pos": 14956
+    },
+    {
+      "t": 575.4,
+      "phase": "finger",
+      "dx": 62,
+      "dy": 0,
+      "mode": 0,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "24.49",
+      "pos": 15008
+    },
+    {
+      "t": 615.7,
+      "phase": "finger",
+      "dx": 358,
+      "dy": 0,
+      "mode": 0,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "86.46",
+      "pos": 15070
+    },
+    {
+      "t": 654.2,
+      "phase": "finger",
+      "dx": 152,
+      "dy": 0,
+      "mode": 0,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "76.13",
+      "pos": 15428
+    },
+    {
+      "t": 692.5,
+      "phase": "finger",
+      "dx": 192,
+      "dy": 0,
+      "mode": 0,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "79.84",
+      "pos": 15580
+    },
+    {
+      "t": 733.5,
+      "phase": "finger",
+      "dx": 100,
+      "dy": 0,
+      "mode": 0,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "60.25",
+      "pos": 15772
+    },
+    {
+      "t": 772.4,
+      "phase": "finger",
+      "dx": 84,
+      "dy": 0,
+      "mode": 0,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "48.12",
+      "pos": 15872
+    },
+    {
+      "t": 810,
+      "phase": "finger",
+      "dx": 104,
+      "dy": 0,
+      "mode": 0,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "47.05",
+      "pos": 15956
+    },
+    {
+      "t": 849.5,
+      "phase": "finger",
+      "dx": 54,
+      "dy": 0,
+      "mode": 0,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "34.94",
+      "pos": 16060
+    },
+    {
+      "t": 886.8,
+      "phase": "finger",
+      "dx": 46,
+      "dy": 0,
+      "mode": 0,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "27.72",
+      "pos": 16114
+    },
+    {
+      "t": 926.5,
+      "phase": "finger",
+      "dx": 38,
+      "dy": 0,
+      "mode": 0,
+      "intent": "momentum",
+      "ownership": "manoeuvre",
+      "velocity": "27.72",
+      "pos": 16160
+    },
+    {
+      "t": 967.7,
+      "phase": "finger",
+      "dx": 46,
+      "dy": 0,
+      "mode": 0,
+      "intent": "momentum",
+      "ownership": "manoeuvre",
+      "velocity": "27.72",
+      "pos": 16160
+    },
+    {
+      "t": 1007.3,
+      "phase": "finger",
+      "dx": 24,
+      "dy": 0,
+      "mode": 0,
+      "intent": "momentum",
+      "ownership": "manoeuvre",
+      "velocity": "27.72",
+      "pos": 16225.5
+    },
+    {
+      "t": 1046.4,
+      "phase": "finger",
+      "dx": 30,
+      "dy": 0,
+      "mode": 0,
+      "intent": "momentum",
+      "ownership": "manoeuvre",
+      "velocity": "27.72",
+      "pos": 16279.5
+    },
+    {
+      "t": 1084.9,
+      "phase": "finger",
+      "dx": 16,
+      "dy": 0,
+      "mode": 0,
+      "intent": "momentum",
+      "ownership": "manoeuvre",
+      "velocity": "27.72",
+      "pos": 16332.5
+    },
+    {
+      "t": 1122.4,
+      "phase": "finger",
+      "dx": 14,
+      "dy": 0,
+      "mode": 0,
+      "intent": "momentum",
+      "ownership": "manoeuvre",
+      "velocity": "27.72",
+      "pos": 16411
+    },
+    {
+      "t": 1160.4,
+      "phase": "finger",
+      "dx": 18,
+      "dy": 0,
+      "mode": 0,
+      "intent": "momentum",
+      "ownership": "manoeuvre",
+      "velocity": "27.72",
+      "pos": 16461
+    },
+    {
+      "t": 1199.8,
+      "phase": "finger",
+      "dx": 8,
+      "dy": 0,
+      "mode": 0,
+      "intent": "momentum",
+      "ownership": "manoeuvre",
+      "velocity": "27.72",
+      "pos": 16512
+    },
+    {
+      "t": 1239,
+      "phase": "finger",
+      "dx": 8,
+      "dy": 0,
+      "mode": 0,
+      "intent": "momentum",
+      "ownership": "manoeuvre",
+      "velocity": "27.72",
+      "pos": 16561.5
+    },
+    {
+      "t": 1250.2,
+      "phase": "finger",
+      "dx": 2,
+      "dy": 0,
+      "mode": 0,
+      "intent": "momentum",
+      "ownership": "manoeuvre",
+      "velocity": "27.72",
+      "pos": 16634
+    },
+    {
+      "t": 1288.2,
+      "phase": "finger",
+      "dx": 4,
+      "dy": 0,
+      "mode": 0,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "13.94",
+      "pos": 16658
+    },
+    {
+      "t": 1324.9,
+      "phase": "finger",
+      "dx": 4,
+      "dy": 0,
+      "mode": 0,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "7.88",
+      "pos": 16662
+    },
+    {
+      "t": 1363.4,
+      "phase": "finger",
+      "dx": 4,
+      "dy": 0,
+      "mode": 0,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "4.80",
+      "pos": 16666
+    },
+    {
+      "t": 1402.7,
+      "phase": "finger",
+      "dx": 4,
+      "dy": 0,
+      "mode": 0,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "3.25",
+      "pos": 16670
+    }
+  ],
+  "oneLine": "27 wheel evts over 1003ms (dx 2..358, mode 0), travel +2000px in 2 phase(s) gaps 82ms, peak 19800px/s, glide 130px/581ms, reverses=false, pauseThenMove=false, scrollTo(smooth)=1, dockError=0px, HUD manoeuvre/finger",
+  "files": {
+    "frames": "gesture-01-frames.csv",
+    "wheel": "gesture-01-wheel.csv",
+    "writes": "gesture-01-writes.json",
+    "png": "gesture-01.png"
+  }
+}

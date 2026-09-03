@@ -1,0 +1,954 @@
+{
+  "tag": "chromium-slow-int",
+  "browserName": "chromium",
+  "flick": "slow",
+  "rounding": "int",
+  "lineMode": false,
+  "diag": false,
+  "streamSamples": 52,
+  "streamMs": 850,
+  "startPos": 12000,
+  "endPos": 12400,
+  "nearestDock": 12400,
+  "dockError": 0,
+  "phases": [
+    {
+      "startT": 49.6,
+      "startPos": 12000,
+      "minD": -29,
+      "maxD": 43,
+      "reversals": 2,
+      "endT": 1815.5,
+      "endPos": 12331,
+      "writers": {
+        "HTMLDivElement.set<onWheel<callWithErrorHandling": 52,
+        "HTMLDivElement.set<step": 3
+      },
+      "scrollToCalls": [
+        "scrollTo(12000,smooth) @117.1ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12000,smooth) @154.8ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12000,smooth) @254.4ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12000,smooth) @321.2ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12000,smooth) @388.7ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12000,smooth) @456.3ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12000,smooth) @526.6ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12000,smooth) @591.6ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12000,smooth) @655.2ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12000,smooth) @719.2ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12000,smooth) @783.6ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12000,smooth) @847.4ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12000,smooth) @912.1ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12400,smooth) @978.5ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12400,smooth) @1042.9ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12400,smooth) @1106.7ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12400,smooth) @1170.4ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12400,smooth) @1234.3ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12400,smooth) @1298ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12400,smooth) @1363ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12400,smooth) @1427.3ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12400,smooth) @1492.4ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12400,smooth) @1529.9ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12400,smooth) @1594ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12400,smooth) @1657.8ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12400,smooth) @1721.9ms by el.scrollTo<dockToNearest<onScrollEndNative",
+        "scrollTo(12400,smooth) @1815.3ms by el.scrollTo<dockToNearest<onScrollEndNative"
+      ],
+      "travel": 331,
+      "durationMs": 1766,
+      "direction": "right"
+    },
+    {
+      "startT": 1865.1,
+      "startPos": 12331,
+      "minD": 1,
+      "maxD": 24,
+      "reversals": 0,
+      "endT": 1997.5,
+      "endPos": 12400,
+      "writers": {
+        "HTMLDivElement.set<step": 1
+      },
+      "scrollToCalls": [
+        "scrollTo(12400,smooth) @1865.3ms by el.scrollTo<dockToNearest<finish"
+      ],
+      "travel": 69,
+      "durationMs": 132,
+      "direction": "right"
+    }
+  ],
+  "gapsBetweenPhasesMs": [
+    50
+  ],
+  "motionReverses": true,
+  "writesByCaller": {
+    "HTMLDivElement.set<onWheel<callWithErrorHandling": 52,
+    "HTMLDivElement.set<step": 6
+  },
+  "scrollToCalls": [
+    {
+      "t": 117.1,
+      "fn": "scrollTo",
+      "left": 12000,
+      "behavior": "smooth",
+      "at": 12002,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 154.8,
+      "fn": "scrollTo",
+      "left": 12000,
+      "behavior": "smooth",
+      "at": 12008,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 254.4,
+      "fn": "scrollTo",
+      "left": 12000,
+      "behavior": "smooth",
+      "at": 12021,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 321.2,
+      "fn": "scrollTo",
+      "left": 12000,
+      "behavior": "smooth",
+      "at": 12033,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 388.7,
+      "fn": "scrollTo",
+      "left": 12000,
+      "behavior": "smooth",
+      "at": 12047,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 456.3,
+      "fn": "scrollTo",
+      "left": 12000,
+      "behavior": "smooth",
+      "at": 12063,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 526.6,
+      "fn": "scrollTo",
+      "left": 12000,
+      "behavior": "smooth",
+      "at": 12082,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 591.6,
+      "fn": "scrollTo",
+      "left": 12000,
+      "behavior": "smooth",
+      "at": 12103,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 655.2,
+      "fn": "scrollTo",
+      "left": 12000,
+      "behavior": "smooth",
+      "at": 12126,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 719.2,
+      "fn": "scrollTo",
+      "left": 12000,
+      "behavior": "smooth",
+      "at": 12147,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 783.6,
+      "fn": "scrollTo",
+      "left": 12000,
+      "behavior": "smooth",
+      "at": 12166,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 847.4,
+      "fn": "scrollTo",
+      "left": 12000,
+      "behavior": "smooth",
+      "at": 12182,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 912.1,
+      "fn": "scrollTo",
+      "left": 12000,
+      "behavior": "smooth",
+      "at": 12196,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 978.5,
+      "fn": "scrollTo",
+      "left": 12400,
+      "behavior": "smooth",
+      "at": 12208,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1042.9,
+      "fn": "scrollTo",
+      "left": 12400,
+      "behavior": "smooth",
+      "at": 12218,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1106.7,
+      "fn": "scrollTo",
+      "left": 12400,
+      "behavior": "smooth",
+      "at": 12227,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1170.4,
+      "fn": "scrollTo",
+      "left": 12400,
+      "behavior": "smooth",
+      "at": 12235,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1234.3,
+      "fn": "scrollTo",
+      "left": 12400,
+      "behavior": "smooth",
+      "at": 12241,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1298,
+      "fn": "scrollTo",
+      "left": 12400,
+      "behavior": "smooth",
+      "at": 12247,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1363,
+      "fn": "scrollTo",
+      "left": 12400,
+      "behavior": "smooth",
+      "at": 12252,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1427.3,
+      "fn": "scrollTo",
+      "left": 12400,
+      "behavior": "smooth",
+      "at": 12256,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1492.4,
+      "fn": "scrollTo",
+      "left": 12400,
+      "behavior": "smooth",
+      "at": 12260,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1529.9,
+      "fn": "scrollTo",
+      "left": 12400,
+      "behavior": "smooth",
+      "at": 12264,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1594,
+      "fn": "scrollTo",
+      "left": 12400,
+      "behavior": "smooth",
+      "at": 12266,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1657.8,
+      "fn": "scrollTo",
+      "left": 12400,
+      "behavior": "smooth",
+      "at": 12268,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1721.9,
+      "fn": "scrollTo",
+      "left": 12400,
+      "behavior": "smooth",
+      "at": 12270,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1815.3,
+      "fn": "scrollTo",
+      "left": 12400,
+      "behavior": "smooth",
+      "at": 12331,
+      "caller": "el.scrollTo<dockToNearest<onScrollEndNative"
+    },
+    {
+      "t": 1865.3,
+      "fn": "scrollTo",
+      "left": 12400,
+      "behavior": "smooth",
+      "at": 12331,
+      "caller": "el.scrollTo<dockToNearest<finish"
+    }
+  ],
+  "scrollendEvents": [
+    "117.3ms@12002.0",
+    "153.5ms@12005.0",
+    "154.9ms@12008.0",
+    "220.4ms@12016.0",
+    "254.4ms@12021.0",
+    "287.5ms@12027.0",
+    "321.2ms@12033.0",
+    "355ms@12040.0",
+    "388.9ms@12047.0",
+    "422.1ms@12055.0",
+    "456.4ms@12063.0",
+    "493.2ms@12072.0",
+    "526.7ms@12082.0",
+    "559.9ms@12092.0",
+    "591.7ms@12103.0",
+    "623ms@12114.0",
+    "655.2ms@12126.0",
+    "687ms@12137.0",
+    "719.3ms@12147.0",
+    "751.4ms@12157.0",
+    "783.6ms@12166.0",
+    "815ms@12174.0",
+    "847.5ms@12182.0",
+    "879.6ms@12189.0",
+    "912.2ms@12196.0",
+    "945.6ms@12202.0",
+    "978.6ms@12208.0",
+    "1010.9ms@12213.0",
+    "1042.9ms@12218.0",
+    "1074.8ms@12223.0",
+    "1106.8ms@12227.0",
+    "1138.1ms@12231.0",
+    "1170.4ms@12235.0",
+    "1201.9ms@12238.0",
+    "1234.5ms@12241.0",
+    "1265.5ms@12244.0",
+    "1298ms@12247.0",
+    "1329.9ms@12250.0",
+    "1363.1ms@12252.0",
+    "1395.1ms@12254.0",
+    "1427.3ms@12256.0",
+    "1460.4ms@12258.0",
+    "1492.5ms@12260.0",
+    "1493.2ms@12262.0",
+    "1530ms@12264.0",
+    "1562.4ms@12265.0",
+    "1594.1ms@12266.0",
+    "1625.6ms@12267.0",
+    "1657.8ms@12268.0",
+    "1690ms@12269.0",
+    "1722ms@12270.0",
+    "1805.5ms@12330.0",
+    "1815.5ms@12331.0",
+    "1831.8ms@12331.0",
+    "2031.8ms@12400.0"
+  ],
+  "scrollEventCount": 65,
+  "fired": [
+    {
+      "t": 53.6,
+      "phase": "finger",
+      "dx": 2,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "idle",
+      "ownership": "native",
+      "velocity": "0.00",
+      "pos": 12002
+    },
+    {
+      "t": 118.2,
+      "phase": "finger",
+      "dx": 3,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "discrete",
+      "ownership": "manual",
+      "velocity": "2.00",
+      "pos": 12005
+    },
+    {
+      "t": 154.6,
+      "phase": "finger",
+      "dx": 3,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "1.38",
+      "pos": 12008
+    },
+    {
+      "t": 155,
+      "phase": "finger",
+      "dx": 4,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "1.38",
+      "pos": 12012
+    },
+    {
+      "t": 186.9,
+      "phase": "finger",
+      "dx": 4,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "56.24",
+      "pos": 12016
+    },
+    {
+      "t": 221.7,
+      "phase": "finger",
+      "dx": 5,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "29.17",
+      "pos": 12021
+    },
+    {
+      "t": 255.1,
+      "phase": "finger",
+      "dx": 6,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "15.79",
+      "pos": 12027
+    },
+    {
+      "t": 288.7,
+      "phase": "finger",
+      "dx": 6,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "9.38",
+      "pos": 12033
+    },
+    {
+      "t": 321.9,
+      "phase": "finger",
+      "dx": 7,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "6.19",
+      "pos": 12040
+    },
+    {
+      "t": 356.2,
+      "phase": "finger",
+      "dx": 7,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "4.85",
+      "pos": 12047
+    },
+    {
+      "t": 389.5,
+      "phase": "finger",
+      "dx": 8,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "4.13",
+      "pos": 12055
+    },
+    {
+      "t": 423.2,
+      "phase": "finger",
+      "dx": 8,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "4.06",
+      "pos": 12063
+    },
+    {
+      "t": 457.1,
+      "phase": "finger",
+      "dx": 9,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "4.02",
+      "pos": 12072
+    },
+    {
+      "t": 494.6,
+      "phase": "finger",
+      "dx": 10,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "4.21",
+      "pos": 12082
+    },
+    {
+      "t": 527.5,
+      "phase": "finger",
+      "dx": 10,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "4.33",
+      "pos": 12092
+    },
+    {
+      "t": 560.6,
+      "phase": "finger",
+      "dx": 11,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "4.70",
+      "pos": 12103
+    },
+    {
+      "t": 592.3,
+      "phase": "finger",
+      "dx": 11,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "5.11",
+      "pos": 12114
+    },
+    {
+      "t": 623.9,
+      "phase": "finger",
+      "dx": 12,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "5.45",
+      "pos": 12126
+    },
+    {
+      "t": 656.1,
+      "phase": "inertia",
+      "dx": 11,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "5.90",
+      "pos": 12137
+    },
+    {
+      "t": 687.9,
+      "phase": "inertia",
+      "dx": 10,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "5.80",
+      "pos": 12147
+    },
+    {
+      "t": 719.9,
+      "phase": "inertia",
+      "dx": 10,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "5.51",
+      "pos": 12157
+    },
+    {
+      "t": 752.1,
+      "phase": "inertia",
+      "dx": 9,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "5.36",
+      "pos": 12166
+    },
+    {
+      "t": 784.4,
+      "phase": "inertia",
+      "dx": 8,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "5.01",
+      "pos": 12174
+    },
+    {
+      "t": 815.8,
+      "phase": "inertia",
+      "dx": 8,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "4.57",
+      "pos": 12182
+    },
+    {
+      "t": 848.1,
+      "phase": "inertia",
+      "dx": 7,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "4.41",
+      "pos": 12189
+    },
+    {
+      "t": 880.4,
+      "phase": "inertia",
+      "dx": 7,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "4.00",
+      "pos": 12196
+    },
+    {
+      "t": 913,
+      "phase": "inertia",
+      "dx": 6,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "3.81",
+      "pos": 12202
+    },
+    {
+      "t": 946.4,
+      "phase": "inertia",
+      "dx": 6,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "3.44",
+      "pos": 12208
+    },
+    {
+      "t": 979.4,
+      "phase": "inertia",
+      "dx": 5,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "3.22",
+      "pos": 12213
+    },
+    {
+      "t": 1012,
+      "phase": "inertia",
+      "dx": 5,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "2.87",
+      "pos": 12218
+    },
+    {
+      "t": 1043.6,
+      "phase": "inertia",
+      "dx": 5,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "2.71",
+      "pos": 12223
+    },
+    {
+      "t": 1075.5,
+      "phase": "inertia",
+      "dx": 4,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "2.68",
+      "pos": 12227
+    },
+    {
+      "t": 1107.4,
+      "phase": "inertia",
+      "dx": 4,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "2.38",
+      "pos": 12231
+    },
+    {
+      "t": 1139.1,
+      "phase": "inertia",
+      "dx": 4,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "2.24",
+      "pos": 12235
+    },
+    {
+      "t": 1171,
+      "phase": "inertia",
+      "dx": 3,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "2.17",
+      "pos": 12238
+    },
+    {
+      "t": 1202.6,
+      "phase": "inertia",
+      "dx": 3,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "1.87",
+      "pos": 12241
+    },
+    {
+      "t": 1235.1,
+      "phase": "inertia",
+      "dx": 3,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "1.72",
+      "pos": 12244
+    },
+    {
+      "t": 1266.3,
+      "phase": "inertia",
+      "dx": 3,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "1.63",
+      "pos": 12247
+    },
+    {
+      "t": 1298.7,
+      "phase": "inertia",
+      "dx": 3,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "1.62",
+      "pos": 12250
+    },
+    {
+      "t": 1330.7,
+      "phase": "inertia",
+      "dx": 2,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "1.58",
+      "pos": 12252
+    },
+    {
+      "t": 1363.8,
+      "phase": "inertia",
+      "dx": 2,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "1.31",
+      "pos": 12254
+    },
+    {
+      "t": 1396,
+      "phase": "inertia",
+      "dx": 2,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "1.16",
+      "pos": 12256
+    },
+    {
+      "t": 1428,
+      "phase": "inertia",
+      "dx": 2,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "1.10",
+      "pos": 12258
+    },
+    {
+      "t": 1461.3,
+      "phase": "inertia",
+      "dx": 2,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "1.07",
+      "pos": 12260
+    },
+    {
+      "t": 1493.2,
+      "phase": "inertia",
+      "dx": 2,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "1.04",
+      "pos": 12262
+    },
+    {
+      "t": 1498.1,
+      "phase": "inertia",
+      "dx": 2,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "1.04",
+      "pos": 12264
+    },
+    {
+      "t": 1530.6,
+      "phase": "inertia",
+      "dx": 1,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "3.92",
+      "pos": 12265
+    },
+    {
+      "t": 1563.1,
+      "phase": "inertia",
+      "dx": 1,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "2.22",
+      "pos": 12266
+    },
+    {
+      "t": 1594.8,
+      "phase": "inertia",
+      "dx": 1,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "1.36",
+      "pos": 12267
+    },
+    {
+      "t": 1626.4,
+      "phase": "inertia",
+      "dx": 1,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "0.95",
+      "pos": 12268
+    },
+    {
+      "t": 1658.4,
+      "phase": "inertia",
+      "dx": 1,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "0.74",
+      "pos": 12269
+    },
+    {
+      "t": 1690.7,
+      "phase": "inertia",
+      "dx": 1,
+      "dy": 0,
+      "preventDefault": true,
+      "intent": "finger",
+      "ownership": "manual",
+      "velocity": "0.63",
+      "pos": 12270
+    }
+  ],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  ],
+  "files": {
+    "csv": "chromium-slow-int-frames.csv",
+    "sketch": "chromium-slow-int-sketch.txt",
+    "hudShot": "/Users/sparkyspider/IdeaProjects/productivity-tools/docs/process/evidence/scroll-diagnosis-2026-09-03/chromium-slow-int-hud-final.png",
+    "video": "/Users/sparkyspider/IdeaProjects/productivity-tools/docs/process/evidence/scroll-diagnosis-2026-09-03/video/chromium-slow-int.webm"
+  }
+}

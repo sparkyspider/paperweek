@@ -1,0 +1,429 @@
+{
+  "writes": [
+    {
+      "t": 53,
+      "from": 12000,
+      "to": 12004,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 116,
+      "from": 12004,
+      "to": 12010,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 151,
+      "from": 12010,
+      "to": 12018,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 180,
+      "from": 12018,
+      "to": 12028,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 209,
+      "from": 12028,
+      "to": 12040,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 238,
+      "from": 12040,
+      "to": 12055,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 267,
+      "from": 12055,
+      "to": 12072,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 295,
+      "from": 12072,
+      "to": 12091,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 325,
+      "from": 12091,
+      "to": 12112,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 354,
+      "from": 12112,
+      "to": 12135,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 385,
+      "from": 12135,
+      "to": 12160,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 415,
+      "from": 12160,
+      "to": 12187,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 445,
+      "from": 12187,
+      "to": 12216,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 475,
+      "from": 12216,
+      "to": 12248,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 505,
+      "from": 12248,
+      "to": 12282,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 534,
+      "from": 12282,
+      "to": 12318,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 565,
+      "from": 12318,
+      "to": 12356,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 593,
+      "from": 12356,
+      "to": 12396,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 627,
+      "from": 12396,
+      "to": 12432,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 740,
+      "from": 12432,
+      "to": 12580,
+      "caller": "step<FrameRequestCallback*runTakeover<handleFingerRelease"
+    },
+    {
+      "t": 824,
+      "from": 12580,
+      "to": 12735,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*runTakeover"
+    },
+    {
+      "t": 909,
+      "from": 12735,
+      "to": 12867.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 994,
+      "from": 12867,
+      "to": 12978,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1079,
+      "from": 12978,
+      "to": 13081.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1108,
+      "from": 13081,
+      "to": 13095.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1141,
+      "from": 13095,
+      "to": 13121,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1171,
+      "from": 13121,
+      "to": 13143,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1205,
+      "from": 13143,
+      "to": 13161.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1247,
+      "from": 13161,
+      "to": 13182,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1289,
+      "from": 13182,
+      "to": 13191.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1311,
+      "from": 13191,
+      "to": 13197.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1345,
+      "from": 13197,
+      "to": 13200,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    }
+  ],
+  "calls": [],
+  "events": [
+    {
+      "t": 114,
+      "type": "scroll",
+      "at": 12004
+    },
+    {
+      "t": 114,
+      "type": "scrollend",
+      "at": 12004
+    },
+    {
+      "t": 149,
+      "type": "scroll",
+      "at": 12010
+    },
+    {
+      "t": 149,
+      "type": "scrollend",
+      "at": 12010
+    },
+    {
+      "t": 207,
+      "type": "scroll",
+      "at": 12028
+    },
+    {
+      "t": 207,
+      "type": "scrollend",
+      "at": 12028
+    },
+    {
+      "t": 265,
+      "type": "scroll",
+      "at": 12055
+    },
+    {
+      "t": 265,
+      "type": "scrollend",
+      "at": 12055
+    },
+    {
+      "t": 323,
+      "type": "scroll",
+      "at": 12091
+    },
+    {
+      "t": 323,
+      "type": "scrollend",
+      "at": 12091
+    },
+    {
+      "t": 383,
+      "type": "scroll",
+      "at": 12135
+    },
+    {
+      "t": 383,
+      "type": "scrollend",
+      "at": 12135
+    },
+    {
+      "t": 443,
+      "type": "scroll",
+      "at": 12187
+    },
+    {
+      "t": 443,
+      "type": "scrollend",
+      "at": 12187
+    },
+    {
+      "t": 503,
+      "type": "scroll",
+      "at": 12248
+    },
+    {
+      "t": 503,
+      "type": "scrollend",
+      "at": 12248
+    },
+    {
+      "t": 563,
+      "type": "scroll",
+      "at": 12318
+    },
+    {
+      "t": 563,
+      "type": "scrollend",
+      "at": 12318
+    },
+    {
+      "t": 655,
+      "type": "scroll",
+      "at": 12432
+    },
+    {
+      "t": 655,
+      "type": "scrollend",
+      "at": 12432
+    },
+    {
+      "t": 824,
+      "type": "scroll",
+      "at": 12580
+    },
+    {
+      "t": 824,
+      "type": "scrollend",
+      "at": 12580
+    },
+    {
+      "t": 909,
+      "type": "scroll",
+      "at": 12735
+    },
+    {
+      "t": 909,
+      "type": "scrollend",
+      "at": 12735
+    },
+    {
+      "t": 994,
+      "type": "scroll",
+      "at": 12867
+    },
+    {
+      "t": 994,
+      "type": "scrollend",
+      "at": 12867
+    },
+    {
+      "t": 1077,
+      "type": "scroll",
+      "at": 12978
+    },
+    {
+      "t": 1077,
+      "type": "scrollend",
+      "at": 12978
+    },
+    {
+      "t": 1108,
+      "type": "scroll",
+      "at": 13081
+    },
+    {
+      "t": 1108,
+      "type": "scrollend",
+      "at": 13081
+    },
+    {
+      "t": 1141,
+      "type": "scroll",
+      "at": 13095
+    },
+    {
+      "t": 1141,
+      "type": "scrollend",
+      "at": 13095
+    },
+    {
+      "t": 1171,
+      "type": "scroll",
+      "at": 13121
+    },
+    {
+      "t": 1171,
+      "type": "scrollend",
+      "at": 13121
+    },
+    {
+      "t": 1205,
+      "type": "scroll",
+      "at": 13143
+    },
+    {
+      "t": 1205,
+      "type": "scrollend",
+      "at": 13143
+    },
+    {
+      "t": 1247,
+      "type": "scroll",
+      "at": 13161
+    },
+    {
+      "t": 1247,
+      "type": "scrollend",
+      "at": 13161
+    },
+    {
+      "t": 1289,
+      "type": "scroll",
+      "at": 13182
+    },
+    {
+      "t": 1289,
+      "type": "scrollend",
+      "at": 13182
+    },
+    {
+      "t": 1311,
+      "type": "scroll",
+      "at": 13191
+    },
+    {
+      "t": 1311,
+      "type": "scrollend",
+      "at": 13191
+    },
+    {
+      "t": 1345,
+      "type": "scroll",
+      "at": 13197
+    },
+    {
+      "t": 1345,
+      "type": "scrollend",
+      "at": 13197
+    },
+    {
+      "t": 1381,
+      "type": "scroll",
+      "at": 13200
+    },
+    {
+      "t": 1381,
+      "type": "scrollend",
+      "at": 13200
+    }
+  ]
+}

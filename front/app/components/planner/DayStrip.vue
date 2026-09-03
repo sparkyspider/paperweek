@@ -19,6 +19,15 @@
  *  notch) gets its own small immediate scroll + settle, no glide. New finger input arriving
  *  mid-manoeuvre cancels it and resumes hands-on driving instantly (see `onWheel`).
  *
+ *  While a wheel gesture is OWNED (`wheelGestureActive`, from its first owned event until its
+ *  own landing/settle completes) the AMBIENT dock triggers — native 'scrollend' and the 140ms
+ *  scroll-debounce — are gated off: Chromium fires 'scrollend' after every discrete scrollLeft
+ *  write, so during the finger phase and the glide they were calling dockToNearest() dozens of
+ *  times per gesture (25 in one diagnosed flick), each one a native smooth scroll fighting the
+ *  hand-driven position. The gesture's own paths (`runTakeover`'s `finish`, the release/settle
+ *  handlers) dock deterministically and clear the gate; non-wheel scrolling (scrollbar drag,
+ *  touch, programmatic) never sets it, so its scrollend/debounce docking is unchanged.
+ *
  *  Keyboard arrows, scrollbar dragging, drag-edge auto-scroll (`onDragOverStrip`), and every
  *  programmatic scroll (week-nav, Today, docking itself) are native/programmatic throughout and
  *  entirely unaffected — only the wheel/trackpad input CHANNEL is intercepted.
@@ -36,8 +45,8 @@
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { fmtISO } from '~/utils/dates'
 import { useDayStrip } from '~/composables/useDayStrip'
-import { decelerationFor, planDock, positionAt, stopTime } from '~/utils/dockPhysics'
-import { createWheelIntentTracker, normalizeWheelDelta, type WheelIntent } from '~/utils/wheelIntent'
+import { planDock, planPositionAt, planToTarget, type DockPlan } from '~/utils/dockPhysics'
+import { BURST_GAP_MS, createWheelIntentTracker, normalizeWheelDelta, type WheelIntent } from '~/utils/wheelIntent'
 
 /** The fallback flag (see file doc comment above): flip to `false` to restore the previous
  *  observe-and-takeover-only design if full wheel ownership ever misbehaves on some device. */
@@ -178,8 +187,12 @@ const STOPPED_VELOCITY = 0.05
  *  handoff ever happens, so the most representative single point to anchor the constant on).
  *  Tunable by feel from here; this is deliberately just the seed, not a physically measured
  *  number. */
+/** Feel multiplier on the seed above. 1 = the seed. Mark, 2026-09-03, on the real trackpad after
+ *  the latched-tail fix: "we need more friction, maybe double" — so 2. Bigger = shorter glides,
+ *  the planner still lands every one flush on a day. */
+const FRICTION = 2
 const PROJECT_TICKS = 10
-const TAKEOVER_A0 = TAKEOVER_VELOCITY / (2 * PROJECT_TICKS)
+const TAKEOVER_A0 = FRICTION * TAKEOVER_VELOCITY / (2 * PROJECT_TICKS)
 
 let velocityRafId: number | null = null
 let lastScrollLeft = 0
@@ -198,33 +211,52 @@ function cancelTakeover(): void {
 }
 function onUserInputDuringTakeover(): void {
   if (takeoverActive) cancelTakeover()
+  // A touch abandons any owned wheel gesture outright (no landing of ours will follow to clear
+  // the gate) — hand docking back to the ambient scrollend/debounce path for the touch scroll.
+  wheelGestureActive = false
+  setGestureState('STILL') // gesture: touch abandons whatever was in flight -> STILL
 }
 
-/** Closed-form constant-deceleration drive, x0 -> target, at exactly the deceleration `a`
- *  dockPhysics.ts solved for — NOT an exponential ease (the old approach): a single continuous
- *  deceleration is what makes the manoeuvre read as one motion rather than a glide-then-correct.
- *  Runs via its own rAF loop (not `scrollTo({behavior:'smooth'})`) because that API gives no
- *  control over the curve's initial slope, only its destination — the whole point here is that
- *  the curve's slope at t=0 has to equal v0, the rate native momentum was already moving at, so
- *  there's no visible blip at the handoff. */
-function runTakeover(el: HTMLElement, target: number, v0: number, a: number, onDock: boolean): void {
+/** Closed-form drive, x0 -> target, along the ONE plan dockPhysics.ts solved for this release —
+ *  constant deceleration at exactly the solved `a` (the model), or, only when the model's own
+ *  duration left the sane band, its bounded Hermite fallback (see `planDock`). NOT an
+ *  exponential ease (the old approach): a single continuous deceleration is what makes the
+ *  manoeuvre read as one motion rather than a glide-then-correct. Runs via its own rAF loop (not
+ *  `scrollTo({behavior:'smooth'})`) because that API gives no control over the curve's initial
+ *  slope, only its destination — the whole point here is that the curve's slope at t=0 has to
+ *  equal v0, the rate the finger released at, so there's no visible blip at the handoff.
+ *
+ *  LANDING (2026-09-03, the 0.5px-every-80ms tail): the loop finishes and writes `target`
+ *  outright the moment the planned position is within 0.5px of it OR t ≥ T — it never lets the
+ *  curve's sub-pixel remainder creep in on its own. Every intermediate write is rounded to 0.5px
+ *  (Chromium quantises scrollLeft to 0.5px at DPR 2; writing 17600.74 then 17600.53 and having
+ *  both paint as 17600.5 is the stutter). */
+function runTakeover(el: HTMLElement, plan: DockPlan, v0: number, onDock: boolean): void {
   const x0 = el.scrollLeft
-  const st = stopTime(v0, a)
+  const { target, T } = plan
+  setGestureState('DECELERATING', target) // gesture: manoeuvre starts -> DECELERATING
 
-  // The manoeuvre landed somewhere that ISN'T a real dock — planDock's own documented "give up,
-  // use A0" case ("if none fits ... the settle-fallback docks the remainder"). Relying on the
+  // `onDock` is false only when planDock had NO dock ahead to land on (its step 6 — since
+  // 2026-09-03 it never gives up while one exists: "Always lands on a day perfectly"), so this
+  // remainder-dock is now the rare edge, not the common tail. Relying on the
   // AMBIENT scroll/scrollend listeners for that remainder turned out fragile in practice:
   // Chromium can fire 'scrollend' after almost every discrete per-frame scrollLeft write during
   // this very manoeuvre (not just once at the true end), which consumes `dockInFlight` early and
   // can leave the 140ms debounce fallback racing this animation instead of running cleanly after
   // it. Calling `dockToNearest()` explicitly, synchronously, the instant we KNOW the manoeuvre is
-  // over is deterministic and doesn't depend on that event timing at all.
+  // over is deterministic and doesn't depend on that event timing at all. This is also where an
+  // owned wheel gesture ENDS (`wheelGestureActive` cleared) — the ambient triggers stay gated
+  // until the manoeuvre has actually landed (or handed its remainder to one explicit dock).
   function finish(): void {
     if (!onDock) dockToNearest()
+    wheelGestureActive = false
+    setGestureState('STILL') // gesture: manoeuvre landed (or handed its remainder to one dock) -> STILL
   }
 
-  if (!Number.isFinite(st) || st <= 0) {
-    if (Math.abs(target - x0) >= 1) { dockInFlight = true; el.scrollTo({ left: target, behavior: 'smooth' }) }
+  if (!Number.isFinite(T) || T <= 0) {
+    // Degenerate plan (unreachable with a solved plan, kept as a guard): place it directly rather
+    // than a native smooth scroll — no second animated motion may ever follow a glide.
+    if (Math.abs(target - x0) >= 0.5) el.scrollLeft = target
     finish()
     return
   }
@@ -236,37 +268,39 @@ function runTakeover(el: HTMLElement, target: number, v0: number, a: number, onD
   function step(now: number): void {
     if (!takeoverActive) return
     const tTicks = (now - start) / TICK_MS
-    if (tTicks >= st) {
-      el.scrollLeft = target
+    const p = planPositionAt(tTicks, x0, v0, plan)
+    if (tTicks >= T || Math.abs(target - p) < 0.5) {
+      el.scrollLeft = target // snap the last half pixel — never a creeping remainder
       takeoverActive = false
       takeoverRafId = null
       finish()
       return
     }
-    el.scrollLeft = positionAt(tTicks, x0, v0, a)
+    el.scrollLeft = Math.round(p * 2) / 2
     takeoverRafId = requestAnimationFrame(step)
   }
   takeoverRafId = requestAnimationFrame(step)
 }
 
 /** `planDock`'s docks, clamped to the strip's actual scrollable range — and, when clamping
- *  changes the chosen target, `a` re-solved for the clamped target rather than reused (the
- *  original `a` was solved for a different distance; driving `positionAt` with it toward a
- *  DIFFERENT target would over/undershoot). Falls back to `null` (no takeover, let the existing
- *  settle-then-dock fallback handle it) on the rare edge where even the clamped target can't be
- *  reached by decelerating from here (e.g. it's now behind the direction of travel). `onDock`
- *  tells the caller whether `target` is actually one of the real dock points, or planDock's own
- *  "gave up" natural-landing point — see runTakeover's `finish()`. */
-function clampedPlan(el: HTMLElement, v: number): { target: number; a: number; onDock: boolean } | null {
+ *  changes the chosen target, the plan re-solved for the clamped target (`planToTarget`, the
+ *  same bounded solve) rather than reused (the original was solved for a different distance;
+ *  driving it toward a DIFFERENT target would over/undershoot). Falls back to `null` (no
+ *  takeover, let the existing settle-then-dock fallback handle it) on the rare edge where even
+ *  the clamped target can't be reached by decelerating from here (e.g. it's now behind the
+ *  direction of travel). `onDock` tells the caller whether the target is actually one of the
+ *  real dock points, or planDock's no-dock-ahead natural-landing point — see runTakeover's
+ *  `finish()`. */
+function clampedPlan(el: HTMLElement, v: number): { plan: DockPlan; onDock: boolean } | null {
   const maxScrollLeft = Math.max(0, el.scrollWidth - el.clientWidth)
   const docks = allDockLefts(el).map(d => Math.max(0, Math.min(d, maxScrollLeft)))
   const plan = planDock(el.scrollLeft, v, docks, TAKEOVER_A0)
   if (!plan) return null
   const onDock = docks.some(d => Math.abs(d - plan.target) < 0.5)
   const target = Math.max(0, Math.min(plan.target, maxScrollLeft))
-  if (target === plan.target) return { ...plan, onDock }
-  const a = decelerationFor(el.scrollLeft, v, target)
-  return a === null ? null : { target, a, onDock }
+  if (target === plan.target) return { plan, onDock }
+  const bounded = planToTarget(el.scrollLeft, v, target)
+  return bounded === null ? null : { plan: bounded, onDock }
 }
 
 // --- Full scroll ownership (WHEEL_OWNERSHIP): a non-passive wheel listener owns horizontal
@@ -278,11 +312,12 @@ function clampedPlan(el: HTMLElement, v: number): { target: number; a: number; o
 
 const wheelTracker = createWheelIntentTracker()
 /** tick-normalised (px/tick, tick ≈ 16.67ms — the same unit dockPhysics assumes throughout) EMA
- *  of recent FINGER-sample velocity. Blended, not the bare last-sample rate, so one unusually
- *  large or small inter-event gap right at release doesn't single-handedly set the manoeuvre's
- *  whole starting speed. */
+ *  of recent FINGER-sample velocity, fed from the tracker's own `lastRate()` — the ONE
+ *  speedometer (wheelIntent.ts file doc comment: rate over the event's OS timestamp, guarded),
+ *  not a second one on the dispatch clock (which read Mark's sawtooth at ~1.5 px/tick by
+ *  release, 2026-09-03). Blended, not the bare last-sample rate, so one unusual inter-event gap
+ *  right at release doesn't single-handedly set the manoeuvre's whole starting speed. */
 let wheelVelocity = 0
-let wheelLastT = 0
 let wheelReleaseTimer: ReturnType<typeof setTimeout> | null = null
 /** Guards `handleFingerRelease` against running twice for the same lift-off: a confirmed
  *  MOMENTUM sample and the silence timer below are two independent triggers racing to detect
@@ -290,13 +325,21 @@ let wheelReleaseTimer: ReturnType<typeof setTimeout> | null = null
  *  moment fresh finger input arrives (a new gesture — or new input cancelling an in-flight
  *  manoeuvre — always gets to release again). */
 let wheelReleasedThisGesture = false
+/** The ambient-dock GATE (see the file doc comment): true from the first owned wheel event of a
+ *  gesture until the gesture's own landing/settle path completes (`runTakeover`'s `finish`, or
+ *  the explicit dock in `handleFingerRelease`/`handleDiscreteSettle`), or a touch abandons it.
+ *  While set, `onScrollEndNative` and the scroll-debounce fallback do nothing. */
+let wheelGestureActive = false
+/** `performance.now()` of the last wheel event this handler OWNED (any intent, momentum
+ *  included — the tracker's own `t` clock sees the same events). Bounds
+ *  the diagonal-sample rule in `onWheel` to the live burst, not the whole glide. */
+let wheelLastOwnedT = 0
 
 /** Silence past this long, with no further wheel event at all, reads as a release even on a
  *  device/browser that never sends synthetic momentum events after lift-off — the fallback
  *  trigger alongside a confirmed MOMENTUM classification (whichever fires first wins, see
  *  `wheelReleasedThisGesture`). */
 const WHEEL_RELEASE_GAP_MS = 80
-const WHEEL_TICK_MS = 1000 / 60
 /** Below this (px/tick) at release, there's nothing worth gliding for — just settle onto
  *  whichever dock is already nearest, same as a discrete notch's own settle. */
 const WHEEL_STOPPED_VELOCITY = 0.05
@@ -317,23 +360,83 @@ interface WheelDebugState {
   ownership: 'native' | 'manual' | 'manoeuvre'
   plannedTarget: number | null
   solvedA: number | null
+  plannedT: number | null
+  profile: DockPlan['profile'] | null
 }
 const wheelDebug = ref<WheelDebugState>({
-  intent: 'idle', normalizedDelta: 0, velocity: 0, ownership: 'native', plannedTarget: null, solvedA: null,
+  intent: 'idle', normalizedDelta: 0, velocity: 0, ownership: 'native', plannedTarget: null, solvedA: null, plannedT: null, profile: null,
 })
 const wheelDebugText = computed(() => {
   const d = wheelDebug.value
   const fmt = (n: number | null) => (n === null ? '—' : n.toFixed(2))
   return [
-    `wheel debug  (A0=${TAKEOVER_A0.toFixed(4)})`,
+    `wheel debug  (A0=${TAKEOVER_A0.toFixed(4)}) rev rate+band`,
     `intent:      ${d.intent}`,
     `delta:       ${fmt(d.normalizedDelta)} px`,
     `velocity:    ${fmt(d.velocity)} px/tick`,
     `ownership:   ${d.ownership}`,
     `target:      ${fmt(d.plannedTarget)}`,
     `solved a*:   ${fmt(d.solvedA)}`,
+    `duration:    ${fmt(d.plannedT)} ticks ${d.profile ?? ''}`,
   ].join('\n')
 })
+
+// --- Gesture state machine (Mark, 2026-09-03: "STILL, DRAGGING, DECELLERATING") --------------
+// Observation only — nothing reads it back to steer behaviour. STILL: no wheel input applied and
+// no manoeuvre running. DRAGGING: finger/discrete wheel input is driving scrollLeft by hand.
+// DECELERATING: `runTakeover` is driving the strip from release velocity to its target. Each
+// transition is set at exactly one documented point (grep `setGestureState`). The console line
+// is the live recorder's feed (rig/live-recorder.mjs) — dev-only and gated on the HUD, so a
+// production build never logs (the deliberate exception to rules-autodoc-logging.md §3).
+type GestureState = 'STILL' | 'DRAGGING' | 'DECELERATING'
+const gestureState = ref<GestureState>('STILL')
+const GESTURE_STATE_CLASS: Record<GestureState, string> = {
+  STILL: 'text-neutral-400', DRAGGING: 'text-sky-400', DECELERATING: 'text-red-400',
+}
+function setGestureState(to: GestureState, target: number | null = null): void {
+  const from = gestureState.value
+  if (from === to) return
+  gestureState.value = to
+  // Plan counter reset rule (Mark): "resets every time it's been still for 2 seconds" — armed on
+  // entering STILL, disarmed the moment the state leaves it, so a re-flick within 2s keeps counting.
+  if (planResetTimer !== null) { clearTimeout(planResetTimer); planResetTimer = null }
+  if (to === 'STILL') planResetTimer = setTimeout(resetPlanCount, PLAN_RESET_STILL_MS)
+  if (wheelDebugEnabled.value) {
+    const x = container.value ? container.value.scrollLeft.toFixed(1) : '-'
+    console.log(`[gesture] ${from} -> ${to} t=${performance.now().toFixed(1)} x=${x} v=${wheelVelocity.toFixed(3)} target=${target === null ? '-' : target.toFixed(1)}`)
+  }
+}
+
+// Mark, 2026-09-03: "a fading PING when it calculates. It should only ever calculate ONCE. The
+// deceleration required to land." `notePlan` is called at the ONE place the release manoeuvre
+// is solved (handleFingerRelease's clampedPlan) — the HUD flashes "PING" and fades over 1.5s,
+// and a small `plans: N` counter on the HUD counts the solves. The counter resets only after
+// the machine has been STILL for 2s continuously (`setGestureState`), so a second solve before
+// that (planCount > 1) is a violation of the invariant: shown red, with the count, kept visible
+// until the counter resets.
+const PLAN_RESET_STILL_MS = 2000
+const planCount = ref(0)
+let planResetTimer: ReturnType<typeof setTimeout> | null = null
+const pingVisible = ref(false)
+const pingViolation = ref(false)
+const pingText = ref('PING')
+let pingTimer: ReturnType<typeof setTimeout> | null = null
+function resetPlanCount(): void {
+  planResetTimer = null
+  planCount.value = 0
+  pingViolation.value = false
+}
+function notePlan(plan: DockPlan | null): void {
+  planCount.value++
+  if (!wheelDebugEnabled.value) return
+  const x = container.value ? container.value.scrollLeft.toFixed(1) : '-'
+  console.log(`[plan] #${planCount.value} t=${performance.now().toFixed(1)} x=${x} v=${wheelVelocity.toFixed(3)} target=${plan ? plan.target.toFixed(1) : '-'} a=${plan ? plan.a.toFixed(4) : '-'} T=${plan ? plan.T.toFixed(1) : '-'} profile=${plan ? plan.profile : '-'}`)
+  pingViolation.value = planCount.value > 1
+  pingText.value = planCount.value > 1 ? `PING x${planCount.value}` : 'PING'
+  pingVisible.value = true
+  if (pingTimer !== null) clearTimeout(pingTimer)
+  pingTimer = setTimeout(() => { pingVisible.value = false }, 50) // one paint at full opacity, then the CSS fade
+}
 
 function clearWheelReleaseTimer(): void {
   if (wheelReleaseTimer !== null) { clearTimeout(wheelReleaseTimer); wheelReleaseTimer = null }
@@ -349,19 +452,25 @@ function handleFingerRelease(): void {
   const el = container.value
   if (!el) return
   if (Math.abs(wheelVelocity) < WHEEL_STOPPED_VELOCITY) {
-    if (wheelDebugEnabled.value) wheelDebug.value = { ...wheelDebug.value, ownership: 'native', plannedTarget: null, solvedA: null }
+    if (wheelDebugEnabled.value) wheelDebug.value = { ...wheelDebug.value, ownership: 'native', plannedTarget: null, solvedA: null, plannedT: null, profile: null }
     dockToNearest()
+    wheelGestureActive = false
+    setGestureState('STILL') // gesture: released stopped, no manoeuvre -> STILL
     return
   }
-  const plan = clampedPlan(el, wheelVelocity)
-  if (plan === null) {
-    if (wheelDebugEnabled.value) wheelDebug.value = { ...wheelDebug.value, ownership: 'native', plannedTarget: null, solvedA: null }
+  const solved = clampedPlan(el, wheelVelocity)
+  notePlan(solved?.plan ?? null) // the ONE solve per gesture (HUD "PING" + `[plan]` line)
+  if (solved === null) {
+    if (wheelDebugEnabled.value) wheelDebug.value = { ...wheelDebug.value, ownership: 'native', plannedTarget: null, solvedA: null, plannedT: null, profile: null }
     dockToNearest()
+    wheelGestureActive = false
+    setGestureState('STILL') // gesture: released with no reachable plan -> STILL
     return
   }
-  if (wheelDebugEnabled.value) wheelDebug.value = { ...wheelDebug.value, ownership: 'manoeuvre', plannedTarget: plan.target, solvedA: plan.a }
-  if (Math.abs(plan.target - el.scrollLeft) < 1) return
-  runTakeover(el, plan.target, wheelVelocity, plan.a, plan.onDock)
+  const { plan, onDock } = solved
+  if (wheelDebugEnabled.value) wheelDebug.value = { ...wheelDebug.value, ownership: 'manoeuvre', plannedTarget: plan.target, solvedA: plan.a, plannedT: plan.T, profile: plan.profile }
+  if (Math.abs(plan.target - el.scrollLeft) < 1) { wheelGestureActive = false; setGestureState('STILL'); return } // gesture: already on target -> STILL
+  runTakeover(el, plan, wheelVelocity, onDock)
 }
 
 /** A discrete notch has no meaningful "release velocity" to carry into a glide the way a
@@ -370,8 +479,10 @@ function handleFingerRelease(): void {
 function handleDiscreteSettle(): void {
   wheelReleasedThisGesture = true
   clearWheelReleaseTimer()
-  if (wheelDebugEnabled.value) wheelDebug.value = { ...wheelDebug.value, ownership: 'native', plannedTarget: null, solvedA: null }
+  if (wheelDebugEnabled.value) wheelDebug.value = { ...wheelDebug.value, ownership: 'native', plannedTarget: null, solvedA: null, plannedT: null, profile: null }
   dockToNearest()
+  wheelGestureActive = false
+  setGestureState('STILL') // gesture: discrete notch settled -> STILL
 }
 
 /** The strip's own wheel listener when WHEEL_OWNERSHIP is on — bound WITHOUT `.passive` (Vue's
@@ -385,6 +496,15 @@ function handleDiscreteSettle(): void {
  *  handling at all) — this strip only ever scrolls horizontally, so vertical input here isn't
  *  this component's to take.
  *
+ *  DIAGONAL SAMPLES INSIDE AN OWNED GESTURE: once a gesture is owned (`wheelGestureActive`) and
+ *  its burst is still live (an owned event within BURST_GAP_MS), any event carrying a non-zero
+ *  deltaX is owned too — even one whose deltaY happens to be larger — and its deltaX is fed to
+ *  the tracker. A trackpad tail is rarely perfectly axis-aligned, and a single slightly-diagonal
+ *  sample judged per-event would slip past the horizontal gate, scroll natively underneath the
+ *  manoeuvre AND leave a hole in the classifier's stream. Pure-vertical events (deltaX 0) and
+ *  vertical-first gestures (nothing owned yet, or the burst gap has elapsed) are still left
+ *  alone entirely.
+ *
  *  Raw event deltas are normalized by `deltaMode` FIRST, before anything else sees them —
  *  Firefox frequently reports DOM_DELTA_LINE (small integers, "N lines") for gestures Chromium
  *  reports as DOM_DELTA_PIXEL for; every threshold downstream (wheelIntent.ts's cadence-in-ms
@@ -396,17 +516,24 @@ function handleDiscreteSettle(): void {
 function onWheel(e: WheelEvent): void {
   if (!WHEEL_OWNERSHIP) { onUserInputDuringTakeover(); return }
 
-  const horizontal = Math.abs(e.deltaX) >= Math.abs(e.deltaY) || e.shiftKey
-  if (!horizontal) return
+  const now = performance.now()
+  const byMagnitude = Math.abs(e.deltaX) >= Math.abs(e.deltaY)
+  const horizontal = byMagnitude || e.shiftKey
+  const diagonalInGesture = wheelGestureActive && e.deltaX !== 0 && now - wheelLastOwnedT < BURST_GAP_MS
+  if (!horizontal && !diagonalInGesture) return
 
   e.preventDefault()
   const el = container.value
   if (!el) return
+  wheelGestureActive = true
+  wheelLastOwnedT = now
 
-  const rawDx = Math.abs(e.deltaX) >= Math.abs(e.deltaY) ? e.deltaX : e.deltaY
+  // shift+wheel maps the vertical axis onto the strip; everything else owned here rides deltaX.
+  const rawDx = byMagnitude ? e.deltaX : e.shiftKey ? e.deltaY : e.deltaX
   const dx = normalizeWheelDelta(rawDx, e.deltaMode, el.clientWidth)
-  const now = performance.now()
-  const intent = wheelTracker.push({ dx, t: now })
+  // Two clocks, deliberately: `t` is when WE saw the event (cadence, burst gaps); `ts` is the
+  // event's own OS timestamp, which the delta was measured against (rate) — wheelIntent.ts.
+  const intent = wheelTracker.push({ dx, t: now, ts: e.timeStamp })
   if (wheelDebugEnabled.value) wheelDebug.value = { ...wheelDebug.value, intent, normalizedDelta: dx }
 
   if (intent === 'momentum') {
@@ -421,17 +548,16 @@ function onWheel(e: WheelEvent): void {
   // manoeuvre already running and hand control straight back to direct manual driving.
   if (takeoverActive) cancelTakeover()
   wheelReleasedThisGesture = false
+  setGestureState('DRAGGING') // gesture: first owned finger/discrete sample, or a re-touch cancelling a manoeuvre -> DRAGGING
 
   const maxScrollLeft = Math.max(0, el.scrollWidth - el.clientWidth)
   el.scrollLeft = Math.max(0, Math.min(el.scrollLeft + dx, maxScrollLeft))
 
-  const dt = wheelLastT ? now - wheelLastT : WHEEL_TICK_MS
-  wheelLastT = now
-  const instantV = dx / (dt / WHEEL_TICK_MS)
+  const instantV = wheelTracker.lastRate()
   wheelVelocity = intent === 'discrete' ? instantV : wheelVelocity * 0.5 + instantV * 0.5
 
   if (wheelDebugEnabled.value) {
-    wheelDebug.value = { ...wheelDebug.value, ownership: 'manual', velocity: wheelVelocity, plannedTarget: null, solvedA: null }
+    wheelDebug.value = { ...wheelDebug.value, ownership: 'manual', velocity: wheelVelocity, plannedTarget: null, solvedA: null, plannedT: null, profile: null }
   }
 
   clearWheelReleaseTimer()
@@ -447,10 +573,10 @@ function maybeTakeOver(el: HTMLElement, v: number): void {
   if (dockInFlight) return
   const speed = Math.abs(v)
   if (speed >= TAKEOVER_VELOCITY || speed < STOPPED_VELOCITY) return
-  const plan = clampedPlan(el, v)
-  if (plan === null) return
-  if (Math.abs(plan.target - el.scrollLeft) < 1) return
-  runTakeover(el, plan.target, v, plan.a, plan.onDock)
+  const solved = clampedPlan(el, v)
+  if (solved === null) return
+  if (Math.abs(solved.plan.target - el.scrollLeft) < 1) return
+  runTakeover(el, solved.plan, v, solved.onDock)
 }
 
 /** Continuous rAF sampler — cheap (a subtraction and a comparison most frames) and simpler than
@@ -473,11 +599,20 @@ function velocityTick(): void {
  *  no-ops (distance < 1px). */
 function scheduleDockFallback(): void {
   if (dockTimer !== null) clearTimeout(dockTimer)
-  dockTimer = setTimeout(dockToNearest, 140)
+  dockTimer = setTimeout(() => {
+    dockTimer = null
+    // Gated off during an owned wheel gesture — its own landing docks (file doc comment).
+    if (wheelGestureActive) return
+    dockToNearest()
+  }, 140)
 }
 
-/** Native settle signal — fires once momentum/inertial scrolling has actually finished. */
+/** Native settle signal — fires once momentum/inertial scrolling has actually finished. Gated
+ *  off during an owned wheel gesture (Chromium fires this after EVERY discrete scrollLeft write,
+ *  so it would otherwise dock dozens of times mid-gesture — see the file doc comment); the
+ *  `dockInFlight` handshake below is for the native smooth scrolls this component starts itself. */
 function onScrollEndNative(): void {
+  if (wheelGestureActive) return
   if (dockInFlight) { dockInFlight = false; return }
   if (dockTimer !== null) { clearTimeout(dockTimer); dockTimer = null }
   dockToNearest()
@@ -600,6 +735,8 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   if (velocityRafId !== null) cancelAnimationFrame(velocityRafId)
   cancelTakeover()
+  if (planResetTimer !== null) clearTimeout(planResetTimer)
+  if (pingTimer !== null) clearTimeout(pingTimer)
 })
 
 defineExpose({ scrollToToday })
@@ -634,5 +771,8 @@ defineExpose({ scrollToToday })
     v-if="wheelDebugEnabled"
     class="pointer-events-none fixed left-2 top-2 z-50 whitespace-pre rounded-none bg-black/80 px-2 py-1.5 font-mono text-[11px] leading-[15px] text-lime-300"
     aria-hidden="true"
-  >{{ wheelDebugText }}</div>
+  ><div class="flex items-baseline gap-3"><span :class="['text-[22px] font-bold leading-7', GESTURE_STATE_CLASS[gestureState]]">{{ gestureState }}</span><span
+      :class="['text-[22px] font-bold leading-7 transition-opacity ease-out', pingViolation ? 'text-red-500' : 'text-amber-300']"
+      :style="{ opacity: pingVisible || pingViolation ? 1 : 0, transitionDuration: pingVisible || pingViolation ? '0ms' : '1500ms' }"
+    >{{ pingText }}</span></div><div :class="pingViolation ? 'text-red-400' : 'text-lime-300'">plans:       {{ planCount }}</div>{{ wheelDebugText }}</div>
 </template>

@@ -15,6 +15,11 @@
  * solved deceleration is automatically close to A0 — the manoeuvre reads as one continuous
  * glide, never a visible brake or a snap.
  *
+ * BOUNDED (2026-09-03): the duration T = 2·d/|v| that falls out of that solve is kept inside
+ * [MIN_TICKS, MAX_TICKS] by choosing a different DAY (never by changing the model), and only when
+ * no day at all fits the band does a cubic Hermite profile over T = MAX_TICKS stand in — see
+ * `planDock`. Constant deceleration solved from distance stays THE model.
+ *
  * Units: `x` in px (scrollLeft), `v` in px/tick, `a` in px/tick², `t` in ticks — a "tick" is
  * one rAF frame (~16.67ms), matching how DayStrip.vue already samples velocity
  * (`el.scrollLeft - lastScrollLeft` once per frame). Keeping everything in tick-space rather
@@ -100,73 +105,146 @@ export function positionAt(t: number, x0: number, v0: number, a: number): number
   return x0 + v0 * tc - 0.5 * Math.sign(v0) * a * tc * tc
 }
 
-/** A solved takeover manoeuvre: decelerate from the caller's current (x, v) at `a` (px/tick²)
- *  and come to rest at `target` (px). */
+/** A solved takeover manoeuvre: from the caller's current (x, v), come to rest EXACTLY at
+ *  `target` (px) after `T` ticks. `profile` says which curve `planPositionAt` drives:
+ *  - 'constant': constant deceleration `a` (px/tick²) — THE model (Mark, 2026-09-03: "the
+ *    deceleration rate is based on distance, not on time. We adjust the time to match the
+ *    distance"); T = 2·d/|v| falls out of the distance, and a = |v|/T = v²/(2d).
+ *  - 'hermite': the bounded fallback (see `planDock`), T was clamped to the sane band; `a` is
+ *    then the MEAN deceleration |v|/T, reported for the HUD, not a constant the curve runs at. */
 export interface DockPlan {
   target: number
   a: number
+  T: number
+  profile: 'constant' | 'hermite'
 }
 
-/** A solved manoeuvre feels alien once its deceleration strays too far from the canvas's own
- *  natural friction A0 — too gentle (a dock so far past the natural landing the glide visibly
- *  free-wheels an extra beat) or too sharp (a dock so close it reads as a stomped brake). Same
- *  multiplier either side of A0 the spec calls for. */
-const CLAMP_LOW = 0.4
-const CLAMP_HIGH = 2.5
+/** The sane band for a manoeuvre's duration, in ticks (0.2s – 0.8s at 60Hz). Constant
+ *  deceleration solved purely from distance can produce any duration at all: gesture-09/10
+ *  (2026-09-03) glided 4080px in 3.1s at a healthy release speed, and crept 226px over 5.5s at a
+ *  mis-measured one (live/CREEP-FINDINGS.md). The band bounds the OUTCOME only when it leaves
+ *  sanity — inside it the model is untouched. MAX picks how far a fast flick may travel
+ *  (≤ v·MAX/2 px); MIN keeps a dock right under the finger from reading as a stomped brake. */
+export const MIN_TICKS = 12
+export const MAX_TICKS = 48
+
+/** Stop time (ticks) of the constant deceleration that lands a glide at `v` exactly `d` px
+ *  away: from d = ½·|v|·T. */
+export function ticksFor(d: number, v: number): number {
+  return (2 * Math.abs(d)) / Math.abs(v)
+}
+
+/** Position at tick `t` on the cubic Hermite profile from `x0` (slope `v0` px/tick at t=0) to
+ *  `x0 + d` (slope 0 at t=T): x(s) = x0 + d·(3s² − 2s³) + v0·T·(s³ − 2s² + s), s = t/T clamped to
+ *  [0, 1]. Starts at EXACTLY the release velocity (no seam), lands EXACTLY on the dock, and when
+ *  T = 2d/v0 it is algebraically the constant deceleration `positionAt` runs (proven in the
+ *  spec) — so it only ever differs from the model where the model's own T left the band.
+ *  Clamping T DOWN (the creep case) keeps it monotone; clamping UP overshoots only if
+ *  T > 3d/v0, which `planDock` never asks for. */
+export function hermitePositionAt(t: number, x0: number, v0: number, d: number, T: number): number {
+  if (T <= 0) return x0 + d
+  const s = Math.min(Math.max(t / T, 0), 1)
+  const s2 = s * s
+  const s3 = s2 * s
+  return x0 + d * (3 * s2 - 2 * s3) + v0 * T * (s3 - 2 * s2 + s)
+}
+
+/** Position at tick `t` along `plan`, whichever profile it carries. Past `plan.T` it is the
+ *  target, fixed. */
+export function planPositionAt(t: number, x0: number, v0: number, plan: DockPlan): number {
+  if (plan.profile === 'hermite') return hermitePositionAt(t, x0, v0, plan.target - x0, plan.T)
+  return positionAt(t, x0, v0, plan.a)
+}
+
+/** The bounded plan for ONE specific target: constant deceleration whenever its own T = 2d/|v|
+ *  is at or under MAX_TICKS (a T under MIN_TICKS is ACCEPTED here — a brief firm stop lands
+ *  exactly and never overshoots, which a stretched curve toward a dock this close would); the
+ *  Hermite fallback at T = MAX_TICKS when the target is too far for the speed (T > MAX_TICKS —
+ *  the creep case: the model alone would take seconds). `null` when `target` is not ahead of
+ *  `x` in the direction of `v`, or already under it (same guards as `decelerationFor`). */
+export function planToTarget(x: number, v: number, target: number): DockPlan | null {
+  const a = decelerationFor(x, v, target)
+  if (a === null) return null
+  const T = ticksFor(target - x, v)
+  if (T <= MAX_TICKS) return { target, a, T, profile: 'constant' }
+  return { target, a: Math.abs(v) / MAX_TICKS, T: MAX_TICKS, profile: 'hermite' }
+}
 
 /**
  * Full policy: given the strip's current (x, v) and the set of dock points, produce the ONE
  * takeover manoeuvre to run — or `null` if there's nothing to solve (no motion, no docks) and
- * the caller should fall back to its existing immediate settle-dock instead.
+ * the caller should fall back to its existing immediate settle-dock instead. Solved ONCE per
+ * release, from the true release velocity (Mark, 2026-09-03: "It should only ever calculate
+ * ONCE. The deceleration required to land." / "Always lands on a day perfectly! Seamless to
+ * the user.").
  *
- * 1. Project the natural landing at friction `A0` and find the dock nearest it — the manoeuvre
- *    a free glide would already be "aiming at."
- * 2. Solve the one deceleration that lands exactly there. If it falls inside
- *    `[CLAMP_LOW·A0, CLAMP_HIGH·A0]`, that's the answer.
- * 3. Otherwise the nearest dock was a bad fit — too close (solved `a` too high) or too far
- *    (solved `a` too low). Step ONE dock further in whichever direction fixes that (farther
- *    along the motion direction if too close; back toward `x` if too far) and re-solve once.
- * 4. If that step doesn't exist, or still doesn't fit, give up on landing exactly on a dock at
- *    all: run the takeover at plain `A0` toward the (unclamped) natural landing, and let the
- *    existing settle-then-dock fallback (DayStrip.vue's scrollend/debounce path) correct
- *    whatever small offset that leaves once it actually stops — "use A0 and the settle-fallback
- *    docks the remainder."
+ * 1. Project the natural landing at friction `A0` and find the dock nearest it among the docks
+ *    AHEAD (reachable by decelerating, never by reversing) — the "primary", the day a free glide
+ *    was already aiming at. A0 now only ever chooses WHICH day; never how long.
+ * 2. Solve the constant deceleration that lands exactly there: T = 2d/|v|. If T sits inside
+ *    [MIN_TICKS, MAX_TICKS], that is the answer — the model, untouched.
+ * 3. T > MAX_TICKS — the flick is too fast for the day it chose (or, at a slow release, the day
+ *    is too far for the speed): take the FARTHEST dock ahead the band can reach, d ≤ |v|·MAX/2,
+ *    never nearer than the nearest dock ahead, and solve the constant deceleration for it. If
+ *    that dock's own T is under MIN (nothing beyond it fits either, by construction) accept it —
+ *    a firm stop, still exact.
+ * 4. T < MIN_TICKS — the dock is too close: step to the next dock ahead if that one fits
+ *    (T ≤ MAX), else accept the close one.
+ * 5. If NO constant-deceleration solution reaches any dock ahead within the band — the nearest
+ *    dock ahead is already beyond |v|·MAX/2 (typically a slow release far from a day) — then and
+ *    only then drive the cubic Hermite profile (`hermitePositionAt`) toward the nearest dock
+ *    ahead over T = clamp(2d/|v|, MIN, MAX) = MAX: same starting slope, exact landing, monotone
+ *    (T was clamped down), 0.8s instead of the 4–8s creep of 2026-09-03. This is the bounded
+ *    fallback, not a second model.
+ * 6. Only when there is genuinely no dock ahead (none in the direction of travel, or every one
+ *    is already under `x`) return the natural landing at `A0` as a constant-deceleration plan;
+ *    DayStrip.vue's settle fallback then docks it.
+ *
+ * REMOVED (2026-09-03): the CLAMP_LOW/CLAMP_HIGH preference (0.4–2.5 × A0 on the solved `a`) and
+ * its closest-in-log-ratio fallback. Both bounded the deceleration, never the duration — the
+ * exact hole every creep fell through (a/A0 ≈ 0.02 was "closest to A0" and still 5.5s long).
  */
 export function planDock(x: number, v: number, docks: number[], a0: number): DockPlan | null {
   if (v === 0 || docks.length === 0) return null
   const direction: 1 | -1 = v > 0 ? 1 : -1
+  const natural = (): DockPlan => {
+    const landing = naturalLanding(x, v, a0)
+    return { target: landing, a: a0, T: stopTime(v, a0), profile: 'constant' }
+  }
 
-  // Only docks at or ahead of `x` in the direction of travel are reachable by decelerating
-  // (never by reversing) — the same set `decelerationFor` would accept — ordered by distance
-  // from `x` so "one dock further/nearer" is a plain index step.
+  // Docks ahead of `x` (solvable by decelerating), nearest first — "one dock further" is an
+  // index step. A dock under `x` (within EPSILON_PX) is not ahead.
   const ahead = docks
-    .filter(d => (d - x) * direction >= -EPSILON_PX)
+    .filter(d => (d - x) * direction >= EPSILON_PX)
     .sort((p, q) => Math.abs(p - x) - Math.abs(q - x))
-  if (ahead.length === 0) return { target: naturalLanding(x, v, a0), a: a0 }
+  if (ahead.length === 0) return natural()
 
-  const landing = naturalLanding(x, v, a0)
-  const primary = nearestDock(landing, ahead, direction)
-  if (primary === null) return { target: landing, a: a0 }
-
+  const primary = nearestDock(naturalLanding(x, v, a0), ahead, direction)
+  if (primary === null) return natural()
   const primaryIndex = ahead.indexOf(primary)
-  const primaryA = decelerationFor(x, v, primary)
+  const T = ticksFor(primary - x, v)
 
-  const fits = (a: number | null): a is number => a !== null && a >= CLAMP_LOW * a0 && a <= CLAMP_HIGH * a0
+  const constant = (target: number): DockPlan => ({
+    target, a: decelerationFor(x, v, target)!, T: ticksFor(target - x, v), profile: 'constant',
+  })
 
-  if (fits(primaryA)) return { target: primary, a: primaryA }
+  if (T >= MIN_TICKS && T <= MAX_TICKS) return constant(primary)
 
-  // Too close (a* too high) → the manoeuvre would be an abrupt brake: step to the dock FARTHER
-  // along the direction of travel, which needs less deceleration.
-  // Too far (a* too low, or the primary target was rejected outright) → step to the dock
-  // NEARER `x`, which needs more.
-  const tooClose = primaryA !== null && primaryA > CLAMP_HIGH * a0
-  const stepIndex = tooClose ? primaryIndex + 1 : primaryIndex - 1
-  const stepped = ahead[stepIndex]
-  const steppedA = stepped === undefined ? null : decelerationFor(x, v, stepped)
+  if (T > MAX_TICKS) {
+    // Step 3: the farthest dock the band reaches, never nearer than ahead[0].
+    const cap = (Math.abs(v) * MAX_TICKS) / 2
+    let chosen: number | null = null
+    for (const d of ahead) {
+      if (Math.abs(d - x) <= cap) chosen = d
+      else break
+    }
+    if (chosen !== null) return constant(chosen)
+    // Step 5: even the nearest dock ahead is beyond the band — the bounded Hermite fallback.
+    return planToTarget(x, v, ahead[0]!)
+  }
 
-  if (stepped !== undefined && fits(steppedA)) return { target: stepped, a: steppedA! }
-
-  // Nothing in clamp range within one step either way — give up on an exact dock and let the
-  // existing settle-fallback finish the job once natural-A0 deceleration actually stops.
-  return { target: landing, a: a0 }
+  // Step 4: T < MIN — too close. The next dock ahead if it fits, else accept.
+  const next = ahead[primaryIndex + 1]
+  if (next !== undefined && ticksFor(next - x, v) <= MAX_TICKS) return constant(next)
+  return constant(primary)
 }

@@ -397,10 +397,13 @@ function setGestureState(to: GestureState, target: number | null = null): void {
   const from = gestureState.value
   if (from === to) return
   gestureState.value = to
-  // Plan counter reset rule (Mark): "resets every time it's been still for 2 seconds" — armed on
-  // entering STILL, disarmed the moment the state leaves it, so a re-flick within 2s keeps counting.
+  // Plan counter rule (Marlow, 2026-09-03): the counter counts plans SINCE THE LAST NEW TOUCH, so
+  // it resets on every entry into DRAGGING (STILL→DRAGGING or DECELERATING→DRAGGING — a re-touch
+  // that cancels a manoeuvre is a new touch too). Mark's "resets every time it's been still for
+  // 2 seconds" is kept as well: armed on entering STILL, disarmed the moment the state leaves it.
   if (planResetTimer !== null) { clearTimeout(planResetTimer); planResetTimer = null }
-  if (to === 'STILL') planResetTimer = setTimeout(resetPlanCount, PLAN_RESET_STILL_MS)
+  if (to === 'DRAGGING') resetPlanCount()
+  else if (to === 'STILL') planResetTimer = setTimeout(resetPlanCount, PLAN_RESET_STILL_MS)
   if (wheelDebugEnabled.value) {
     const x = container.value ? container.value.scrollLeft.toFixed(1) : '-'
     console.log(`[gesture] ${from} -> ${to} t=${performance.now().toFixed(1)} x=${x} v=${wheelVelocity.toFixed(3)} target=${target === null ? '-' : target.toFixed(1)}`)
@@ -410,10 +413,13 @@ function setGestureState(to: GestureState, target: number | null = null): void {
 // Mark, 2026-09-03: "a fading PING when it calculates. It should only ever calculate ONCE. The
 // deceleration required to land." `notePlan` is called at the ONE place the release manoeuvre
 // is solved (handleFingerRelease's clampedPlan) — the HUD flashes "PING" and fades over 1.5s,
-// and a small `plans: N` counter on the HUD counts the solves. The counter resets only after
-// the machine has been STILL for 2s continuously (`setGestureState`), so a second solve before
-// that (planCount > 1) is a violation of the invariant: shown red, with the count, kept visible
-// until the counter resets.
+// and a small `plans: N` counter on the HUD counts the solves SINCE THE LAST NEW TOUCH: it is
+// reset on every transition into DRAGGING and after 2s of continuous STILL (`setGestureState`).
+// "Once" means once per touch, so ten quick flicks are ten separate plans, not a violation (the
+// first HUD counted them cumulatively across the 2s window and cried "PING x10" — a false alarm).
+// A violation is a second solve WITHOUT the machine having passed through DRAGGING since the
+// previous one (planCount > 1): shown red as "PING xN", kept visible until the counter resets,
+// and logged as a `[plan-violation]` console line for the live recorder.
 const PLAN_RESET_STILL_MS = 2000
 const planCount = ref(0)
 let planResetTimer: ReturnType<typeof setTimeout> | null = null
@@ -433,6 +439,7 @@ function notePlan(plan: DockPlan | null): void {
   console.log(`[plan] #${planCount.value} t=${performance.now().toFixed(1)} x=${x} v=${wheelVelocity.toFixed(3)} target=${plan ? plan.target.toFixed(1) : '-'} a=${plan ? plan.a.toFixed(4) : '-'} T=${plan ? plan.T.toFixed(1) : '-'} profile=${plan ? plan.profile : '-'}`)
   pingViolation.value = planCount.value > 1
   pingText.value = planCount.value > 1 ? `PING x${planCount.value}` : 'PING'
+  if (pingViolation.value) console.log(`[plan-violation] #${planCount.value} plans since the last new touch (no DRAGGING between them) t=${performance.now().toFixed(1)} x=${x} target=${plan ? plan.target.toFixed(1) : '-'}`)
   pingVisible.value = true
   if (pingTimer !== null) clearTimeout(pingTimer)
   pingTimer = setTimeout(() => { pingVisible.value = false }, 50) // one paint at full opacity, then the CSS fade

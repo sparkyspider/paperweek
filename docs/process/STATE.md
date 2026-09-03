@@ -1,49 +1,67 @@
-# STATE — session close 2026-09-02 evening
+# STATE — session close 2026-09-03 evening
 
-*(Supersedes the process monitor's running log below-the-fold history; this is the resurrection
-point for the next session. Read OPERATIONS.md for how the operation runs, LESSONS.md for the
-incident-derived rules.)*
+*(Resurrection point for the next session. OPERATIONS.md says how the operation runs,
+LESSONS.md holds the incident-derived rules. Marlow ran this session; the day's evidence and
+verbatim rulings are in `docs/process/evidence/scroll-diagnosis-2026-09-03/`.)*
 
 ## Where everything stands
 
 - **The app Mark uses**: branch `v2`, front on **:3200**, back on **:3201**, both left running.
   Postgres local, Zitadel shared at :8080 (org "Productivity"). Login mark@flyh2.com; local
-  password is Mark's own (set 2026-09-02; file in `auth/.machinekey/` matches).
-- **Design**: Mark chose the parchment v1 look over the ink-on-paper alternative. The full
-  ink build is PRESERVED: branch `design-sexy` @ `2536eae`, worktree `../productivity-tools-sexy`
-  (server stopped). Decision recorded in `docs/design-v2/README.md`.
-- **Latest v2 commits**: `968b6cd` (Firefox wheel fix + `?wheeldebug=1` HUD) ← `1cc5d71`
-  (softened theme cards) ← `6f230d4` (full scroll ownership from true release velocity) ←
-  `9c12fa5` (flattening wave: one sheet, kinematic docking) ← `81e067d` ← `8c82189`.
-- **Working tree**: clean (verify on resume).
+  password file in `auth/.machinekey/`.
+- **Design**: parchment v1. Ink alternative preserved on `design-sexy` @ `2536eae`.
+- **Latest v2 commits** (all today): plan-violation-by-touch + this file ← `d741997` (the
+  3-second rule) ← `ddf08bb` (evidence) ← `2096e1a` (latched momentum, always land on a day,
+  rate-based speedometer) ← `40b229d` (yesterday's "disaster" verdict).
+- **Working tree**: clean (verify on resume). Evidence videos are gitignored, local only.
 
-## THE OPEN THREAD — first thing next session
+## THE SCROLLING — RESOLVED, Mark's words: "Everything is perfect."
 
-**⚠️ MARK'S CLOSING VERDICT (his words): "the scrolling is a disaster and we fix it tomorrow."**
-Not a calibration nicety — the scroll-ownership physics FAILS his real-Firefox trackpad feel
-test despite passing all synthetic verification (42 tests, both engines, flush landings).
-Treat as: synthetic-verified ≠ feels-right; the whole feel needs diagnosis with Mark present,
-using the `?wheeldebug=1` HUD as the shared instrument. `WHEEL_OWNERSHIP = false` in
-DayStrip.vue is the one-line fallback to native scrolling + tail-dock if he wants relief
-before the fix. The pipeline is built and Firefox-verified mechanically; Next session: have him hard-refresh :3200, flick,
-and/or open `:3200/?wheeldebug=1` (dev-only HUD: intent classification, velocity, ownership
-state, planned target + solved a*). Map his feel-words to constants: `TAKEOVER_A0` (canvas
-friction — fast flicks currently expected to feel FLOATY, known gap), classifier sensitivity,
-`WHEEL_OWNERSHIP` flag in `DayStrip.vue` is the full-restore fallback if needed.
+Yesterday's "the scrolling is a disaster" was three stacked defects, each found on Mark's own
+trackpad traces and fixed in order (full story: `evidence/scroll-diagnosis-2026-09-03/PREDICTION.md`):
+
+1. Real inertia tails repeat integers; a flat pair un-confirmed momentum and cancelled the
+   glide → stop-then-readjust. Momentum is now latched per burst (`wheelIntent.ts`).
+2. Planner gave up when no day fit its deceleration clamp → glide to nowhere, pause, snap.
+   It now always lands on a day (`dockPhysics.ts`).
+3. OS wheel timestamps alternate 16/33 ms → delta sawtooth → speedometer read 1.5 px/tick
+   instead of 30 → five-second creep. Everything is now judged on RATE from the event's own
+   timestamp; glide time bounded by choosing which day.
+
+**The model, as Mark states it:** deceleration is solved from the distance to a day; time
+follows. **Mark's 3-second rule (verbatim):** *"If it looks like it'll get there in less than 3
+seconds, let it get there by itself. If not, do what you do."* → `MAX_TICKS = 180` pure
+physics ceiling; `FALLBACK_TICKS = 48` cubic-Hermite only beyond it. `FRICTION = 2` (Mark:
+"maybe double"). 83 unit tests; 10/10 rig runs; 54+ real flicks recorded, every one landing
+exactly (glides 0.8–2.8 s).
+
+**Instruments (dev only, `:3200/?wheeldebug=1`):** STILL / DRAGGING / DECELERATING state
+machine, fading PING per plan, plans counter (resets on each new touch and after 2 s still;
+red "PING xN" = a plan without a new touch = the invariant broken). **Live recorder** (headed
+Chromium, records Mark's real flicks per gesture with state sequence and plan count):
+`node docs/process/evidence/scroll-diagnosis-2026-09-03/live/rig/live-recorder.mjs`
+(run from the scratchpad; log to `live/recorder.log`, timestamps UTC). Synthetic rig with
+sawtooth replay of Mark's gesture-10: `.../after3/rig/trackpad-rig.mjs`.
+
+**Known, not yet ruled on:** the one-to-two-frame hold at hand→glide handoff (classifier
+confirmation latency) — nobody has complained. Real-Firefox trackpad timestamps unverified
+(all real flicks today were in headed Chromium). Slow releases (≈3–5 px/tick) sometimes take
+the 0.8 s fallback, sometimes a 2–3 s pure drift, depending on distance — Mark called the
+whole feel perfect; revisit only if he raises it.
 
 ## Parked items (Mark's calls, no rush)
 
-- Notes-section semantics: currently task-shaped; free-writing alternative undecided.
+- Notes-section semantics: task-shaped now; free-writing alternative undecided.
 - Past-task aging: missed vs not-yet-due render identically; sepia-fade proposal open.
 - `v2` → `main` merge: main is behind; merge when Mark says.
-- Google login: waits on the co-sy-v2 side adding a Google IdP to the FlyH2 org (suggestion
-  text already given to Mark to relay). Then: BFF IdP-intent flow + login button here.
+- Google login: waits on co-sy-v2 adding a Google IdP to the FlyH2 org.
 - Tarryn's account: `auth/add-user.sh <email> <name>` when her email arrives.
-- Sexy-branch future: kept as finished alternative; refs 02/04 remain in docs/design-v2/.
+- Sexy-branch future: kept as finished alternative.
 
 ## Operating rules in force (see memory + OPERATIONS.md)
 
-Commit protocol: standing authority; announce when Mark present, act when away. Single writer
-per surface. Evidence before claims; retract-and-reprove. QT- test data only, never real
-themes/tasks. Playwright verifies in BOTH engines (Mark browses Firefox). Mark's feedback style:
-screenshots + terse observations; "Wait" = hold; late distillations override micro-instructions.
+Marlow persona (portable skill) ran today: subagents do all reading/building/verifying;
+Marlow eyeballs every plot before "done"; prediction written before diagnosis; rulings recorded
+verbatim before acting. Commit protocol: standing authority; explicit paths, never `add -A`.
+Evidence before claims; retract-and-reprove. Playwright verifies in BOTH engines. Mark's
+laptop lid closing kills workers mid-step — keep it open during dispatches.

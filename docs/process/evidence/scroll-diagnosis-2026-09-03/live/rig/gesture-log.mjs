@@ -10,9 +10,13 @@
 // fields (2026-09-03: T= and profile= were added to DayStrip.vue's line and the old anchored
 // regex silently matched nothing — planCount read 0 on gestures 14-16).
 //
-// Plan counter rule (mirrors the HUD's `planCount` / PLAN_RESET_STILL_MS): the counter is reset
-// only once the machine has been STILL for 2000ms continuously; a re-flick (leaving STILL)
-// before that keeps counting, so a second `[plan]` in that span is a PLAN-VIOLATION.
+// Plan counter rule (mirrors the HUD's `planCount`, Marlow's ruling 2026-09-03): a plan is one
+// solve per TOUCH. The per-plan `count` is the number of plans since the last new touch — reset
+// on every transition INTO DRAGGING (STILL→DRAGGING or DECELERATING→DRAGGING) and, as before,
+// once the machine has been STILL for PLAN_RESET_STILL_MS continuously. A PLAN-VIOLATION is a
+// `[plan]` NOT preceded by a DRAGGING transition since the previous `[plan]` (count > 1). Ten
+// quick flicks with one plan each are ten touches — plans=10 flicks=10, no violation (the old
+// rule counted them cumulatively across the 2s window and flagged gesture-17 falsely).
 
 export const PLAN_RESET_STILL_MS = 2000
 export const GESTURE_RE = /^\[gesture\] (\S+) -> (\S+) t=(\S+) x=(\S+) v=(\S+) target=(\S+)$/
@@ -63,8 +67,9 @@ export class GestureLog {
     return state
   }
 
-  /** Recorder-side plan counter for every plan, applying the HUD's reset rule to the whole
-   *  session (not just one recorder window). Returns [{...plan, count}] in time order. */
+  /** Recorder-side plan counter for every plan, applying the HUD's reset rule (reset on entry
+   *  into DRAGGING, and after resetStillMs continuous STILL) to the whole session (not just one
+   *  recorder window). Returns [{...plan, count}] in time order; count > 1 is a violation. */
   countedPlans() {
     const evs = [...this.transitions.map(x => ({ ...x, kind: 'gesture' })), ...this.plans.map(x => ({ ...x, kind: 'plan' }))]
       .sort((a, b) => a.t - b.t || (a.kind === 'plan' ? -1 : 1)) // plan is solved before the state change in the same tick
@@ -73,8 +78,10 @@ export class GestureLog {
     for (const e of evs) {
       // The HUD's timer would have fired: reset before handling anything at or after that moment.
       if (stillSince !== null && e.t - stillSince >= this.resetStillMs) { counter = 0; stillSince = null }
-      if (e.kind === 'gesture') stillSince = e.to === 'STILL' ? e.t : null
-      else { counter++; out.push({ ...e, count: counter }) }
+      if (e.kind === 'gesture') {
+        stillSince = e.to === 'STILL' ? e.t : null
+        if (e.to === 'DRAGGING') counter = 0 // a new touch: plans are counted from here
+      } else { counter++; out.push({ ...e, count: counter }) }
     }
     return out
   }
@@ -90,10 +97,15 @@ export class GestureLog {
       recorderCount: e.count,
     }))
     const initialState = this.stateAt(absStart - 0.001)
-    // planCount mirrors the HUD: the counter value as of the last plan in this window (0 if none).
-    const planCount = plans.length ? plans[plans.length - 1].recorderCount : 0
+    // planCount: total plans in this window. flicks: touches (transitions into DRAGGING) in it.
+    // hudPlanCount: the HUD's own `#n` on the last plan (its per-touch counter, for cross-checking).
+    // planViolation: any plan in the window not preceded by a DRAGGING transition since the
+    // previous plan (recorderCount > 1).
+    const planCount = plans.length
+    const flicks = transitions.filter(tr => tr.to === 'DRAGGING').length
     const hudPlanCount = plans.length ? plans[plans.length - 1].n : 0
-    return { transitions, plans, initialState, planCount, hudPlanCount, planViolation: planCount > 1 }
+    const planViolation = plans.some(p => p.recorderCount > 1)
+    return { transitions, plans, initialState, planCount, flicks, hudPlanCount, planViolation }
   }
 
   /** Drop history older than absBefore, keeping the last transition so stateAt() stays right. */
@@ -121,10 +133,10 @@ export function planForTransition(tr, plans, withinMs = 100) {
   return best
 }
 
-/** Compact line: `states: STILL→DRAGGING@384 →DECELERATING@1231(v=1.49,target=17600,T=100,constant) →STILL@6268 plans=1[ PLAN-VIOLATION]`
+/** Compact line: `states: STILL→DRAGGING@384 →DECELERATING@1231(v=1.49,target=17600,T=100,constant) →STILL@6268 plans=1 flicks=1[ PLAN-VIOLATION]`
  *  — the `,T=<ticks>,<profile>` half appears only when the `[plan]` line that started that
- *  DECELERATING transition carried them. */
-export function formatStateLine({ transitions, plans, initialState, planCount }) {
+ *  DECELERATING transition carried them. PLAN-VIOLATION only under the per-touch rule (see top). */
+export function formatStateLine({ transitions, plans, initialState, planCount, flicks, planViolation }) {
   let s = 'states: '
   if (!transitions.length) s += `${initialState} (no transitions)`
   else {
@@ -137,7 +149,7 @@ export function formatStateLine({ transitions, plans, initialState, planCount })
       return `${i === 0 ? tr.from : ''}→${tr.to}@${Math.round(tr.t)}${detail}`
     }).join(' ')
   }
-  s += ` plans=${planCount}`
-  if (planCount > 1) s += ' PLAN-VIOLATION'
+  s += ` plans=${planCount} flicks=${flicks}`
+  if (planViolation) s += ' PLAN-VIOLATION'
   return s
 }

@@ -382,11 +382,12 @@ function saveGesture(p) {
     scrollendEvents: events.filter(e => e.type === 'scrollend').map(e => `${e.t}ms@${e.at}`),
     scrollEventCount: events.filter(e => e.type === 'scroll').length,
     hudFinal,
-    // State machine feed (`[gesture]` / `[plan]` console lines), gesture-relative t. planCount
-    // follows the HUD's rule (reset only after 2000ms continuous STILL) applied session-long by
-    // the recorder; each plan also carries the HUD's own `#n` for cross-checking.
+    // State machine feed (`[gesture]` / `[plan]` console lines), gesture-relative t. planCount is
+    // the total plans in this window, flicks the touches (DRAGGING entries); planViolation is a
+    // plan with no DRAGGING since the previous plan (gesture-log.mjs, per-touch rule); each plan
+    // also carries the HUD's own `#n` (its per-touch counter) for cross-checking.
     initialState: gw.initialState, transitions: gw.transitions, plans: gw.plans,
-    planCount: gw.planCount, hudPlanCount: gw.hudPlanCount, planViolation: gw.planViolation, stateLine,
+    planCount: gw.planCount, flicks: gw.flicks, hudPlanCount: gw.hudPlanCount, planViolation: gw.planViolation, stateLine,
     // `fired` keeps the plot script's contract: ticks along the bottom, one per wheel event.
     fired: wheel.map(w => ({ t: w.t, phase: w.synthetic ? 'inertia' : 'finger', dx: w.dx, dy: w.dy, mode: w.mode, intent: w.intent, ownership: w.ownership, velocity: w.velocity, pos: w.pos })),
     oneLine,

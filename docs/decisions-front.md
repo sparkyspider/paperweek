@@ -129,3 +129,48 @@ needed. New entries for this project start at **D-front-029**.
   personal weekly-planning tool meant to feel calm and physical. The *mechanism*
   (tokens → gallery → components, D-front-015, the async/touch/nav rules) transfers
   wholesale; the *values* do not.
+
+- **D-front-030 · Day-strip wheel scrolling is OWNED, not observed; no CSS scroll-snap** — Decided 2026-09-02, confirmed 2026-09-03
+  One non-passive `wheel` listener `preventDefault`s every horizontal-intent event and drives
+  `scrollLeft` by hand; the OS momentum tail is classified and ignored, and the glide runs from
+  the true release velocity. Native momentum can't be intervened on early enough, and even
+  `scroll-snap: proximity` cut a flick short. `WHEEL_OWNERSHIP=false` is the relief valve.
+
+- **D-front-031 · Wheel intent classified and measured on RATE from the event's own timestamp** — Decided 2026-09-03
+  macOS delivers wheel events with `timeStamp`s alternating 16/33 ms, so raw deltas sawtooth
+  (7,14,7,14…) while px/ms is flat. Comparing raw deltas tripped the re-touch rule and sank the
+  speedometer to ~1.5 px/tick (a 226 px glide took 5.5 s). Classification and the one
+  speedometer (`lastRate()`) both use rate; never a second clock on dispatch time.
+
+- **D-front-032 · Momentum is latched per burst; re-touch only by reversal or a clear rise** — Decided 2026-09-03
+  Real inertia tails repeat integers (7,7,6,6…); a flat pair un-confirmed momentum, the glide was
+  cancelled, the tail applied by hand, and a second landing planned — the visible
+  scroll-stop-readjust. Once confirmed, a same-direction sample stays MOMENTUM.
+
+- **D-front-033 · The glide model: deceleration solved from distance, time follows; always lands on a day** — Decided 2026-09-03
+  Mark: *"the decelleration rate is based on distance, not on time. We adjust the time to match the
+  distance."* and *"Always lands on a day perfectly!"* One constant deceleration a = v²/2d to a
+  chosen dock; friction `A0` only picks WHICH day. The old a/A0 clamp (0.4–2.5) that gave up and
+  glided to nowhere is removed — `planDock` never returns without a dock while one is ahead.
+
+- **D-front-034 · Mark's 3-second rule bounds the glide by choosing the day; Hermite only past the ceiling** — Decided 2026-09-03
+  Mark: *"If it looks like it'll get there in less than 3 seconds, let it get there by itself. If
+  not, do what you do."* `MAX_TICKS=180` (3 s) is the pure-physics ceiling, `MIN_TICKS=12` the
+  floor; the band is satisfied by picking a nearer/farther day, never by bending the model. Only
+  when no day fits does a cubic-Hermite curve run, at its own `FALLBACK_TICKS=48` (0.8 s).
+
+- **D-front-035 · `FRICTION = 2`** — Decided 2026-09-03
+  Mark, on his own trackpad after the latch fix: *"we need more friction, maybe double."* Feel
+  multiplier on the seeded `A0`; shorter glides, still every one on a day. Retune only by his hand.
+
+- **D-front-036 · The plan is solved exactly ONCE per touch** — Decided 2026-09-03
+  Mark: *"It should only ever calculate ONCE."* `handleFingerRelease` is the single solve site,
+  idempotent per gesture. Dev HUD (`?wheeldebug=1`) flashes PING per plan and counts plans since
+  the last DRAGGING entry; a red "PING xN" / `[plan-violation]` line is the invariant broken. The
+  live recorder (`evidence/…/live/rig/live-recorder.mjs`) scores every real gesture on the same rule.
+
+- **D-front-037 · Ambient settle-then-dock listeners are muted during an owned wheel gesture** — Decided 2026-09-03
+  Chromium fires `scrollend` after every `scrollLeft` write, so the old scrollend/140 ms-debounce
+  dock ran 25× in one flick, each a native smooth scroll fighting the hand-driven position.
+  `wheelGestureActive` gates them from first owned event to the gesture's own landing; non-wheel
+  scrolling (scrollbar, touch, programmatic) still docks the old way.

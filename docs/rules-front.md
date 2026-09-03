@@ -352,3 +352,14 @@ and then `app/error.vue` renders the not-found stage client-side — a **plastic
 and behaves as a not-found to the person while the status stays 200 for the machine. Routes
 **outside** `/app` are server-rendered and keep their genuine HTTP 404 (also dressed by
 `error.vue`); only `/app` carries the deep-link promise.
+
+## 14. Day-strip wheel scrolling (MUST)
+
+Shape: `architecture-front.md` §Day-strip wheel scrolling; why: D-front-030…037.
+
+- **Never compare raw wheel deltas — rate only** (px/tick from `WheelEvent.timeStamp`). OS timestamps alternate 16/33 ms; raw deltas sawtooth.
+- **No CSS `scroll-snap` on the strip**, not even `proximity`.
+- **Ambient dock listeners (`scrollend`, scroll-debounce) stay gated while a wheel gesture is owned** (`wheelGestureActive`).
+- **One plan per touch.** Solve in `handleFingerRelease` only; a red "PING xN" on the HUD is a defect, not noise.
+- **Every change to `wheelIntent.ts`, `dockPhysics.ts` or DayStrip's scroll code** passes `npm run test:unit` (both spec files) AND the Playwright rig in BOTH engines — `docs/process/evidence/scroll-diagnosis-2026-09-03/after3/rig/trackpad-rig.mjs`, including the recorded-stream (sawtooth) replay.
+- **Feel changes are not "done" on synthetic evidence.** Mark's hand on the live recorder (`OPERATIONS.md` §12) decides; his verdict is recorded verbatim before anything further moves.

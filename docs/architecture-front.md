@@ -88,6 +88,28 @@ minimum target. Both matter more than usual here — dragging a task card betwee
 touch-first interaction. Both grow the BOX and leave the type alone, so a component never has
 to remember either one.
 
+## Day-strip wheel scrolling
+
+The planner is one endless horizontal strip of day cards (`components/planner/DayStrip.vue`); a
+flick must land a day flush at the left edge as one continuous motion. The strip OWNS wheel input
+(D-front-030) — no CSS scroll-snap, no observing native momentum:
+
+```
+onWheel (non-passive, preventDefault) → normalizeWheelDelta (deltaMode → px)
+  → wheelIntent.ts: FINGER | MOMENTUM | DISCRETE, judged on RATE (px/tick from the event's own
+    timeStamp), momentum LATCHED per burst; FINGER drives scrollLeft by hand, MOMENTUM is ignored
+  → release (first confirmed MOMENTUM, or 80 ms silence; idempotent per gesture)
+  → dockPhysics.planDock: ONE constant deceleration a = v²/2d to a day chosen inside
+    [MIN_TICKS 12, MAX_TICKS 180]; cubic-Hermite (FALLBACK_TICKS 48) only when no day fits
+  → runTakeover: rAF-driven, writes on a 0.5 px grid, snaps the last half pixel, then STILL
+```
+
+States: STILL → DRAGGING → DECELERATING → STILL (observation only; new finger input mid-glide
+cancels and re-enters DRAGGING). Dev HUD `?wheeldebug=1` (compiled out of prod): intent, rate,
+plan, state, PING per plan. Invariants: one plan per touch; always lands on a day; native
+scrolling fully suppressed and the ambient scrollend/debounce dock gated for the whole owned
+gesture. Why: `decisions-front.md` D-front-030…037; rules: `rules-front.md` §14.
+
 ## Boundaries
 
 - Backend access only via the typed API layer, base URL from env — no hard-coded

@@ -575,3 +575,17 @@ addition to, the QA-ledger lag caveat in §4, which is about *reporting* lag, no
 deepest reason single-writer-per-surface and the evidence-in-writing standards (§3)
 matter — they're not just about avoiding clobbers, they're what makes an agent's work
 recoverable at all if it dies mid-task with no warning.
+
+## 12. The live trackpad recorder — ADOPTED 2026-09-03
+
+The instrument for any scroll-feel work: a HEADED Chromium Mark flicks with his own trackpad;
+every gesture is saved with frames, wheel events, scrollLeft writes, state sequence and plan count.
+- Launch from the scratchpad (its cwd), front on :3200 with `?wheeldebug=1`:
+  `node docs/process/evidence/scroll-diagnosis-2026-09-03/live/rig/live-recorder.mjs [--out DIR]`
+  — password from `auth/.machinekey/mark-initial-password.txt`; log to `live/recorder.log`.
+- Timestamps are UTC. Per gesture: `gesture-NN-{frames.csv,wheel.csv,writes.json,summary.json,png}`
+  in `live/`; NN continues from the highest existing file, safe to relaunch. One stdout line per
+  gesture ends `plans=N` — anything but 1 per flick is a plan violation.
+- Restart the recorder to pick up rig code changes (it does not hot-reload).
+- An HMR page reload resets the strip to today and shows up as a bogus jump inside a gesture — discard that gesture, don't diagnose it.
+- Mark's verdict on the live window is recorded verbatim in the evidence folder's `PREDICTION.md`.

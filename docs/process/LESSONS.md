@@ -325,6 +325,13 @@ corroborated against direct evidence).
   instance of written-artifact handover (the judge's score/notes, not a resumed
   transcript) carrying the work forward.
 
+## INC-15 — 2026-09-03, scroll diagnosis: one-line lessons
+- **Synthetic-verified ≠ real.** The rig's clean fractional momentum tails and uniform 60 Hz timing passed 10/10 while Mark's trackpad (integer tails 7,7,6,6…; OS timestamps alternating 16/33 ms) stopped-and-readjusted, glided to nowhere, and crept for 5 s. Rule: replay Mark's recorded streams (`evidence/…/live/gesture-NN-wheel.csv`), don't invent them.
+- **The recorder turned feel-words into traces.** "It scrolls, stops, re-adjusts" became three separable defects only once every real flick had a frames/wheel/writes trace and a state sequence. Rule: instrument the app before arguing about feel.
+- **Mark's laptop lid closing kills workers mid-step** (600 s watchdog fired on a healthy run). Rule: lid stays open during a dispatch; a dead worker is resumed from written evidence, never re-run blind.
+- **Prediction before diagnosis, verdict before action.** `PREDICTION.md` was written before the first trace and scored against it; each of Mark's rulings was recorded verbatim before code moved. Rule: keep both orders.
+- **Checkpoint commit before an experiment** (`2096e1a`, `d741997`) so Mark can flick both builds and compare. Rule: a feel experiment starts from a committed baseline.
+
 ## Open watch items (not yet incidents — logged so they don't become one silently)
 - **`<scratchpad>/front.log` — sparse-file gap from an uncoordinated truncate, not an
   active disk-fill risk.** Real on-disk usage is low (~12-98KB, root volume has 21Gi

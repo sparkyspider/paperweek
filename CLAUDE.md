@@ -102,6 +102,13 @@ Matching `architecture-*.md` and `decisions-*.md` exist for every area above, pl
 [`architecture-scaling-up.md`](docs/architecture-scaling-up.md) — the single-instance-assumptions
 registry (no rules/decisions counterpart, same as in co-sy-v2).
 
+**Process docs — `docs/process/`** (how the multi-agent operation runs; not read on every build):
+[`STATE.md`](docs/process/STATE.md) — the resurrection point, rewritten at every session close;
+[`OPERATIONS.md`](docs/process/OPERATIONS.md) — roster, protocols, verification recipes, instruments;
+[`LESSONS.md`](docs/process/LESSONS.md) — incident log, symptom → cause → rule, append-only.
+Evidence for a diagnosis lives in `docs/process/evidence/<topic>-<date>/` (prediction, traces,
+plots, rigs, verbatim rulings); `video/` folders are gitignored, local only.
+
 If a rule blocks you and you believe it's wrong, don't break it silently — say so and
 leave the rule in place until it's deliberately changed.
 

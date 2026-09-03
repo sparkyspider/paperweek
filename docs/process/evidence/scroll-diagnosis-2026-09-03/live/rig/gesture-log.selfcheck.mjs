@@ -12,6 +12,15 @@ assert.deepEqual(parseConsoleLine('[gesture] STILL -> DRAGGING t=1384.2 x=16000.
 assert.deepEqual(parseConsoleLine('[plan] #1 t=2230.9 x=16812.5 v=1.490 target=17600.0 a=-0.0631'),
   { kind: 'plan', n: 1, t: 2230.9, x: 16812.5, v: 1.49, target: 17600, a: -0.0631 })
 assert.equal(parseConsoleLine('[plan] #2 t=9.0 x=- v=0.000 target=- a=-').x, null)
+// The CURRENT DayStrip.vue line (2026-09-03, verbatim from after3/chromium-fast-int-summary.json): T= and profile= appended.
+assert.deepEqual(parseConsoleLine('[plan] #1 t=3489.3 x=12432.0 v=36.984 target=13200.0 a=0.8905 T=41.5 profile=constant'),
+  { kind: 'plan', n: 1, t: 3489.3, x: 12432, v: 36.984, target: 13200, a: 0.8905, T: 41.5, profile: 'constant' })
+assert.deepEqual(parseConsoleLine('[plan] #3 t=12.5 x=- v=0.000 target=- a=- T=- profile=-'),
+  { kind: 'plan', n: 3, t: 12.5, x: null, v: 0, target: null, a: null, T: null, profile: null })
+// Tolerant of fields we do not know about yet, and of any order.
+assert.equal(parseConsoleLine('[plan] #4 t=1.0 x=5.0 v=2.000 target=400.0 a=0.0050 T=48.0 profile=hermite extra=1').profile, 'hermite')
+assert.equal(parseConsoleLine('[plan] #5 profile=constant T=100.0 t=2.0 v=8.000 x=0.0 target=400.0 a=0.0800').T, 100)
+assert.equal(parseConsoleLine('[plan] #6'), null)
 assert.equal(parseConsoleLine('[vite] connected.'), null)
 assert.equal(parseConsoleLine('[gesture] nonsense'), null)
 console.log('parse: ok')
@@ -84,6 +93,25 @@ const gwNone = glog.window(pageT0 + 17000, pageT0 + 18000)
 assert.equal(formatStateLine(gwNone), 'states: STILL (no transitions) plans=0')
 assert.equal(glog.window(pageT0 + 1500, pageT0 + 1600).initialState, 'DECELERATING')
 console.log('empty window:', formatStateLine(gwNone))
+
+// Current-format scenario: the state line carries T and profile per DECELERATING transition.
+const glog2 = new GestureLog()
+for (const l of [
+  '[gesture] STILL -> DRAGGING t=1401.0 x=18800.0 v=0.000 target=-',
+  '[plan] #1 t=1610.0 x=18990.0 v=6.090 target=19200.0 a=0.0883 T=100.0 profile=constant',
+  '[gesture] DRAGGING -> DECELERATING t=1610.0 x=18990.0 v=6.090 target=19200.0',
+  '[gesture] DECELERATING -> STILL t=3280.0 x=19200.0 v=6.090 target=-',
+  '[gesture] STILL -> DRAGGING t=3800.0 x=19200.0 v=0.000 target=-',
+  '[plan] #2 t=4100.0 x=19250.0 v=2.500 target=19600.0 a=0.0521 T=48.0 profile=hermite',
+  '[gesture] DRAGGING -> DECELERATING t=4100.0 x=19250.0 v=2.500 target=19600.0',
+  '[gesture] DECELERATING -> STILL t=4900.0 x=19600.0 v=2.500 target=-',
+]) glog2.push(l)
+const gw2 = glog2.window(1000, 6000)
+assert.equal(gw2.planCount, 2); assert.equal(gw2.planViolation, true)
+assert.deepEqual(gw2.plans[0], { n: 1, t: 610, x: 18990, v: 6.09, target: 19200, a: 0.0883, T: 100, profile: 'constant', recorderCount: 1 })
+const line2 = formatStateLine(gw2)
+console.log('current format:', line2)
+assert.equal(line2, 'states: STILL→DRAGGING@401 →DECELERATING@610(v=6.09,target=19200,T=100,constant) →STILL@2280 →DRAGGING@2800 →DECELERATING@3100(v=2.50,target=19600,T=48,hermite) →STILL@3900 plans=2 PLAN-VIOLATION')
 
 // trim() keeps stateAt() correct.
 glog.trim(15000) // absolute page time: drops everything before gesture C's DECELERATING@14500 except that one

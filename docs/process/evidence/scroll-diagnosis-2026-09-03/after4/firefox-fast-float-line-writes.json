@@ -1,0 +1,1011 @@
+{
+  "writes": [
+    {
+      "t": 52,
+      "from": 12000,
+      "to": 12004,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 92,
+      "from": 12004,
+      "to": 12010.117647058823,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 146,
+      "from": 12010,
+      "to": 12018.235294117647,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 192,
+      "from": 12018,
+      "to": 12028.35294117647,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 239,
+      "from": 12028,
+      "to": 12040.470588235294,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 279,
+      "from": 12040,
+      "to": 12054.588235294117,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 326,
+      "from": 12055,
+      "to": 12071.70588235294,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 366,
+      "from": 12072,
+      "to": 12090.823529411764,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 432,
+      "from": 12091,
+      "to": 12111.941176470587,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 482,
+      "from": 12112,
+      "to": 12135.058823529413,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 515,
+      "from": 12135,
+      "to": 12160.176470588236,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 554,
+      "from": 12160,
+      "to": 12187.29411764706,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 590,
+      "from": 12187,
+      "to": 12216.411764705883,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 639,
+      "from": 12216,
+      "to": 12247.529411764706,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 684,
+      "from": 12248,
+      "to": 12281.64705882353,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 733,
+      "from": 12282,
+      "to": 12317.764705882353,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 786,
+      "from": 12318,
+      "to": 12355.882352941177,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 828,
+      "from": 12356,
+      "to": 12396,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 885,
+      "from": 12396,
+      "to": 12432,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 946,
+      "from": 12432,
+      "to": 12464.4,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 997,
+      "from": 12464,
+      "to": 12493.16,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 1045,
+      "from": 12493,
+      "to": 12519.244,
+      "caller": "onWheel<callWithErrorHandling<callWithAsyncErrorHandling"
+    },
+    {
+      "t": 1175,
+      "from": 12519,
+      "to": 12638.5,
+      "caller": "step<FrameRequestCallback*runTakeover<handleFingerRelease"
+    },
+    {
+      "t": 1245,
+      "from": 12638,
+      "to": 12748.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*runTakeover"
+    },
+    {
+      "t": 1331,
+      "from": 12748,
+      "to": 12904,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1421,
+      "from": 12904,
+      "to": 13029.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1513,
+      "from": 13029,
+      "to": 13148.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1582,
+      "from": 13148,
+      "to": 13262,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1673,
+      "from": 13262,
+      "to": 13370,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1771,
+      "from": 13370,
+      "to": 13493,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1867,
+      "from": 13493,
+      "to": 13608,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 1963,
+      "from": 13608,
+      "to": 13697.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2065,
+      "from": 13697,
+      "to": 13814.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2127,
+      "from": 13814,
+      "to": 13861,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2131,
+      "from": 13861,
+      "to": 13876,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2169,
+      "from": 13876,
+      "to": 13906,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2209,
+      "from": 13906,
+      "to": 13934.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2243,
+      "from": 13934,
+      "to": 13962.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2282,
+      "from": 13962,
+      "to": 14003,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2298,
+      "from": 14003,
+      "to": 14016,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2336,
+      "from": 14016,
+      "to": 14041,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2371,
+      "from": 14041,
+      "to": 14065.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2407,
+      "from": 14065,
+      "to": 14089.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2443,
+      "from": 14089,
+      "to": 14112,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2479,
+      "from": 14112,
+      "to": 14133.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2516,
+      "from": 14133,
+      "to": 14165,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2567,
+      "from": 14165,
+      "to": 14194.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2581,
+      "from": 14194,
+      "to": 14203.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2617,
+      "from": 14203,
+      "to": 14221.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2654,
+      "from": 14221,
+      "to": 14239,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2690,
+      "from": 14239,
+      "to": 14255,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2727,
+      "from": 14255,
+      "to": 14270.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2766,
+      "from": 14270,
+      "to": 14292,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2802,
+      "from": 14292,
+      "to": 14305,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2836,
+      "from": 14305,
+      "to": 14317.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2848,
+      "from": 14317,
+      "to": 14323.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2899,
+      "from": 14323,
+      "to": 14339.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2933,
+      "from": 14339,
+      "to": 14349.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 2967,
+      "from": 14349,
+      "to": 14358.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3001,
+      "from": 14358,
+      "to": 14366.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3034,
+      "from": 14366,
+      "to": 14373.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3068,
+      "from": 14373,
+      "to": 14380,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3100,
+      "from": 14380,
+      "to": 14385.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3131,
+      "from": 14385,
+      "to": 14388,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3163,
+      "from": 14388,
+      "to": 14392,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3196,
+      "from": 14392,
+      "to": 14395.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3226,
+      "from": 14395,
+      "to": 14397.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3263,
+      "from": 14397,
+      "to": 14399.5,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    },
+    {
+      "t": 3266,
+      "from": 14399,
+      "to": 14400,
+      "caller": "step<FrameRequestCallback*step<FrameRequestCallback*step"
+    }
+  ],
+  "calls": [],
+  "events": [
+    {
+      "t": 91,
+      "type": "scroll",
+      "at": 12004
+    },
+    {
+      "t": 91,
+      "type": "scrollend",
+      "at": 12004
+    },
+    {
+      "t": 141,
+      "type": "scroll",
+      "at": 12010
+    },
+    {
+      "t": 141,
+      "type": "scrollend",
+      "at": 12010
+    },
+    {
+      "t": 236,
+      "type": "scroll",
+      "at": 12028
+    },
+    {
+      "t": 236,
+      "type": "scrollend",
+      "at": 12028
+    },
+    {
+      "t": 324,
+      "type": "scroll",
+      "at": 12055
+    },
+    {
+      "t": 324,
+      "type": "scrollend",
+      "at": 12055
+    },
+    {
+      "t": 419,
+      "type": "scroll",
+      "at": 12091
+    },
+    {
+      "t": 419,
+      "type": "scrollend",
+      "at": 12091
+    },
+    {
+      "t": 514,
+      "type": "scroll",
+      "at": 12135
+    },
+    {
+      "t": 514,
+      "type": "scrollend",
+      "at": 12135
+    },
+    {
+      "t": 587,
+      "type": "scroll",
+      "at": 12187
+    },
+    {
+      "t": 587,
+      "type": "scrollend",
+      "at": 12187
+    },
+    {
+      "t": 680,
+      "type": "scroll",
+      "at": 12248
+    },
+    {
+      "t": 680,
+      "type": "scrollend",
+      "at": 12248
+    },
+    {
+      "t": 784,
+      "type": "scroll",
+      "at": 12318
+    },
+    {
+      "t": 784,
+      "type": "scrollend",
+      "at": 12318
+    },
+    {
+      "t": 880,
+      "type": "scroll",
+      "at": 12396
+    },
+    {
+      "t": 880,
+      "type": "scrollend",
+      "at": 12396
+    },
+    {
+      "t": 992,
+      "type": "scroll",
+      "at": 12464
+    },
+    {
+      "t": 992,
+      "type": "scrollend",
+      "at": 12464
+    },
+    {
+      "t": 1087,
+      "type": "scroll",
+      "at": 12519
+    },
+    {
+      "t": 1087,
+      "type": "scrollend",
+      "at": 12519
+    },
+    {
+      "t": 1245,
+      "type": "scroll",
+      "at": 12638
+    },
+    {
+      "t": 1245,
+      "type": "scrollend",
+      "at": 12638
+    },
+    {
+      "t": 1331,
+      "type": "scroll",
+      "at": 12748
+    },
+    {
+      "t": 1331,
+      "type": "scrollend",
+      "at": 12748
+    },
+    {
+      "t": 1421,
+      "type": "scroll",
+      "at": 12904
+    },
+    {
+      "t": 1421,
+      "type": "scrollend",
+      "at": 12904
+    },
+    {
+      "t": 1513,
+      "type": "scroll",
+      "at": 13029
+    },
+    {
+      "t": 1513,
+      "type": "scrollend",
+      "at": 13029
+    },
+    {
+      "t": 1581,
+      "type": "scroll",
+      "at": 13148
+    },
+    {
+      "t": 1581,
+      "type": "scrollend",
+      "at": 13148
+    },
+    {
+      "t": 1673,
+      "type": "scroll",
+      "at": 13262
+    },
+    {
+      "t": 1673,
+      "type": "scrollend",
+      "at": 13262
+    },
+    {
+      "t": 1771,
+      "type": "scroll",
+      "at": 13370
+    },
+    {
+      "t": 1771,
+      "type": "scrollend",
+      "at": 13370
+    },
+    {
+      "t": 1867,
+      "type": "scroll",
+      "at": 13493
+    },
+    {
+      "t": 1867,
+      "type": "scrollend",
+      "at": 13493
+    },
+    {
+      "t": 1963,
+      "type": "scroll",
+      "at": 13608
+    },
+    {
+      "t": 1963,
+      "type": "scrollend",
+      "at": 13608
+    },
+    {
+      "t": 2065,
+      "type": "scroll",
+      "at": 13697
+    },
+    {
+      "t": 2065,
+      "type": "scrollend",
+      "at": 13697
+    },
+    {
+      "t": 2127,
+      "type": "scroll",
+      "at": 13814
+    },
+    {
+      "t": 2127,
+      "type": "scrollend",
+      "at": 13814
+    },
+    {
+      "t": 2131,
+      "type": "scroll",
+      "at": 13861
+    },
+    {
+      "t": 2131,
+      "type": "scrollend",
+      "at": 13861
+    },
+    {
+      "t": 2168,
+      "type": "scroll",
+      "at": 13876
+    },
+    {
+      "t": 2168,
+      "type": "scrollend",
+      "at": 13876
+    },
+    {
+      "t": 2208,
+      "type": "scroll",
+      "at": 13906
+    },
+    {
+      "t": 2208,
+      "type": "scrollend",
+      "at": 13906
+    },
+    {
+      "t": 2243,
+      "type": "scroll",
+      "at": 13934
+    },
+    {
+      "t": 2243,
+      "type": "scrollend",
+      "at": 13934
+    },
+    {
+      "t": 2282,
+      "type": "scroll",
+      "at": 13962
+    },
+    {
+      "t": 2282,
+      "type": "scrollend",
+      "at": 13962
+    },
+    {
+      "t": 2297,
+      "type": "scroll",
+      "at": 14003
+    },
+    {
+      "t": 2297,
+      "type": "scrollend",
+      "at": 14003
+    },
+    {
+      "t": 2335,
+      "type": "scroll",
+      "at": 14016
+    },
+    {
+      "t": 2335,
+      "type": "scrollend",
+      "at": 14016
+    },
+    {
+      "t": 2370,
+      "type": "scroll",
+      "at": 14041
+    },
+    {
+      "t": 2370,
+      "type": "scrollend",
+      "at": 14041
+    },
+    {
+      "t": 2406,
+      "type": "scroll",
+      "at": 14065
+    },
+    {
+      "t": 2406,
+      "type": "scrollend",
+      "at": 14065
+    },
+    {
+      "t": 2443,
+      "type": "scroll",
+      "at": 14089
+    },
+    {
+      "t": 2443,
+      "type": "scrollend",
+      "at": 14089
+    },
+    {
+      "t": 2479,
+      "type": "scroll",
+      "at": 14112
+    },
+    {
+      "t": 2479,
+      "type": "scrollend",
+      "at": 14112
+    },
+    {
+      "t": 2516,
+      "type": "scroll",
+      "at": 14133
+    },
+    {
+      "t": 2516,
+      "type": "scrollend",
+      "at": 14133
+    },
+    {
+      "t": 2567,
+      "type": "scroll",
+      "at": 14165
+    },
+    {
+      "t": 2567,
+      "type": "scrollend",
+      "at": 14165
+    },
+    {
+      "t": 2581,
+      "type": "scroll",
+      "at": 14194
+    },
+    {
+      "t": 2581,
+      "type": "scrollend",
+      "at": 14194
+    },
+    {
+      "t": 2617,
+      "type": "scroll",
+      "at": 14203
+    },
+    {
+      "t": 2617,
+      "type": "scrollend",
+      "at": 14203
+    },
+    {
+      "t": 2653,
+      "type": "scroll",
+      "at": 14221
+    },
+    {
+      "t": 2653,
+      "type": "scrollend",
+      "at": 14221
+    },
+    {
+      "t": 2690,
+      "type": "scroll",
+      "at": 14239
+    },
+    {
+      "t": 2690,
+      "type": "scrollend",
+      "at": 14239
+    },
+    {
+      "t": 2727,
+      "type": "scroll",
+      "at": 14255
+    },
+    {
+      "t": 2727,
+      "type": "scrollend",
+      "at": 14255
+    },
+    {
+      "t": 2766,
+      "type": "scroll",
+      "at": 14270
+    },
+    {
+      "t": 2766,
+      "type": "scrollend",
+      "at": 14270
+    },
+    {
+      "t": 2802,
+      "type": "scroll",
+      "at": 14292
+    },
+    {
+      "t": 2802,
+      "type": "scrollend",
+      "at": 14292
+    },
+    {
+      "t": 2836,
+      "type": "scroll",
+      "at": 14305
+    },
+    {
+      "t": 2836,
+      "type": "scrollend",
+      "at": 14305
+    },
+    {
+      "t": 2848,
+      "type": "scroll",
+      "at": 14317
+    },
+    {
+      "t": 2848,
+      "type": "scrollend",
+      "at": 14317
+    },
+    {
+      "t": 2898,
+      "type": "scroll",
+      "at": 14323
+    },
+    {
+      "t": 2898,
+      "type": "scrollend",
+      "at": 14323
+    },
+    {
+      "t": 2931,
+      "type": "scroll",
+      "at": 14339
+    },
+    {
+      "t": 2931,
+      "type": "scrollend",
+      "at": 14339
+    },
+    {
+      "t": 2966,
+      "type": "scroll",
+      "at": 14349
+    },
+    {
+      "t": 2966,
+      "type": "scrollend",
+      "at": 14349
+    },
+    {
+      "t": 3000,
+      "type": "scroll",
+      "at": 14358
+    },
+    {
+      "t": 3000,
+      "type": "scrollend",
+      "at": 14358
+    },
+    {
+      "t": 3033,
+      "type": "scroll",
+      "at": 14366
+    },
+    {
+      "t": 3033,
+      "type": "scrollend",
+      "at": 14366
+    },
+    {
+      "t": 3067,
+      "type": "scroll",
+      "at": 14373
+    },
+    {
+      "t": 3067,
+      "type": "scrollend",
+      "at": 14373
+    },
+    {
+      "t": 3099,
+      "type": "scroll",
+      "at": 14380
+    },
+    {
+      "t": 3099,
+      "type": "scrollend",
+      "at": 14380
+    },
+    {
+      "t": 3131,
+      "type": "scroll",
+      "at": 14385
+    },
+    {
+      "t": 3131,
+      "type": "scrollend",
+      "at": 14385
+    },
+    {
+      "t": 3162,
+      "type": "scroll",
+      "at": 14388
+    },
+    {
+      "t": 3162,
+      "type": "scrollend",
+      "at": 14388
+    },
+    {
+      "t": 3195,
+      "type": "scroll",
+      "at": 14392
+    },
+    {
+      "t": 3195,
+      "type": "scrollend",
+      "at": 14392
+    },
+    {
+      "t": 3226,
+      "type": "scroll",
+      "at": 14395
+    },
+    {
+      "t": 3226,
+      "type": "scrollend",
+      "at": 14395
+    },
+    {
+      "t": 3263,
+      "type": "scroll",
+      "at": 14397
+    },
+    {
+      "t": 3263,
+      "type": "scrollend",
+      "at": 14397
+    },
+    {
+      "t": 3265,
+      "type": "scroll",
+      "at": 14399
+    },
+    {
+      "t": 3265,
+      "type": "scrollend",
+      "at": 14399
+    },
+    {
+      "t": 3313,
+      "type": "scroll",
+      "at": 14400
+    },
+    {
+      "t": 3313,
+      "type": "scrollend",
+      "at": 14400
+    }
+  ]
+}

@@ -1,0 +1,515 @@
+# chromium-replay-gesture-10: per-frame scrollLeft delta (px). '>' right, '<' left. Caller: W=onWheel S=runTakeover.step T=scrollTo(smooth, native) A=withAnchor
+   18.2ms  12000    0.0                                                
+   33.1ms  12000    0.0                                                
+   50.3ms  12000    0.0                                                
+   85.6ms  11998   -2.0 ?HTMLDivElement.set <<                                         f:-2->idle
+   86.5ms  11998    0.0                                                
+   99.7ms  11998    0.0                                                
+  128.2ms  11942  -56.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-56/6->discrete
+  163.3ms  11916  -26.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<                 f:-26/2->finger
+  190.9ms  11892  -24.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<                   f:-24->finger
+  218.4ms  11860  -32.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<           f:-32->finger
+    246ms  11722 -138.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-138->finger
+  273.6ms  11654  -68.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-68->finger
+  301.2ms  11620  -34.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<         f:-34->finger
+  329.7ms  11620    0.0                                                f:-60->finger
+  331.2ms  11620    0.0 ?HTMLDivElement.set                                            
+  360.8ms  11593  -27.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<                f:-50->momentum
+  413.5ms  11560  -33.0     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<          f:-42->momentum
+  441.9ms  11527  -33.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<          i:-18->momentum
+  469.4ms  11430  -97.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-34->momentum
+    497ms  11366  -64.0     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-14->momentum
+  524.5ms  11303  -63.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-26->momentum
+  551.3ms  11272  -31.0     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<            f:-22->momentum
+  578.6ms  11211  -61.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-10->momentum
+  605.4ms  11150  -61.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-18->momentum
+  632.3ms  11121  -29.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<              f:-8->momentum
+  659.8ms  11061  -60.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-14->momentum
+  686.6ms  11003  -58.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-12->momentum
+  713.5ms  10974  -29.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<              f:-6->momentum
+  740.4ms  10918  -56.0     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-8->momentum
+    742ms  10890  -28.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<               f:-8->momentum
+  773.1ms  10834  -56.0     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-2->momentum
+  799.7ms  10807  -27.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<                f:-4->momentum
+  806.3ms  10780  -27.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<                f:-4->momentum
+  815.5ms  10726  -54.0     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< 
+  852.4ms  10701  -25.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<                  f:-2->momentum
+  879.2ms  10674  -27.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<                f:-4->momentum
+    880ms  10648  -26.0     <<<<<<<<<<<<<<<<<<<<<<<<<<                 
+  888.1ms  10622  -26.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<                 
+  899.8ms  10596  -26.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<                 
+  916.4ms  10571  -25.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<                  
+  933.2ms  10546  -25.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<                  
+  949.8ms  10521  -25.0     <<<<<<<<<<<<<<<<<<<<<<<<<                  
+  966.4ms  10497  -24.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<                   
+  983.1ms  10472  -25.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<                  
+  999.8ms  10448  -24.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<                   
+ 1015.5ms  10424  -24.0     <<<<<<<<<<<<<<<<<<<<<<<<                   
+ 1032.2ms  10402  -22.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<                     
+ 1049.7ms  10379  -23.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<                    
+ 1066.4ms  10354  -25.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<                  
+ 1083.2ms  10331  -23.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<                    
+ 1099.8ms  10308  -23.0     <<<<<<<<<<<<<<<<<<<<<<<                    
+ 1116.5ms  10286  -22.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<                     
+ 1133.1ms  10264  -22.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<                     
+ 1149.7ms  10241  -23.0     <<<<<<<<<<<<<<<<<<<<<<<                    
+ 1166.5ms  10220  -21.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<                      
+ 1183.1ms  10198  -22.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<                     
+ 1199.9ms  10177  -21.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<                      
+ 1216.5ms  10156  -21.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<                      
+ 1233.2ms  10135  -21.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<                      
+ 1249.7ms  10114  -21.0     <<<<<<<<<<<<<<<<<<<<<                      
+ 1266.5ms  10094  -20.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<                       
+ 1283.3ms  10073  -21.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<                      
+ 1299.8ms  10053  -20.0     <<<<<<<<<<<<<<<<<<<<                       
+ 1316.5ms  10034  -19.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<                        
+ 1333.1ms  10014  -20.0     <<<<<<<<<<<<<<<<<<<<                       
+ 1349.8ms   9995  -19.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<                        
+ 1366.5ms   9976  -19.0     <<<<<<<<<<<<<<<<<<<                        
+ 1383.2ms   9957  -19.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<                        
+ 1399.8ms   9938  -19.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<                        
+ 1416.5ms   9920  -18.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<                         
+ 1433.1ms   9902  -18.0     <<<<<<<<<<<<<<<<<<                         
+   1449ms   9884  -18.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<                         
+ 1466.4ms   9867  -17.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<                          
+ 1482.7ms   9849  -18.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<                         
+ 1499.8ms   9832  -17.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<                          
+ 1516.6ms   9815  -17.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<                          
+ 1533.2ms   9798  -17.0     <<<<<<<<<<<<<<<<<                          
+ 1549.9ms   9782  -16.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<                           
+ 1566.5ms   9765  -17.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<                          
+ 1583.3ms   9749  -16.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<                           
+ 1599.8ms   9734  -15.0     <<<<<<<<<<<<<<<                            
+ 1616.5ms   9718  -16.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<                           
+ 1633.2ms   9703  -15.0     <<<<<<<<<<<<<<<                            
+ 1649.8ms   9687  -16.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<                           
+ 1666.5ms   9673  -14.0 ?HTMLDivElement.set <<<<<<<<<<<<<<                             
+   1683ms   9658  -15.0     <<<<<<<<<<<<<<<                            
+ 1699.9ms   9644  -14.0 ?HTMLDivElement.set <<<<<<<<<<<<<<                             
+ 1716.5ms   9629  -15.0     <<<<<<<<<<<<<<<                            
+ 1733.2ms   9615  -14.0 ?HTMLDivElement.set <<<<<<<<<<<<<<                             
+ 1749.9ms   9602  -13.0     <<<<<<<<<<<<<                              
+ 1766.5ms   9588  -14.0 ?HTMLDivElement.set <<<<<<<<<<<<<<                             
+ 1783.2ms   9575  -13.0 ?HTMLDivElement.set <<<<<<<<<<<<<                              
+ 1799.8ms   9562  -13.0 ?HTMLDivElement.set <<<<<<<<<<<<<                              
+ 1816.5ms   9549  -13.0 ?HTMLDivElement.set <<<<<<<<<<<<<                              
+ 1833.1ms   9536  -13.0     <<<<<<<<<<<<<                              
+ 1849.9ms   9524  -12.0 ?HTMLDivElement.set <<<<<<<<<<<<                               
+ 1866.4ms   9512  -12.0     <<<<<<<<<<<<                               
+ 1883.2ms   9500  -12.0 ?HTMLDivElement.set <<<<<<<<<<<<                               
+ 1899.8ms   9488  -12.0 ?HTMLDivElement.set <<<<<<<<<<<<                               
+ 1916.5ms   9477  -11.0     <<<<<<<<<<<                                
+ 1933.2ms   9466  -11.0 ?HTMLDivElement.set <<<<<<<<<<<                                
+ 1949.8ms   9455  -11.0     <<<<<<<<<<<                                
+ 1966.4ms   9444  -11.0 ?HTMLDivElement.set <<<<<<<<<<<                                
+ 1983.1ms   9434  -10.0 ?HTMLDivElement.set <<<<<<<<<<                                 
+ 1999.8ms   9423  -11.0 ?HTMLDivElement.set <<<<<<<<<<<                                
+ 2016.5ms   9413  -10.0 ?HTMLDivElement.set <<<<<<<<<<                                 
+ 2033.1ms   9403  -10.0     <<<<<<<<<<                                 
+ 2049.7ms   9394   -9.0 ?HTMLDivElement.set <<<<<<<<<                                  
+ 2066.4ms   9385   -9.0 ?HTMLDivElement.set <<<<<<<<<                                  
+ 2083.1ms   9376   -9.0 ?HTMLDivElement.set <<<<<<<<<                                  
+ 2099.7ms   9367   -9.0 ?HTMLDivElement.set <<<<<<<<<                                  
+ 2116.5ms   9358   -9.0 ?HTMLDivElement.set <<<<<<<<<                                  
+ 2133.1ms   9350   -8.0     <<<<<<<<                                   
+ 2149.8ms   9341   -9.0 ?HTMLDivElement.set <<<<<<<<<                                  
+ 2166.4ms   9333   -8.0 ?HTMLDivElement.set <<<<<<<<                                   
+ 2182.7ms   9326   -7.0 ?HTMLDivElement.set <<<<<<<                                    
+ 2199.9ms   9318   -8.0 ?HTMLDivElement.set <<<<<<<<                                   
+ 2216.4ms   9311   -7.0 ?HTMLDivElement.set <<<<<<<                                    
+ 2233.2ms   9304   -7.0 ?HTMLDivElement.set <<<<<<<                                    
+ 2249.7ms   9297   -7.0     <<<<<<<                                    
+ 2266.5ms   9290   -7.0 ?HTMLDivElement.set <<<<<<<                                    
+ 2283.2ms   9284   -6.0     <<<<<<                                     
+ 2299.8ms   9278   -6.0 ?HTMLDivElement.set <<<<<<                                     
+ 2315.5ms   9272   -6.0 ?HTMLDivElement.set <<<<<<                                     
+ 2333.1ms   9267   -5.0     <<<<<                                      
+ 2349.8ms   9261   -6.0 ?HTMLDivElement.set <<<<<<                                     
+ 2366.5ms   9256   -5.0 ?HTMLDivElement.set <<<<<                                      
+ 2383.2ms   9251   -5.0 ?HTMLDivElement.set <<<<<                                      
+ 2399.8ms   9246   -5.0     <<<<<                                      
+ 2416.5ms   9242   -4.0 ?HTMLDivElement.set <<<<                                       
+ 2433.2ms   9237   -5.0 ?HTMLDivElement.set <<<<<                                      
+ 2449.8ms   9233   -4.0 ?HTMLDivElement.set <<<<                                       
+ 2466.5ms   9230   -3.0 ?HTMLDivElement.set <<<                                        
+ 2483.1ms   9226   -4.0     <<<<                                       
+ 2499.8ms   9223   -3.0 ?HTMLDivElement.set <<<                                        
+ 2515.8ms   9220   -3.0 ?HTMLDivElement.set <<<                                        
+ 2533.2ms   9217   -3.0 ?HTMLDivElement.set <<<                                        
+ 2549.8ms   9214   -3.0     <<<                                        
+ 2566.5ms   9212   -2.0 ?HTMLDivElement.set <<                                         
+ 2583.1ms   9210   -2.0 ?HTMLDivElement.set <<                                         
+ 2599.9ms   9208   -2.0     <<                                         
+ 2616.5ms   9206   -2.0 ?HTMLDivElement.set <<                                         
+ 2633.3ms   9204   -2.0 ?HTMLDivElement.set <<                                         
+ 2649.9ms   9203   -1.0 ?HTMLDivElement.set <                                          
+ 2666.5ms   9202   -1.0     <                                          
+ 2682.2ms   9201   -1.0 ?HTMLDivElement.set <                                          
+ 2708.2ms   9200   -1.0     <                                          
+ 2716.5ms   9200    0.0                                                
+ 2732.1ms   9200    0.0                                                
+ 2748.8ms   9200    0.0                                                
+ 2765.5ms   9200    0.0                                                
+ 2782.1ms   9200    0.0                                                
+ 2798.8ms   9200    0.0                                                
+ 2815.7ms   9200    0.0                                                
+ 2832.6ms   9200    0.0                                                
+ 2849.7ms   9200    0.0                                                
+ 2866.4ms   9200    0.0                                                
+ 2883.1ms   9200    0.0                                                
+ 2899.8ms   9200    0.0                                                
+ 2916.4ms   9200    0.0                                                
+ 2933.2ms   9200    0.0                                                
+ 2949.8ms   9200    0.0                                                
+ 2966.4ms   9200    0.0                                                
+ 2983.1ms   9200    0.0                                                
+ 2999.8ms   9200    0.0                                                
+ 3016.4ms   9200    0.0                                                
+ 3033.1ms   9200    0.0                                                
+ 3049.7ms   9200    0.0                                                
+ 3066.5ms   9200    0.0                                                
+ 3083.2ms   9200    0.0                                                
+ 3099.8ms   9200    0.0                                                
+ 3116.5ms   9200    0.0                                                
+ 3133.1ms   9200    0.0                                                
+ 3149.8ms   9200    0.0                                                
+ 3166.5ms   9200    0.0                                                
+ 3183.1ms   9200    0.0                                                
+ 3199.8ms   9200    0.0                                                
+ 3216.4ms   9200    0.0                                                
+ 3232.4ms   9200    0.0                                                
+ 3249.7ms   9200    0.0                                                
+ 3266.4ms   9200    0.0                                                
+ 3283.1ms   9200    0.0                                                
+ 3299.7ms   9200    0.0                                                
+ 3316.4ms   9200    0.0                                                
+ 3333.1ms   9200    0.0                                                
+ 3349.7ms   9200    0.0                                                
+ 3366.3ms   9200    0.0                                                
+   3383ms   9200    0.0                                                
+ 3399.7ms   9200    0.0                                                
+ 3416.4ms   9200    0.0                                                
+ 3433.1ms   9200    0.0                                                
+ 3449.7ms   9200    0.0                                                
+ 3492.1ms   9198   -2.0 ?HTMLDivElement.set <<                                         f:-2->momentum
+ 3493.2ms   9198    0.0                                                
+   3502ms   9198    0.0                                                
+ 3529.8ms   9150  -48.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-48/12->discrete
+ 3563.1ms   9098  -52.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-52/10->finger
+ 3563.8ms   9098    0.0                                                
+ 3592.2ms   9042  -56.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-56/6->finger
+ 3593.1ms   9042    0.0                                                
+ 3621.2ms   9014  -28.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<               f:-28/2->finger
+ 3647.6ms   8976  -38.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<     f:-38->finger
+   3674ms   8806 -170.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-170->finger
+ 3700.3ms   8766  -40.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<   f:-40->finger
+ 3701.8ms   8766    0.0                                                
+ 3727.7ms   8676  -90.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-90->finger
+ 3755.6ms   8598  -78.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-78->finger
+ 3756.3ms   8598    0.0                                                
+ 3786.1ms   8564  -34.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<         f:-34->finger
+ 3786.9ms   8564    0.0                                                
+ 3814.4ms   8564    0.0                                                f:-60->finger
+ 3841.4ms   8540  -24.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<                   f:-50->momentum
+ 3842.2ms   8502  -38.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<     
+ 3895.6ms   8465  -37.0     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<      f:-22->momentum
+ 3922.8ms   8428  -37.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<      f:-38->momentum
+ 3949.5ms   8356  -72.0     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-32->momentum
+ 3976.2ms   8282  -74.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-26->momentum
+ 4003.5ms   8210  -72.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< i:-12->momentum
+ 4029.8ms   8175  -35.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<        f:-20->momentum
+ 4056.9ms   8104  -71.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-10->momentum
+ 4083.8ms   8069  -35.0     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<        f:-16->momentum
+ 4110.3ms   8000  -69.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-14->momentum
+ 4136.5ms   7932  -68.0     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-6->momentum
+   4163ms   7898  -34.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<         f:-12->momentum
+   4189ms   7831  -67.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< f:-8->momentum
+ 4189.8ms   7797  -34.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<         f:-8->momentum
+ 4199.8ms   7731  -66.0     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< 
+ 4235.4ms   7699  -32.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<           i:-2->momentum
+ 4262.8ms   7666  -33.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<          f:-4->momentum
+ 4263.6ms   7634  -32.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<           f:-4->momentum
+ 4271.9ms   7602  -32.0     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<           
+ 4283.2ms   7570  -32.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<           
+ 4318.3ms   7539  -31.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<            f:-2->momentum
+ 4319.2ms   7508  -31.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<            f:-2->momentum
+ 4333.3ms   7477  -31.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<            
+   4350ms   7446  -31.0     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<            f:-2->momentum
+ 4366.5ms   7415  -31.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<            
+ 4383.2ms   7384  -31.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<            f:-2->momentum
+ 4399.9ms   7354  -30.0     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<             
+ 4416.5ms   7324  -30.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<             
+ 4433.2ms   7294  -30.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<             
+ 4449.9ms   7265  -29.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<              
+ 4466.6ms   7235  -30.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<             
+ 4483.2ms   7206  -29.0     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<              
+ 4499.9ms   7177  -29.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<              
+ 4516.6ms   7148  -29.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<              
+ 4533.2ms   7120  -28.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<               
+ 4549.9ms   7091  -29.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<<              
+ 4566.5ms   7063  -28.0     <<<<<<<<<<<<<<<<<<<<<<<<<<<<               
+ 4583.2ms   7035  -28.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<               
+ 4599.9ms   7007  -28.0     <<<<<<<<<<<<<<<<<<<<<<<<<<<<               
+ 4616.5ms   6980  -27.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<                
+ 4633.2ms   6953  -27.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<                
+ 4649.9ms   6925  -28.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<<               
+ 4666.5ms   6899  -26.0     <<<<<<<<<<<<<<<<<<<<<<<<<<                 
+ 4683.2ms   6872  -27.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<                
+ 4699.9ms   6845  -27.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<<                
+ 4716.6ms   6819  -26.0     <<<<<<<<<<<<<<<<<<<<<<<<<<                 
+ 4733.1ms   6793  -26.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<                 
+ 4748.8ms   6767  -26.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<<                 
+ 4766.5ms   6743  -24.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<                   
+ 4783.2ms   6716  -27.0     <<<<<<<<<<<<<<<<<<<<<<<<<<<                
+ 4799.9ms   6691  -25.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<                  
+ 4816.6ms   6666  -25.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<                  
+ 4833.3ms   6641  -25.0     <<<<<<<<<<<<<<<<<<<<<<<<<                  
+ 4849.9ms   6617  -24.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<                   
+ 4866.5ms   6592  -25.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<<                  
+ 4883.2ms   6568  -24.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<                   
+   4900ms   6544  -24.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<                   
+ 4916.6ms   6521  -23.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<                    
+ 4933.3ms   6497  -24.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<<                   
+ 4949.8ms   6474  -23.0     <<<<<<<<<<<<<<<<<<<<<<<                    
+ 4966.5ms   6451  -23.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<                    
+ 4983.2ms   6428  -23.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<                    
+ 4999.9ms   6405  -23.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<                    
+ 5016.5ms   6383  -22.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<                     
+ 5033.3ms   6360  -23.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<<                    
+ 5049.9ms   6338  -22.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<                     
+ 5066.6ms   6316  -22.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<                     
+ 5082.8ms   6295  -21.0     <<<<<<<<<<<<<<<<<<<<<                      
+ 5099.8ms   6274  -21.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<                      
+ 5116.6ms   6252  -22.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<<                     
+ 5133.2ms   6231  -21.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<                      
+ 5149.8ms   6211  -20.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<                       
+ 5166.6ms   6190  -21.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<<                      
+ 5183.2ms   6170  -20.0     <<<<<<<<<<<<<<<<<<<<                       
+ 5199.9ms   6150  -20.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<                       
+ 5216.5ms   6130  -20.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<                       
+ 5233.2ms   6110  -20.0     <<<<<<<<<<<<<<<<<<<<                       
+ 5249.9ms   6090  -20.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<<                       
+ 5266.5ms   6071  -19.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<                        
+ 5283.2ms   6052  -19.0     <<<<<<<<<<<<<<<<<<<                        
+ 5299.9ms   6033  -19.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<<                        
+ 5316.6ms   6015  -18.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<                         
+ 5333.2ms   5996  -19.0     <<<<<<<<<<<<<<<<<<<                        
+ 5349.8ms   5978  -18.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<                         
+ 5366.5ms   5960  -18.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<                         
+ 5382.3ms   5942  -18.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<                         
+ 5399.9ms   5925  -17.0     <<<<<<<<<<<<<<<<<                          
+ 5416.6ms   5907  -18.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<<                         
+ 5433.2ms   5890  -17.0     <<<<<<<<<<<<<<<<<                          
+ 5449.9ms   5873  -17.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<                          
+ 5466.5ms   5856  -17.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<<                          
+ 5483.3ms   5840  -16.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<                           
+ 5499.8ms   5823  -17.0     <<<<<<<<<<<<<<<<<                          
+ 5516.5ms   5807  -16.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<                           
+ 5533.2ms   5791  -16.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<                           
+ 5549.9ms   5776  -15.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<                            
+ 5566.6ms   5760  -16.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<<                           
+ 5583.2ms   5745  -15.0     <<<<<<<<<<<<<<<                            
+ 5599.9ms   5730  -15.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<                            
+ 5616.5ms   5715  -15.0 ?HTMLDivElement.set <<<<<<<<<<<<<<<                            
+ 5633.2ms   5700  -15.0     <<<<<<<<<<<<<<<                            
+ 5649.8ms   5686  -14.0 ?HTMLDivElement.set <<<<<<<<<<<<<<                             
+ 5666.5ms   5672  -14.0 ?HTMLDivElement.set <<<<<<<<<<<<<<                             
+ 5683.3ms   5658  -14.0 ?HTMLDivElement.set <<<<<<<<<<<<<<                             
+   5700ms   5644  -14.0 ?HTMLDivElement.set <<<<<<<<<<<<<<                             
+ 5716.6ms   5630  -14.0     <<<<<<<<<<<<<<                             
+ 5733.2ms   5617  -13.0 ?HTMLDivElement.set <<<<<<<<<<<<<                              
+ 5749.9ms   5604  -13.0 ?HTMLDivElement.set <<<<<<<<<<<<<                              
+   5766ms   5591  -13.0 ?HTMLDivElement.set <<<<<<<<<<<<<                              
+ 5783.2ms   5578  -13.0 ?HTMLDivElement.set <<<<<<<<<<<<<                              
+ 5799.9ms   5565  -13.0 ?HTMLDivElement.set <<<<<<<<<<<<<                              
+ 5816.5ms   5553  -12.0     <<<<<<<<<<<<                               
+ 5833.2ms   5541  -12.0 ?HTMLDivElement.set <<<<<<<<<<<<                               
+ 5849.9ms   5529  -12.0 ?HTMLDivElement.set <<<<<<<<<<<<                               
+ 5866.5ms   5517  -12.0     <<<<<<<<<<<<                               
+ 5883.2ms   5506  -11.0 ?HTMLDivElement.set <<<<<<<<<<<                                
+ 5899.9ms   5495  -11.0 ?HTMLDivElement.set <<<<<<<<<<<                                
+ 5916.5ms   5484  -11.0     <<<<<<<<<<<                                
+ 5933.2ms   5473  -11.0 ?HTMLDivElement.set <<<<<<<<<<<                                
+ 5949.8ms   5462  -11.0 ?HTMLDivElement.set <<<<<<<<<<<                                
+ 5966.6ms   5452  -10.0 ?HTMLDivElement.set <<<<<<<<<<                                 
+ 5983.2ms   5442  -10.0 ?HTMLDivElement.set <<<<<<<<<<                                 
+   6000ms   5432  -10.0 ?HTMLDivElement.set <<<<<<<<<<                                 
+ 6016.5ms   5422  -10.0 ?HTMLDivElement.set <<<<<<<<<<                                 
+ 6033.2ms   5412  -10.0 ?HTMLDivElement.set <<<<<<<<<<                                 
+ 6049.9ms   5403   -9.0 ?HTMLDivElement.set <<<<<<<<<                                  
+ 6066.5ms   5394   -9.0     <<<<<<<<<                                  
+ 6083.2ms   5385   -9.0 ?HTMLDivElement.set <<<<<<<<<                                  
+ 6099.9ms   5376   -9.0 ?HTMLDivElement.set <<<<<<<<<                                  
+ 6116.6ms   5368   -8.0     <<<<<<<<                                   
+ 6133.2ms   5359   -9.0 ?HTMLDivElement.set <<<<<<<<<                                  
+ 6149.8ms   5351   -8.0     <<<<<<<<                                   
+ 6166.6ms   5343   -8.0 ?HTMLDivElement.set <<<<<<<<                                   
+ 6183.3ms   5336   -7.0 ?HTMLDivElement.set <<<<<<<                                    
+   6200ms   5328   -8.0 ?HTMLDivElement.set <<<<<<<<                                   
+ 6216.5ms   5321   -7.0     <<<<<<<                                    
+ 6233.2ms   5314   -7.0 ?HTMLDivElement.set <<<<<<<                                    
+ 6249.9ms   5307   -7.0 ?HTMLDivElement.set <<<<<<<                                    
+ 6266.5ms   5300   -7.0 ?HTMLDivElement.set <<<<<<<                                    
+ 6283.3ms   5294   -6.0 ?HTMLDivElement.set <<<<<<                                     
+ 6299.9ms   5288   -6.0 ?HTMLDivElement.set <<<<<<                                     
+ 6316.6ms   5282   -6.0     <<<<<<                                     
+ 6333.2ms   5276   -6.0 ?HTMLDivElement.set <<<<<<                                     
+ 6349.8ms   5271   -5.0 ?HTMLDivElement.set <<<<<                                      
+ 6366.5ms   5265   -6.0 ?HTMLDivElement.set <<<<<<                                     
+ 6383.2ms   5260   -5.0 ?HTMLDivElement.set <<<<<                                      
+ 6399.9ms   5255   -5.0 ?HTMLDivElement.set <<<<<                                      
+ 6416.6ms   5250   -5.0 ?HTMLDivElement.set <<<<<                                      
+ 6433.3ms   5246   -4.0 ?HTMLDivElement.set <<<<                                       
+ 6449.9ms   5242   -4.0 ?HTMLDivElement.set <<<<                                       
+ 6466.6ms   5238   -4.0 ?HTMLDivElement.set <<<<                                       
+   6483ms   5234   -4.0     <<<<                                       
+ 6499.8ms   5230   -4.0 ?HTMLDivElement.set <<<<                                       
+ 6516.7ms   5227   -3.0 ?HTMLDivElement.set <<<                                        
+ 6533.2ms   5223   -4.0 ?HTMLDivElement.set <<<<                                       
+ 6549.9ms   5220   -3.0     <<<                                        
+ 6566.6ms   5218   -2.0 ?HTMLDivElement.set <<                                         
+ 6583.2ms   5215   -3.0 ?HTMLDivElement.set <<<                                        
+ 6599.9ms   5213   -2.0 ?HTMLDivElement.set <<                                         
+ 6616.6ms   5210   -3.0 ?HTMLDivElement.set <<<                                        
+ 6633.2ms   5208   -2.0     <<                                         
+ 6649.8ms   5207   -1.0 ?HTMLDivElement.set <                                          
+ 6666.6ms   5205   -2.0 ?HTMLDivElement.set <<                                         
+ 6683.2ms   5204   -1.0     <                                          
+ 6699.9ms   5203   -1.0 ?HTMLDivElement.set <                                          
+ 6716.6ms   5202   -1.0     <                                          
+ 6733.3ms   5201   -1.0 ?HTMLDivElement.set <                                          
+ 6759.3ms   5200   -1.0     <                                          
+ 6765.8ms   5200    0.0                                                
+ 6783.1ms   5200    0.0                                                
+ 6799.8ms   5200    0.0                                                
+ 6816.5ms   5200    0.0                                                
+ 6833.1ms   5200    0.0                                                
+ 6849.8ms   5200    0.0                                                
+ 6866.5ms   5200    0.0                                                
+ 6883.1ms   5200    0.0                                                
+ 6899.8ms   5200    0.0                                                
+ 6916.4ms   5200    0.0                                                
+ 6933.1ms   5200    0.0                                                
+ 6949.9ms   5200    0.0                                                
+ 6966.7ms   5200    0.0                                                
+ 7028.5ms   5202    2.0 ?HTMLDivElement.set >>                                         f:2->momentum
+ 7061.1ms   5228   26.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>                 f:26/-4->discrete
+ 7088.7ms   5272   44.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> f:44/-6->finger
+ 7116.6ms   5290   18.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>                         f:18/-4->finger
+   7144ms   5310   20.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>                       f:20/-4->finger
+ 7170.9ms   5334   24.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>                   f:24->finger
+ 7197.8ms   5438  104.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> f:104->finger
+ 7224.5ms   5490   52.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> f:52->finger
+ 7251.7ms   5516   26.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>                 f:26->finger
+ 7278.2ms   5564   48.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> f:48->finger
+ 7305.8ms   5564    0.0                                                f:38->finger
+ 7332.9ms   5564    0.0 ?HTMLDivElement.set                                            f:18->momentum
+ 7385.2ms   5594   30.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>             f:30->momentum
+ 7412.2ms   5642   48.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> f:26->momentum
+   7439ms   5712   70.0     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> f:22->momentum
+ 7466.2ms   5734   22.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>                     i:10->momentum
+   7494ms   5779   45.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> f:18->momentum
+ 7521.8ms   5801   22.0     >>>>>>>>>>>>>>>>>>>>>>                     f:16->momentum
+ 7549.1ms   5845   44.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> f:12->momentum
+ 7550.1ms   5887   42.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> i:12->momentum
+ 7550.1ms   5908   21.0     >>>>>>>>>>>>>>>>>>>>>                      
+ 7587.8ms   5928   20.0     >>>>>>>>>>>>>>>>>>>>                       i:4->momentum
+ 7615.9ms   5949   21.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>>                      f:8->momentum
+ 7642.7ms   5989   40.0     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>   f:6->momentum
+ 7643.4ms   6008   19.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>                        
+ 7671.3ms   6028   20.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>>                       f:2->momentum
+ 7672.1ms   6047   19.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>                        
+ 7701.8ms   6066   19.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>                        f:4->momentum
+ 7703.3ms   6084   18.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>                         f:4->momentum
+ 7716.7ms   6103   19.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>>                        
+ 7760.3ms   6121   18.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>                         f:2->momentum
+ 7761.2ms   6139   18.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>                         f:2->momentum
+   7774ms   6157   18.0     >>>>>>>>>>>>>>>>>>                         
+ 7783.3ms   6174   17.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>                          
+   7800ms   6192   18.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>>                         
+ 7816.5ms   6209   17.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>>                          
+ 7833.3ms   6225   16.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>                           
+ 7849.9ms   6242   17.0     >>>>>>>>>>>>>>>>>                          
+ 7866.5ms   6258   16.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>                           
+ 7883.3ms   6274   16.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>                           
+ 7899.9ms   6290   16.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>                           
+ 7916.5ms   6306   16.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>>                           
+ 7933.2ms   6321   15.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>                            
+ 7949.9ms   6336   15.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>                            
+ 7966.5ms   6351   15.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>                            
+ 7983.2ms   6365   14.0 ?HTMLDivElement.set >>>>>>>>>>>>>>                             
+ 7999.9ms   6380   15.0 ?HTMLDivElement.set >>>>>>>>>>>>>>>                            
+ 8016.6ms   6394   14.0 ?HTMLDivElement.set >>>>>>>>>>>>>>                             
+ 8033.3ms   6408   14.0 ?HTMLDivElement.set >>>>>>>>>>>>>>                             
+   8050ms   6421   13.0 ?HTMLDivElement.set >>>>>>>>>>>>>                              
+ 8066.6ms   6435   14.0 ?HTMLDivElement.set >>>>>>>>>>>>>>                             
+ 8083.4ms   6448   13.0 ?HTMLDivElement.set >>>>>>>>>>>>>                              
+ 8099.9ms   6461   13.0     >>>>>>>>>>>>>                              
+ 8116.6ms   6473   12.0 ?HTMLDivElement.set >>>>>>>>>>>>                               
+ 8133.2ms   6486   13.0 ?HTMLDivElement.set >>>>>>>>>>>>>                              
+ 8149.9ms   6498   12.0 ?HTMLDivElement.set >>>>>>>>>>>>                               
+ 8166.6ms   6510   12.0 ?HTMLDivElement.set >>>>>>>>>>>>                               
+ 8183.3ms   6522   12.0 ?HTMLDivElement.set >>>>>>>>>>>>                               
+ 8199.9ms   6533   11.0     >>>>>>>>>>>                                
+ 8216.6ms   6544   11.0 ?HTMLDivElement.set >>>>>>>>>>>                                
+ 8233.3ms   6555   11.0 ?HTMLDivElement.set >>>>>>>>>>>                                
+ 8249.9ms   6566   11.0     >>>>>>>>>>>                                
+ 8266.5ms   6577   11.0 ?HTMLDivElement.set >>>>>>>>>>>                                
+ 8283.2ms   6587   10.0 ?HTMLDivElement.set >>>>>>>>>>                                 
+ 8299.9ms   6597   10.0 ?HTMLDivElement.set >>>>>>>>>>                                 
+ 8316.7ms   6607   10.0 ?HTMLDivElement.set >>>>>>>>>>                                 
+ 8333.3ms   6616    9.0 ?HTMLDivElement.set >>>>>>>>>                                  
+ 8349.9ms   6626   10.0     >>>>>>>>>>                                 
+ 8366.6ms   6635    9.0 ?HTMLDivElement.set >>>>>>>>>                                  
+   8383ms   6643    8.0     >>>>>>>>                                   
+ 8399.9ms   6652    9.0 ?HTMLDivElement.set >>>>>>>>>                                  
+ 8416.6ms   6660    8.0 ?HTMLDivElement.set >>>>>>>>                                   
+ 8433.2ms   6668    8.0     >>>>>>>>                                   
+ 8449.8ms   6676    8.0 ?HTMLDivElement.set >>>>>>>>                                   
+ 8466.5ms   6684    8.0 ?HTMLDivElement.set >>>>>>>>                                   
+ 8483.2ms   6691    7.0     >>>>>>>                                    
+ 8499.9ms   6698    7.0 ?HTMLDivElement.set >>>>>>>                                    
+ 8516.7ms   6705    7.0 ?HTMLDivElement.set >>>>>>>                                    
+ 8533.3ms   6712    7.0 ?HTMLDivElement.set >>>>>>>                                    
+ 8549.9ms   6718    6.0     >>>>>>                                     
+ 8566.6ms   6724    6.0 ?HTMLDivElement.set >>>>>>                                     
+ 8583.2ms   6730    6.0 ?HTMLDivElement.set >>>>>>                                     
+   8600ms   6736    6.0 ?HTMLDivElement.set >>>>>>                                     
+ 8616.6ms   6741    5.0 ?HTMLDivElement.set >>>>>                                      
+ 8633.3ms   6747    6.0     >>>>>>                                     
+   8650ms   6752    5.0 ?HTMLDivElement.set >>>>>                                      
+ 8666.6ms   6756    4.0 ?HTMLDivElement.set >>>>                                       
+ 8683.2ms   6761    5.0     >>>>>                                      
+ 8699.9ms   6765    4.0 ?HTMLDivElement.set >>>>                                       
+ 8716.7ms   6769    4.0 ?HTMLDivElement.set >>>>                                       
+ 8733.3ms   6773    4.0 ?HTMLDivElement.set >>>>                                       
+ 8749.9ms   6776    3.0     >>>                                        
+ 8766.6ms   6780    4.0 ?HTMLDivElement.set >>>>                                       
+ 8783.2ms   6783    3.0     >>>                                        
+   8800ms   6785    2.0 ?HTMLDivElement.set >>                                         
+ 8816.5ms   6788    3.0     >>>                                        
+ 8833.4ms   6790    2.0 ?HTMLDivElement.set >>                                         
+ 8849.9ms   6792    2.0     >>                                         
+ 8866.6ms   6794    2.0 ?HTMLDivElement.set >>                                         
+ 8883.2ms   6796    2.0     >>                                         
+ 8899.9ms   6797    1.0 ?HTMLDivElement.set >                                          
+ 8916.7ms   6798    1.0 ?HTMLDivElement.set >                                          
+ 8933.3ms   6799    1.0 ?HTMLDivElement.set >                                          
+ 8949.9ms   6800    1.0 ?HTMLDivElement.set >                                          
+ 8977.5ms   6800    0.0                                                
+ 8984.5ms   6800    0.0                                                
+ 8999.8ms   6800    0.0                                                
+ 9016.6ms   6800    0.0                                                
+ 9033.2ms   6800    0.0                                                
+ 9049.9ms   6800    0.0                                                
+   9067ms   6800    0.0                                                
+ 9083.2ms   6800    0.0                                                
+ 9100.4ms   6800    0.0                                                
+ 9116.5ms   6800    0.0                                                
+ 9133.2ms   6800    0.0                                                
+ 9149.9ms   6800    0.0                                                
+ 9166.5ms   6800    0.0                                                
+ 9183.2ms   6800    0.0                                                
+ 9199.9ms   6800    0.0                                                
+ 9216.6ms   6800    0.0                                                
+ 9233.3ms   6800    0.0                                                

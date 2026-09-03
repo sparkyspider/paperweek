@@ -42,3 +42,16 @@ state sequence and flags any gesture that plans twice.
 most glides run on the bounded fallback curve, not on pure constant deceleration. Raising the cap
 would put more flicks on pure physics at the cost of longer glides. Mark's feel decides.
 Recorder plan-count parser needs updating to the new `[plan]` line format (instrument only).
+
+## The 3-second rule — 2026-09-03, later the same afternoon
+
+Mark, verbatim: *"If it looks like it'll get there in less than 3 seconds, let it get there by
+itself. If not, do what you do."* Applied: `MAX_TICKS = 180` is the pure-physics ceiling;
+`FALLBACK_TICKS = 48` is the Hermite's own duration, used only past the ceiling. Rig `after4/`:
+10/10 exact landings, no Hermite anywhere, fast flicks 9 days in 2.8 s, slow 0.77 s.
+
+Mark flicked the live window on this build and closed it. Verdict, verbatim:
+> "Everything is perfect." — "That's why I closed it. Isn't that a lovely thing to close."
+
+No per-gesture traces were saved for those flicks (the window closed before the recorder
+flushed); the verdict stands on Mark's hand, the rig stands on `after4/`.

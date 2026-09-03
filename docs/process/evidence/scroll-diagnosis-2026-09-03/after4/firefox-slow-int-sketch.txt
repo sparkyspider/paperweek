@@ -1,0 +1,49 @@
+# firefox-slow-int: per-frame scrollLeft delta (px). '>' right, '<' left. Caller: W=onWheel S=runTakeover.step T=scrollTo(smooth, native) A=withAnchor
+     20ms  12000    0.0                                                
+     37ms  12000    0.0                                                
+     72ms  12002    2.0 W   >>                                         f:2->idle
+     97ms  12005    3.0 W   >>>                                        f:3->discrete
+    139ms  12012    7.0 W   >>>>>>>                                    f:3->finger f:4->finger
+    183ms  12021    9.0 W   >>>>>>>>>                                  f:4->finger f:5->finger
+    240ms  12040   19.0 W   >>>>>>>>>>>>>>>>>>>                        f:6->finger f:6->finger f:7->finger
+    299ms  12063   23.0 W   >>>>>>>>>>>>>>>>>>>>>>>                    f:7->finger f:8->finger f:8->finger
+    376ms  12103   40.0 W   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>   f:9->finger f:10->finger f:10->finger f:11->finger
+    454ms  12147   44.0 W   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> f:11->finger f:12->finger i:11->finger i:10->finger
+    540ms  12147    0.0 S                                              i:10->finger i:9->momentum i:8->momentum i:8->momentum
+    567ms  12195   48.0 S   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> i:7->momentum i:7->momentum
+    595ms  12204    9.0     >>>>>>>>>                                  i:6->momentum i:6->momentum
+    651ms  12222   18.0 S   >>>>>>>>>>>>>>>>>>                         i:5->momentum i:5->momentum i:5->momentum i:4->momentum
+    653ms  12248   26.0     >>>>>>>>>>>>>>>>>>>>>>>>>>                 i:4->momentum
+    724ms  12256    8.0 S   >>>>>>>>                                   i:4->momentum i:3->momentum i:3->momentum i:3->momentum i:3->momentum i:3->momentum i:2->momentum
+    737ms  12286   30.0 S   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>             i:2->momentum i:2->momentum
+    775ms  12293    7.0 S   >>>>>>>                                    i:2->momentum i:2->momentum
+    818ms  12306   13.0 S   >>>>>>>>>>>>>                              i:2->momentum i:2->momentum
+    848ms  12319   13.0 S   >>>>>>>>>>>>>                              i:1->momentum i:1->momentum
+    889ms  12330   11.0 S   >>>>>>>>>>>                                i:1->momentum i:1->momentum i:1->momentum
+    903ms  12346   16.0     >>>>>>>>>>>>>>>>                           i:1->momentum
+    940ms  12351    5.0 S   >>>>>                                      
+    975ms  12360    9.0     >>>>>>>>>                                  
+   1012ms  12368    8.0 S   >>>>>>>>                                   
+   1050ms  12375    7.0 S   >>>>>>>                                    
+   1086ms  12381    6.0 S   >>>>>>                                     
+   1122ms  12386    5.0 S   >>>>>                                      
+   1174ms  12393    7.0 S   >>>>>>>                                    
+   1187ms  12397    4.0 S   >>>>                                       
+   1225ms  12398    1.0 S   >                                          
+   1263ms  12400    2.0     >>                                         
+   1308ms  12400    0.0                                                
+   1320ms  12400    0.0                                                
+   1337ms  12400    0.0                                                
+   1353ms  12400    0.0                                                
+   1370ms  12400    0.0                                                
+   1386ms  12400    0.0                                                
+   1404ms  12400    0.0                                                
+   1420ms  12400    0.0                                                
+   1437ms  12400    0.0                                                
+   1454ms  12400    0.0                                                
+   1470ms  12400    0.0                                                
+   1487ms  12400    0.0                                                
+   1503ms  12400    0.0                                                
+   1520ms  12400    0.0                                                
+   1537ms  12400    0.0                                                
+   1554ms  12400    0.0                                                

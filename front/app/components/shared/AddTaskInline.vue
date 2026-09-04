@@ -20,11 +20,13 @@ import { taskIdFromDrag } from '~/utils/dnd'
 import { forceHomeEnd } from '~/utils/textInputKeys'
 import { useDragTaught } from '~/composables/useDragTaught'
 import { useDragOverTracking } from '~/composables/useDragOverTracking'
+import { useLastUsedTheme } from '~/composables/useLastUsedTheme'
 
 const props = defineProps<{ themeId: string; color: string; themeName?: string; placeholder?: string }>()
 
 const tasks = useTasksStore()
 const dragTaught = useDragTaught()
+const lastUsedTheme = useLastUsedTheme()
 const root = ref<HTMLElement | null>(null)
 const { current: dragOverIndex, markOver: onRowDragOver, clear: clearDragOverIndex } = useDragOverTracking<number>()
 
@@ -60,12 +62,18 @@ async function handleEnter(draft: DraftLine) {
   await onClickEmpty(nextIndex)
 }
 
+/** A drop here always re-themes the dropped task to `props.themeId` (see `dropTaskAt` /
+ *  `defaultThemeId` above) — a native HTML5 drag never fires `pointerdown`/`focusin` on the
+ *  DESTINATION card (only the source gets those, on grab), so ThemeCard's root listener can't
+ *  see this. Set the destination as last-used explicitly: "the theme a task just landed in
+ *  becomes current" applies here same as a re-theme via the picker. */
 function onDropAt(e: DragEvent, index: number) {
   clearDragOverIndex()
   const id = taskIdFromDrag(e)
   if (!id) return
   dragTaught.markDragged()
   dropTaskAt(id, index)
+  lastUsedTheme.set(props.themeId)
 }
 
 /** Instant clear on `dragend` — a fast path on top of useDragOverTracking's own ~150ms

@@ -12,6 +12,7 @@ import { useToast } from '~/composables/useToast'
 import { useThemeVisibility } from '~/composables/useThemeVisibility'
 import { useDragTaught } from '~/composables/useDragTaught'
 import { useDragOverTracking } from '~/composables/useDragOverTracking'
+import { useLastUsedTheme } from '~/composables/useLastUsedTheme'
 import { taskIdFromDrag } from '~/utils/dnd'
 
 const props = defineProps<{ theme: Theme }>()
@@ -20,7 +21,20 @@ const themes = useThemesStore()
 const tasks = useTasksStore()
 const visibility = useThemeVisibility()
 const dragTaught = useDragTaught()
+const lastUsedTheme = useLastUsedTheme()
 const { show } = useToast()
+
+/** "Last theme touched" (task 16 redesign, extended): any interaction inside this card marks it
+ *  current — click the header, write/edit a backlog line, start dragging one of its tasks out.
+ *  A single capturing listener on the card root covers all of that cheaply (set() already no-ops
+ *  when unchanged) without per-row handlers; capture phase so it fires even if a descendant
+ *  (e.g. a `@click.stop` input) stops bubbling. Native HTML5 drag start still fires `pointerdown`
+ *  on the SOURCE first, so grabbing a task to drag it out counts as touching this card too — but
+ *  a drop lands on the DESTINATION card, which never gets a pointerdown/focusin for it; that path
+ *  is handled explicitly in `onDropEnd` below and in AddTaskInline's own drop handler. */
+function touch(): void {
+  lastUsedTheme.set(props.theme.id)
+}
 
 const editing = ref(false)
 const draft = ref(props.theme.name)
@@ -88,6 +102,7 @@ function onDropEnd(e: DragEvent) {
   const list = tasks.backlogFor(props.theme.id)
   const nextIndex = list.length ? Math.max(...list.map(t => t.position)) + 1 : 0
   tasks.patchTask(id, { themeId: props.theme.id, scheduledOn: null, daypart: null, position: nextIndex })
+  lastUsedTheme.set(props.theme.id)
 }
 </script>
 
@@ -95,6 +110,8 @@ function onDropEnd(e: DragEvent) {
   <div
     class="paper-card paper-card--soft p-3 transition-all"
     :class="[dragOver ? 'card-drop-target' : '', visibility.isVisible(theme.id) ? '' : 'opacity-45']"
+    @pointerdown.capture="touch"
+    @focusin.capture="touch"
     @dragover.prevent="markCardOver(true)"
     @drop.prevent="onDropEnd"
   >

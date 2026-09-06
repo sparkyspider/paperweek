@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
@@ -14,6 +15,7 @@ import { ThemesService } from './themes.service';
 import { CreateThemeDto } from './dto/create-theme.dto';
 import { UpdateThemeDto } from './dto/update-theme.dto';
 import { ListThemesQueryDto } from './dto/list-themes-query.dto';
+import { ReorderThemesDto } from './dto/reorder-themes.dto';
 import { CurrentUser } from '../core/security/current-user.decorator';
 import type { AuthUser } from '../core/security/jwt-auth.guard';
 
@@ -36,6 +38,17 @@ export class ThemesController {
     @Body() dto: CreateThemeDto,
   ): Promise<Theme> {
     return this.themes.create(user.ownerId, dto);
+  }
+
+  // Declared before the `:id` routes (and on a distinct verb, PUT, so it can never be shadowed
+  // by `PATCH :id` matching the literal segment "order" as an id) — sidebar drag-to-reorder
+  // writes through this in one transaction rather than N individual `PATCH :id {position}` calls.
+  @Put('order')
+  reorder(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: ReorderThemesDto,
+  ): Promise<Theme[]> {
+    return this.themes.reorder(user.ownerId, dto.ids);
   }
 
   @Patch(':id')

@@ -3,6 +3,7 @@
  * Matches the API contract exactly:
  *   GET    /api/themes?includeArchived=false -> Theme[]
  *   POST   /api/themes {name, color?}
+ *   PUT    /api/themes/order {ids}  -> reorder (sidebar drag-and-drop; ids = the full active set)
  *   PATCH  /api/themes/:id {name?, color?, position?, archived?}
  *   DELETE /api/themes/:id  (soft archive)
  */
@@ -94,6 +95,34 @@ export const useThemesStore = defineStore('themes', () => {
     }
   }
 
+  /** Drag-to-reorder in the sidebar: `orderedIds` is the caller's complete, ordered set of
+   *  active theme ids (front to back). Optimistic — positions update locally immediately, so
+   *  the drop feels instant — then `PUT /api/themes/order` commits it; a failure (a fellow
+   *  archive/create racing the drag, a network blip) reverts every touched position back to
+   *  what it was and surfaces the message the same way every other theme action does
+   *  (`error.value`). Server response is authoritative once it lands (reconciled below), not
+   *  just trusted blind, since `archived`/`position` could theoretically have moved under us. */
+  async function reorderThemes(orderedIds: string[]): Promise<void> {
+    const prevPositions = new Map(items.value.map(t => [t.id, t.position]))
+    orderedIds.forEach((id, index) => {
+      const t = items.value.find(x => x.id === id)
+      if (t) t.position = index
+    })
+    try {
+      const updated = await api<Theme[]>('/api/themes/order', { method: 'PUT', body: { ids: orderedIds } })
+      for (const u of updated) {
+        const t = items.value.find(x => x.id === u.id)
+        if (t) t.position = u.position
+      }
+    } catch (e) {
+      for (const [id, position] of prevPositions) {
+        const t = items.value.find(x => x.id === id)
+        if (t) t.position = position
+      }
+      error.value = messageOf(e, 'Could not reorder your themes.')
+    }
+  }
+
   async function recolorTheme(id: string, color: string): Promise<void> {
     const t = items.value.find(x => x.id === id)
     if (!t) return
@@ -140,6 +169,6 @@ export const useThemesStore = defineStore('themes', () => {
 
   return {
     items, active, loading, loaded, error, unreachable,
-    fetchThemes, addTheme, renameTheme, recolorTheme, archiveThemeQueued,
+    fetchThemes, addTheme, renameTheme, recolorTheme, reorderThemes, archiveThemeQueued,
   }
 })

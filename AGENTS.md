@@ -120,6 +120,10 @@ instance, so the backend checks the password directly via Zitadel's Session API 
 ```
 GET    /api/themes?includeArchived=true|false(default false)
 POST   /api/themes {name, color?}                          → position auto-appended
+PUT    /api/themes/order {ids: string[]}                     → reorders: ids must be EXACTLY the
+                                                                 caller's current active theme id
+                                                                 set (no omissions/dupes/foreign
+                                                                 ids) or 400; sets position=index
 PATCH  /api/themes/:id {name?, color?, position?, archived?}  → archived:true/false sets/clears archivedAt
 DELETE /api/themes/:id                                       → soft archive (= PATCH {archived:true})
 ```

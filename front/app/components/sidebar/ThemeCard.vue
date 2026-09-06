@@ -13,7 +13,8 @@ import { useThemeVisibility } from '~/composables/useThemeVisibility'
 import { useDragTaught } from '~/composables/useDragTaught'
 import { useDragOverTracking } from '~/composables/useDragOverTracking'
 import { useLastUsedTheme } from '~/composables/useLastUsedTheme'
-import { taskIdFromDrag } from '~/utils/dnd'
+import { useThemeDragState } from '~/composables/useThemeDragState'
+import { taskIdFromDrag, THEME_DRAG_MIME } from '~/utils/dnd'
 
 const props = defineProps<{ theme: Theme }>()
 
@@ -22,6 +23,7 @@ const tasks = useTasksStore()
 const visibility = useThemeVisibility()
 const dragTaught = useDragTaught()
 const lastUsedTheme = useLastUsedTheme()
+const themeDrag = useThemeDragState()
 const { show } = useToast()
 
 /** "Last theme touched" (task 16 redesign, extended): any interaction inside this card marks it
@@ -104,20 +106,53 @@ function onDropEnd(e: DragEvent) {
   tasks.patchTask(id, { themeId: props.theme.id, scheduledOn: null, daypart: null, position: nextIndex })
   lastUsedTheme.set(props.theme.id)
 }
+
+/** The card-wide "drop a task here" wash (`markCardOver`/`onDropEnd` above) is unrelated to a
+ *  theme-reorder drag going on over this same card — `ThemeSidebar` owns that entirely (its
+ *  capture-phase listeners stop this handler from even seeing a theme drag; this guard is
+ *  belt-and-braces for the same reason the rest of this file layers cheap self-correcting
+ *  checks rather than trusting a single control path). */
+function onCardDragOver(e: DragEvent) {
+  if (e.dataTransfer?.types.includes(THEME_DRAG_MIME)) return
+  markCardOver(true)
+}
+
+/** Drag SOURCE for reordering: only the header (name row) starts a theme drag — the swatch
+ *  (visibility toggle), rename/archive buttons and the rename input all opt out with an
+ *  explicit `draggable="false"` on themselves, which native drag respects even though they sit
+ *  inside this draggable row (see template). Blocked entirely while renaming. */
+function onHeaderDragStart(e: DragEvent) {
+  if (editing.value) { e.preventDefault(); return }
+  e.dataTransfer?.setData(THEME_DRAG_MIME, props.theme.id)
+  if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move'
+  dragTaught.markDragged()
+  themeDrag.start(props.theme.id)
+}
+
+function onHeaderDragEnd() {
+  themeDrag.end()
+}
 </script>
 
 <template>
   <div
     class="paper-card paper-card--soft p-3 transition-all"
-    :class="[dragOver ? 'card-drop-target' : '', visibility.isVisible(theme.id) ? '' : 'opacity-45']"
+    :class="[dragOver ? 'card-drop-target' : '', visibility.isVisible(theme.id) ? '' : 'opacity-45', themeDrag.draggingId.value === theme.id ? 'opacity-40' : '']"
     @pointerdown.capture="touch"
     @focusin.capture="touch"
-    @dragover.prevent="markCardOver(true)"
+    @dragover.prevent="onCardDragOver"
     @drop.prevent="onDropEnd"
   >
-    <div class="group flex items-center gap-2">
+    <div
+      class="group flex cursor-grab items-center gap-2 active:cursor-grabbing"
+      :draggable="!editing"
+      title="Drag to reorder"
+      @dragstart="onHeaderDragStart"
+      @dragend="onHeaderDragEnd"
+    >
       <button
         type="button"
+        draggable="false"
         class="shrink-0 rounded-full transition-transform hover:scale-110"
         :class="visibility.isVisible(theme.id) ? '' : 'grayscale'"
         :title="visibility.isVisible(theme.id) ? `Hide ${theme.name} tasks` : `Show ${theme.name} tasks`"
@@ -133,7 +168,8 @@ function onDropEnd(e: DragEvent) {
         ref="nameInput"
         v-model="draft"
         type="text"
-        class="min-w-0 flex-1 border-0 border-b border-dashed border-[var(--accent-ink)] bg-transparent text-[17px] font-semibold text-[var(--ink)] outline-none"
+        draggable="false"
+        class="min-w-0 flex-1 cursor-text border-0 border-b border-dashed border-[var(--accent-ink)] bg-transparent text-[17px] font-semibold text-[var(--ink)] outline-none"
         @keyup.enter="commitEdit"
         @keyup.esc="editing = false"
         @blur="commitEdit"
@@ -149,6 +185,7 @@ function onDropEnd(e: DragEvent) {
       <button
         v-if="!editing"
         type="button"
+        draggable="false"
         class="shrink-0 rounded-none p-1 text-[var(--ink-faint)] opacity-0 transition-opacity hover:text-[var(--accent-ink)] group-hover:opacity-100"
         aria-label="Rename theme"
         @click="startEdit"
@@ -159,6 +196,7 @@ function onDropEnd(e: DragEvent) {
       </button>
       <button
         type="button"
+        draggable="false"
         class="shrink-0 rounded-none p-1 text-[var(--ink-faint)] opacity-0 transition-opacity hover:text-[var(--danger)] group-hover:opacity-100"
         aria-label="Archive theme"
         @click="archive"

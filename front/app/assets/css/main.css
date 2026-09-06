@@ -155,6 +155,32 @@ body {
   background: var(--accent-ink-soft);
 }
 
+/* Theme sidebar drag-to-reorder (ThemeSidebar.vue): the drop indicator BETWEEN two theme
+   cards — a single gouache brush stroke (family-matched to `.gouache-underline`'s hardcoded
+   ochre, #b8862f / --gouache-stroke — see that class's own note on why the data-URI can't
+   just reference the custom property), not a corporate blue insertion bar. ONE element,
+   absolutely positioned (against `ThemeSidebar.vue`'s `relative` list container) and moved to
+   whichever gap the cursor is nearest via an inline `top` — never an inserted-and-removed flex
+   sibling, so it can't perturb the list's own `gap-3` rhythm between cards. `pointer-events:
+   none` matters: without it this sits directly in the drop target's own hit-testing path and
+   would itself become the `dragover`/`drop` target instead of the card underneath it. Opacity-
+   only transition (no layout property) — fades in/out at a fixed size, never "grows/shrinks",
+   so a late decay (`useDragOverTracking`) reads as a quick fade, never a stuck wide bar. */
+.theme-drop-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 10px;
+  margin-top: -5px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 16' preserveAspectRatio='none'%3E%3Cpath d='M4 9 C 110 5, 290 5, 396 8' stroke='%23b8862f' stroke-width='6' fill='none' stroke-linecap='round' opacity='0.85'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+}
+.theme-drop-line--active {
+  opacity: 1;
+}
+
 /* A standalone sheet resting on the desk (the login card): a soft warm shadow lifting it off
    the parchment, like paper under a warm lamp. Scoped separately from .paper-card so the
    planner's day cards and theme cards can carry a lighter lift. */

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Theme } from '@prisma/client';
 import { PrismaService } from '../core/prisma/prisma.service';
 import { CreateThemeDto } from './dto/create-theme.dto';
@@ -57,6 +61,41 @@ export class ThemesService {
           ? { archivedAt: dto.archived ? new Date() : null }
           : {}),
       },
+    });
+  }
+
+  /** PUT /api/themes/order — reorder the caller's active themes in one transaction. `ids` must
+   *  be exactly the caller's current active (non-archived) theme id set, in the desired order —
+   *  anything short of that (a missing id, one belonging to someone else, a duplicate) is
+   *  rejected outright rather than silently reordering a partial list, which would leave gaps or
+   *  collisions in `position` for the ids left out. On success, `position` is set to each id's
+   *  index in the array. Sibling shifting for the single-row `PATCH .../:id { position }` path
+   *  is intentionally NOT implemented — that endpoint sets one row's `position` verbatim (its
+   *  existing, pre-drag-and-drop behaviour); this endpoint is the one drag-to-reorder writes
+   *  through. */
+  async reorder(ownerId: string, ids: string[]): Promise<Theme[]> {
+    return this.prisma.$transaction(async (tx) => {
+      const owned = await tx.theme.findMany({
+        where: { ownerId, archivedAt: null },
+        select: { id: true },
+      });
+      const ownedIds = new Set(owned.map((t) => t.id));
+      const isExactMatch =
+        ids.length === ownedIds.size && ids.every((id) => ownedIds.has(id));
+      if (!isExactMatch) {
+        throw new BadRequestException(
+          "ids must be exactly the caller's current set of active themes, with no duplicates or omissions.",
+        );
+      }
+      await Promise.all(
+        ids.map((id, position) =>
+          tx.theme.update({ where: { id }, data: { position } }),
+        ),
+      );
+      return tx.theme.findMany({
+        where: { ownerId, archivedAt: null },
+        orderBy: { position: 'asc' },
+      });
     });
   }
 

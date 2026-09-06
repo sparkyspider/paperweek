@@ -85,6 +85,9 @@ export function useAutosaveLines(opts: {
   const activeDrafts = ref<Map<number, DraftLine>>(new Map())
   const timers = new Map<string, ReturnType<typeof setTimeout>>()
   const inFlight = new Map<string, Promise<string | null>>()
+  /** Per-draft save queue (task 28 — truncated-title bug) — see `persist` below for the failure
+   *  this closes. */
+  const saveQueue = new Map<string, Promise<void>>()
 
   /** Saved tasks mapped onto line-slot indices — literal `position` when the section's
    *  positions are already distinct non-negative integers, otherwise laid out in sort order
@@ -199,8 +202,34 @@ export function useAutosaveLines(opts: {
     return id
   }
 
-  async function persist(draft: DraftLine): Promise<void> {
+  /** Real typing pauses mid-title (a breath before the next word) reliably exceed `DEBOUNCE_MS`
+   *  — the debounce fires and starts saving whatever's typed SO FAR ("Review"), then Enter/blur
+   *  (or the next pause) fires a SECOND save with the fuller text ("Review Trevor Feedback")
+   *  before the first one's round trip has even returned. Both calls used to run concurrently:
+   *  whichever's network response landed LAST won, and it wrote whatever `trimmed` text IT
+   *  personally captured back when IT was invoked — which, for the earlier/shorter-text call,
+   *  could be stale by the time it actually lands. That's the reported bug: a title silently
+   *  regressing to its first word (or fewer) after Enter, because the short-text call's PATCH
+   *  arrived after the full-text one's and clobbered it. Root cause file:line at the time this
+   *  was diagnosed: `persist` being invoked directly, letting two overlapping calls both reach
+   *  the `draft.taskId && draft.lastSaved !== trimmed` guard with their own frozen `trimmed`.
+   *  Fix: serialize every persist for a given draft through one queue — a call's body doesn't
+   *  actually START (and doesn't read `draft.text` for its `trimmed` snapshot) until every
+   *  earlier call for that same draft has fully finished, so the text it captures and saves is
+   *  never older than what the previous save already committed. `ensureCreated`'s own `inFlight`
+   *  map still exists as a second line of defense but should no longer see concurrent callers for
+   *  the same draft now that this queues them. */
+  function persist(draft: DraftLine): Promise<void> {
     clearTimer(draft.key)
+    const prior = saveQueue.get(draft.key) ?? Promise.resolve()
+    const run = prior.then(() => persistNow(draft))
+    // Swallow so a failed save doesn't permanently wedge the queue for this draft — persistNow
+    // already records failure on the draft itself (draft.failed / the toast).
+    saveQueue.set(draft.key, run.catch(() => {}))
+    return run
+  }
+
+  async function persistNow(draft: DraftLine): Promise<void> {
     const trimmed = draft.text.trim()
 
     if (!trimmed) {

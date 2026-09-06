@@ -332,6 +332,41 @@ corroborated against direct evidence).
 - **Prediction before diagnosis, verdict before action.** `PREDICTION.md` was written before the first trace and scored against it; each of Mark's rulings was recorded verbatim before code moved. Rule: keep both orders.
 - **Checkpoint commit before an experiment** (`2096e1a`, `d741997`) so Mark can flick both builds and compare. Rule: a feel experiment starts from a committed baseline.
 
+## INC-16 — 2026-09-06: theme-backlog task titles truncating to the first word on real typing
+- **Symptom**: typing a multi-word title into a life-theme's sidebar backlog line ("Review Trevor
+  Feedback", "Quote Findhorn") and pressing Enter created a task with only the first word
+  ("Review", "Quote"). Reproduced live in Mark's own account; did **not** reproduce with a robotic
+  fixed-90ms-per-character Playwright type (see below for why that mattered).
+- **Root cause**: `persist()` in `front/app/composables/useAutosaveLines.ts` (pre-fix ~line 202)
+  is invoked from two places for the same draft — the 600ms debounce timer (`onInput`) and
+  Enter/blur (`settle`) — and both used to run **concurrently** with no ordering guarantee. A
+  natural mid-sentence typing pause (a breath before the next word) reliably exceeds the 600ms
+  debounce, so the timer fires and starts creating a task titled with whatever's typed so far
+  ("Review") while the network round trip is still in flight; finishing the sentence and hitting
+  Enter fires a **second**, overlapping `persist()` call with the fuller text. Each call froze its
+  own `trimmed` text at invocation time and, on discovering `draft.taskId` already set by the
+  other call, unconditionally PATCHed **its own** (possibly stale) text as authoritative — so
+  whichever call's response landed *last* won, and an earlier short-text call landing after a
+  later full-text call silently regressed the title back down. Confirmed by artificially delaying
+  the create POST via Playwright network interception: with the delay, the create body was
+  `{"title":"Review"}` and a later corrective PATCH `{"title":"Review Trevor Feedback"}` raced it —
+  proving the concurrency, not just a text-diffing bug.
+- **Rule adopted / fix**: serialize every `persist()` call for the same draft through a per-draft
+  `saveQueue` (a chained `Promise`, keyed by `draft.key`) — a queued call's body doesn't start,
+  and doesn't read `draft.text` for its `trimmed` snapshot, until every earlier call for that same
+  draft has fully finished. This guarantees the text a call captures and saves is never older than
+  what the previous save already committed, regardless of network timing. Verified post-fix with
+  the same delayed-network repro **plus** a harder 3-way-overlapping variant (two mid-typing
+  pauses + Enter, with the create POST delayed *more* than the update PATCH to try to invert
+  completion order) — both converged on the full, correct title with zero interleaving. **General
+  lesson**: a debounced-autosave-plus-immediate-commit pattern (debounce timer + Enter/blur both
+  calling the same save function) needs either serialization or a monotonic staleness guard the
+  moment there's more than one path that can trigger a save for the same draft — "the text I
+  captured when I started" is not safe to trust as "the text that should win" once two saves can
+  overlap. Also re-confirms INC-15's synthetic-vs-real lesson from a different angle: a uniform
+  fixed-delay synthetic type (no pause ever exceeding the debounce) does not exercise this path at
+  all — the repro needed an actual pause, not just "type slowly."
+
 ## Open watch items (not yet incidents — logged so they don't become one silently)
 - **`<scratchpad>/front.log` — sparse-file gap from an uncoordinated truncate, not an
   active disk-fill risk.** Real on-disk usage is low (~12-98KB, root volume has 21Gi

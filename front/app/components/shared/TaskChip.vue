@@ -116,6 +116,13 @@ function remove() {
   show('Task deleted', { actionLabel: 'Undo', onAction: () => undo?.() })
 }
 
+/** `draggable` on the row is dropped to `false` while `editing` (see the template) — Chrome
+ *  treats ANY draggable ancestor as owning mousedown-drag on its subtree, which blocks native
+ *  text selection (double-click-to-select-word, click-drag-to-highlight) inside the `<input>`
+ *  even though the input itself never asked to be draggable. Since the input only renders while
+ *  `editing`, and dragging a row that's mid-rename was never a supported gesture anyway, gating
+ *  `draggable` on `!editing` restores normal text-editing behaviour with no loss of the drag
+ *  affordance outside edit mode. */
 function onDragStart(e: DragEvent) {
   e.dataTransfer?.setData('text/plain', props.task.id)
   if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move'
@@ -180,9 +187,13 @@ onBeforeUnmount(() => {
 
 <template>
   <div
-    class="group flex min-w-0 flex-1 cursor-grab items-end gap-1.5 transition-opacity active:cursor-grabbing"
-    :class="[dense ? '' : 'py-0.5', { 'opacity-55': task.doneAt }]"
-    draggable="true"
+    class="group flex min-w-0 flex-1 items-end gap-1.5 transition-opacity"
+    :class="[
+      dense ? '' : 'py-0.5',
+      { 'opacity-55': task.doneAt },
+      editing ? '' : 'cursor-grab active:cursor-grabbing',
+    ]"
+    :draggable="!editing"
     @dragstart="onDragStart"
   >
     <span

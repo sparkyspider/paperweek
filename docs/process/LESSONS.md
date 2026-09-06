@@ -367,6 +367,31 @@ corroborated against direct evidence).
   fixed-delay synthetic type (no pause ever exceeding the debounce) does not exercise this path at
   all — the repro needed an actual pause, not just "type slowly."
 
+## INC-17 — 2026-09-06: editing a task's title blocked native text selection (dblclick-word, click-drag)
+- **Symptom**: once a task chip was in rename/edit mode, double-clicking a word inside the edit
+  `<input>` didn't select it, and click-dragging across the text didn't highlight a range — normal
+  browser text-editing behaviour was dead.
+- **Root cause**: `TaskChip.vue`'s row `<div>` (the chip's whole wrapper, containing the input when
+  editing) carried `draggable="true"` **unconditionally**, including while editing. Chrome treats
+  any `draggable` ancestor as owning mousedown-driven drag for its entire subtree, which suppresses
+  native text-selection drag inside descendants — even a plain `<input>` that never opted into
+  being draggable. The row's own drag affordance (dragging the chip to reschedule/reorder) was
+  never meant to apply while mid-rename in the first place.
+- **Fix**: `front/app/components/shared/TaskChip.vue` — `:draggable="!editing"` (was a bare
+  `draggable="true"`), with the `cursor-grab` affordance classes also gated on `!editing`. Verified
+  with Playwright: draggable is `true` normally, `false` the instant edit mode opens, and back to
+  `true` on cancel; double-clicking a word inside the edit input selects exactly that word
+  (`window.activeElement.selectionStart/End` sliced the word), and a mouse down→move→up drag across
+  the input selects the expected range — both confirmed via screenshot and the live selection
+  string, not just "no console error."
+- **Rule for next time**: `draggable="true"` on a row that can also enter an editable/text-input
+  state must be conditional on NOT being in that state — an ancestor's `draggable` silently
+  overrides a descendant `<input>`'s native selection behaviour with no console warning, so this
+  class of bug won't show up in a typecheck/lint/zero-console-errors pass; it only shows up by
+  actually trying to select text with a real mouse gesture and reading `getSelection()`/
+  `selectionStart`/`selectionEnd`, per this project's own touch/instrument standard
+  (`rules-front.md` §4's "prove the instrument, don't just screenshot it").
+
 ## Open watch items (not yet incidents — logged so they don't become one silently)
 - **`<scratchpad>/front.log` — sparse-file gap from an uncoordinated truncate, not an
   active disk-fill risk.** Real on-disk usage is low (~12-98KB, root volume has 21Gi

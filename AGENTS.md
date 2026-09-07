@@ -133,8 +133,8 @@ DELETE /api/themes/:id                                       → soft archive (=
 ```
 GET    /api/tasks?from=YYYY-MM-DD&to=YYYY-MM-DD      → non-deleted scheduled tasks in range
 GET    /api/tasks?themeId=<uuid>&backlog=true         → non-deleted unscheduled tasks for a theme
-POST   /api/tasks {themeId, title, notes?}            → creates a backlog task
-PATCH  /api/tasks/:id {title?, notes?, themeId?, scheduledOn?(YYYY-MM-DD|null), daypart?(morning|afternoon|evening|notes|null), position?, done?}
+POST   /api/tasks {themeId, title, notes?, bold?}     → creates a backlog task (bold defaults to false)
+PATCH  /api/tasks/:id {title?, notes?, bold?, themeId?, scheduledOn?(YYYY-MM-DD|null), daypart?(morning|afternoon|evening|notes|null), position?, done?}
 DELETE /api/tasks/:id                                  → soft delete
 ```
 

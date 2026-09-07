@@ -1,4 +1,11 @@
-import { IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 /** POST /api/tasks — always creates a backlog task (scheduledOn/daypart null); scheduling
  *  happens via PATCH once the task is dragged into the week. */
@@ -15,4 +22,9 @@ export class CreateTaskDto {
   @IsString()
   @MaxLength(4000)
   notes?: string;
+
+  /** Whole-line bold (Cmd+B in the frontend). Defaults to false. */
+  @IsOptional()
+  @IsBoolean()
+  bold?: boolean;
 }

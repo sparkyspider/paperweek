@@ -59,6 +59,7 @@ export class TasksService {
         themeId: dto.themeId,
         title: dto.title,
         notes: dto.notes,
+        bold: dto.bold,
         position,
       },
     });
@@ -79,6 +80,7 @@ export class TasksService {
       data: {
         ...(dto.title !== undefined ? { title: dto.title } : {}),
         ...(dto.notes !== undefined ? { notes: dto.notes } : {}),
+        ...(dto.bold !== undefined ? { bold: dto.bold } : {}),
         ...(dto.themeId !== undefined ? { themeId: dto.themeId } : {}),
         ...(dto.scheduledOn !== undefined
           ? {

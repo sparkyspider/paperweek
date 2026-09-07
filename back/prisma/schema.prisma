@@ -44,6 +44,7 @@ model Task {
   theme       Theme     @relation(fields: [themeId], references: [id])
   title       String
   notes       String?
+  bold        Boolean   @default(false)
   scheduledOn DateTime? @map("scheduled_on") @db.Date
   daypart     Daypart?
   position    Int

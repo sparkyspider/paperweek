@@ -24,3 +24,14 @@ export function forceHomeEnd(e: KeyboardEvent): void {
   const pos = toStart ? 0 : el.value.length
   el.setSelectionRange(pos, pos)
 }
+
+/**
+ * Cmd+B (macOS) / Ctrl+B (everyone else) — whole-line bold toggle on a task line, per Mark's
+ * ask: keyboard only, no button/toolbar. Checked with `e.metaKey || e.ctrlKey` rather than
+ * sniffing `navigator.platform`, so it fires on whichever physical key the OS maps Cmd/Ctrl to.
+ * Callers must `preventDefault()` themselves on a true hit so the browser's own bold/bookmark
+ * shortcut doesn't also fire.
+ */
+export function isBoldShortcut(e: KeyboardEvent): boolean {
+  return (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b'
+}

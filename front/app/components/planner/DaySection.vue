@@ -21,7 +21,7 @@ import { useLastUsedTheme } from '~/composables/useLastUsedTheme'
 import { useDragTaught } from '~/composables/useDragTaught'
 import { useDragOverTracking } from '~/composables/useDragOverTracking'
 import { taskIdFromDrag } from '~/utils/dnd'
-import { forceHomeEnd } from '~/utils/textInputKeys'
+import { forceHomeEnd, isBoldShortcut } from '~/utils/textInputKeys'
 
 const props = defineProps<{
   dateISO: string
@@ -64,13 +64,23 @@ const showTeachingNote = computed(() => !!props.showFirstDragTip && !dragTaught.
  *  of `savedList` entirely was the actual bug — the task didn't just look hidden, its LINE
  *  became available again, which is how "muting a theme" turned into "silently deleting its
  *  scheduled tasks' visible trace." */
-const { slots, activateLine, onInput, onEnter, onBlur, revert, dropTaskAt } = useAutosaveLines({
+const { slots, activateLine, onInput, onEnter, onBlur, revert, dropTaskAt, toggleBold } = useAutosaveLines({
   savedList: () => tasks.forCell(props.dateISO, props.daypart),
   defaultThemeId: () => lastUsedTheme.get() ?? pickerThemes.value[0]?.id ?? themes.items[0]?.id ?? null,
   scheduledOn: () => props.dateISO,
   daypart: () => props.daypart,
   minLines: () => props.minLines,
 })
+
+/** Cmd+B while typing/editing a draft line — routed through useAutosaveLines' own `toggleBold`
+ *  (the per-draft save queue, INC-16), same as the sidebar backlog's AddTaskInline.vue. */
+function onDraftKeydown(e: KeyboardEvent, draft: DraftLine): void {
+  forceHomeEnd(e)
+  if (isBoldShortcut(e)) {
+    e.preventDefault()
+    toggleBold(draft)
+  }
+}
 
 const activeKey = ref<string | null>(null)
 const root = ref<HTMLElement | null>(null)
@@ -341,10 +351,11 @@ onBeforeUnmount(() => document.removeEventListener('dragend', clearDragOverIndex
               :value="slot.draft.text"
               placeholder="Write here…"
               class="diary-input font-write min-w-0 flex-1 text-[18px] leading-[22px] text-[var(--ink)]"
+              :class="{ 'font-write--bold': slot.draft.bold }"
               @click.stop
               @input="slot.draft.text = ($event.target as HTMLInputElement).value; onInput(slot.draft)"
               @focus="activeKey = slot.draft.key"
-              @keydown="forceHomeEnd"
+              @keydown="onDraftKeydown($event, slot.draft)"
               @keydown.enter.prevent="handleEnter(slot.draft)"
               @keydown.esc="revert(slot.draft); ($event.target as HTMLInputElement).blur()"
               @blur="activeKey = null; handleBlur(slot.draft)"

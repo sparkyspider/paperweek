@@ -26,7 +26,7 @@ A TeuxDeux-inspired weekly planner. Google Calendar felt messy; this is the calm
 
 ## The governing principle: it IS paper
 
-The UI looks and feels like writing on paper. When something is written, it's on a line. When something is added, it's written on a line. **There are no checkboxes, no chips, no boxes around tasks, no buttons-per-task** — task text is handwriting sitting directly on a ruled line. Completing a task = crossing it out: click/tap the written words and an ink strikethrough draws through them (click again to un-cross). Typing on an empty line writes and autosaves — no Add button. Every control that can be a paper gesture should be one; UI chrome that paper doesn't have must justify itself.
+The UI looks and feels like writing on paper. When something is written, it's on a line. When something is added, it's written on a line. **There are no checkboxes, no chips, no boxes around tasks, no buttons-per-task** — task text is handwriting sitting directly on a ruled line. Completing a task = crossing it out: click/tap the written words and an ink strikethrough draws through them (click again to un-cross). Typing on an empty line writes and autosaves — no Add button. Cmd+B (Ctrl+B off Mac) toggles whole-line bold on a task — keyboard only, no button. Every control that can be a paper gesture should be one; UI chrome that paper doesn't have must justify itself.
 
 **Two voices** (ruled 2026-09-01): the page has a stationer's voice — everything pre-printed (ruling, dates, structural labels → Lora serif / Inter) — and a writer's voice — everything the user writes (tasks, notes, theme names → Caveat). Day names are a deliberate exception: technically pre-printed, kept handwritten as v1's signature.
 

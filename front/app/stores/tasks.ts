@@ -29,6 +29,9 @@ export interface Task {
   deletedAt: string | null
   createdAt: string
   updatedAt: string
+  /** Cmd+B whole-line bold (Mark's ask, 2026-09-07) — a plain flag on the task, same as `doneAt`
+   *  is for strikethrough. No per-word/rich-text formatting; the whole line or nothing. */
+  bold: boolean
 }
 
 export const useTasksStore = defineStore('tasks', () => {
@@ -114,7 +117,7 @@ export const useTasksStore = defineStore('tasks', () => {
     }
   }
 
-  async function createBacklogTask(themeId: string, title: string): Promise<Task | null> {
+  async function createBacklogTask(themeId: string, title: string, bold = false): Promise<Task | null> {
     const trimmed = title.trim()
     if (!trimmed) return null
     const tempId = `tmp_${Math.random().toString(36).slice(2)}`
@@ -122,10 +125,11 @@ export const useTasksStore = defineStore('tasks', () => {
     const optimistic: Task = {
       id: tempId, themeId, title: trimmed, notes: null, scheduledOn: null, daypart: null,
       position: backlogFor(themeId).length, doneAt: null, deletedAt: null, createdAt: now, updatedAt: now,
+      bold,
     }
     byId.value[tempId] = optimistic
     try {
-      const created = await api<Task>('/api/tasks', { method: 'POST', body: { themeId, title: trimmed } })
+      const created = await api<Task>('/api/tasks', { method: 'POST', body: { themeId, title: trimmed, bold } })
       delete byId.value[tempId]
       byId.value[created.id] = created
       return created
@@ -137,7 +141,7 @@ export const useTasksStore = defineStore('tasks', () => {
   }
 
   /** Also used directly for scheduling / moving / unscheduling — they are all just a patch. */
-  async function patchTask(id: string, patch: Partial<Pick<Task, 'title' | 'notes' | 'themeId' | 'scheduledOn' | 'daypart' | 'position'>>): Promise<void> {
+  async function patchTask(id: string, patch: Partial<Pick<Task, 'title' | 'notes' | 'themeId' | 'scheduledOn' | 'daypart' | 'position' | 'bold'>>): Promise<void> {
     const t = byId.value[id]
     if (!t) return
     const prev = { ...t }
@@ -167,6 +171,14 @@ export const useTasksStore = defineStore('tasks', () => {
 
   function updateTitle(id: string, title: string): Promise<void> {
     return patchTask(id, { title: title.trim() })
+  }
+
+  /** Cmd+B — same thin wrapper-over-`patchTask` shape as `updateTitle` (optimistic, revert on
+   *  failure, via `patchTask`'s own snapshot/restore). Whole-line bold, no per-word formatting. */
+  function toggleBold(id: string): Promise<void> {
+    const t = byId.value[id]
+    if (!t) return Promise.resolve()
+    return patchTask(id, { bold: !t.bold })
   }
 
   /** Completion toggles `done`, but the server derives `doneAt` — set it optimistically so the
@@ -283,6 +295,6 @@ export const useTasksStore = defineStore('tasks', () => {
   return {
     byId, all, loading, error, unreachable, backlogLoaded, rangeLoaded,
     forCell, backlogFor, fetchRange, fetchBacklog, createBacklogTask,
-    patchTask, schedule, unschedule, updateTitle, toggleDone, toggleDoneDeferred, deleteTaskQueued,
+    patchTask, schedule, unschedule, updateTitle, toggleBold, toggleDone, toggleDoneDeferred, deleteTaskQueued,
   }
 })

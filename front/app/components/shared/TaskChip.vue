@@ -30,7 +30,7 @@ import { ref, computed, nextTick, onBeforeUnmount } from 'vue'
 import type { Task } from '~/stores/tasks'
 import { useTasksStore } from '~/stores/tasks'
 import { useToast } from '~/composables/useToast'
-import { forceHomeEnd } from '~/utils/textInputKeys'
+import { forceHomeEnd, isBoldShortcut } from '~/utils/textInputKeys'
 
 const props = withDefaults(
   defineProps<{ task: Task; color: string; dense?: boolean; dotInMargin?: boolean; themeName?: string }>(),
@@ -68,6 +68,34 @@ function commitEdit() {
 function cancelEdit() {
   editing.value = false
   draft.value = props.task.title
+}
+
+/** Cmd+B (Mark's ask) — whole-line bold, keyboard only, no button. This edits an already-saved
+ *  task (unlike the draft-line composable's own `toggleBold`), so the same direct
+ *  optimistic-update-with-revert `tasks.toggleBold` used elsewhere for a single-field flip
+ *  (mirrors `toggleDone`) applies unchanged — no debounce/queue involved here, so no INC-16-style
+ *  race with the title save to guard against. Returns whether it handled the key, so callers can
+ *  short-circuit their own key handling. */
+function handleBoldShortcut(e: KeyboardEvent): boolean {
+  if (!isBoldShortcut(e)) return false
+  e.preventDefault()
+  tasks.toggleBold(props.task.id)
+  return true
+}
+
+function onEditKeydown(e: KeyboardEvent): void {
+  forceHomeEnd(e)
+  handleBoldShortcut(e)
+}
+
+/** Not-in-edit-mode row: a single real handler rather than stacking another bare `@keydown`
+ *  alongside the existing `.enter`/`.space`/`.f2` modifier bindings, so behaviour doesn't depend
+ *  on how Vue merges same-event listeners on one element. */
+function onRowKeydown(e: KeyboardEvent): void {
+  if (handleBoldShortcut(e)) return
+  if (e.key === 'Enter') { e.preventDefault(); startEdit(); return }
+  if (e.key === ' ' || e.key === 'Spacebar') { e.preventDefault(); onLineClick(e); return }
+  if (e.key === 'F2') { e.preventDefault(); startEdit() }
 }
 
 /** ~300ms: both the "is this becoming a double-click" window AND the done-PATCH defer delay —
@@ -210,7 +238,8 @@ onBeforeUnmount(() => {
       v-model="draft"
       type="text"
       class="font-write min-w-0 flex-1 border-0 bg-transparent text-[18px] leading-[22px] text-[var(--ink)] outline-none"
-      @keydown="forceHomeEnd"
+      :class="{ 'font-write--bold': task.bold }"
+      @keydown="onEditKeydown"
       @keyup.enter="commitEdit"
       @keyup.esc="cancelEdit"
       @blur="commitEdit"
@@ -225,14 +254,12 @@ onBeforeUnmount(() => {
       class="font-write min-w-0 flex-1 cursor-pointer text-[18px] leading-[22px] text-[var(--ink)]"
       :class="[dense ? 'truncate' : 'break-words']"
       @click="onLineClick"
-      @keydown.enter.prevent="startEdit"
-      @keydown.space.prevent="onLineClick"
-      @keydown.f2.prevent="startEdit"
+      @keydown="onRowKeydown"
       @mouseenter="scheduleTape"
       @mouseleave="hideTape"
       @focus="scheduleTape"
       @blur="hideTape"
-    ><span :class="task.doneAt ? 'ink-strike' : ''">{{ task.title }}</span></span>
+    ><span :class="[task.doneAt ? 'ink-strike' : '', task.bold ? 'font-write--bold' : '']">{{ task.title }}</span></span>
 
     <!-- Both glyph buttons as one snug pair, not two independent flex items spaced by the row's
          own gap-1.5 (that read as two stray marks scattered across the line-end, not a cluster).

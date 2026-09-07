@@ -36,6 +36,14 @@ export interface DraftLine {
   saving: boolean
   failed: boolean
   toastShown: boolean
+  /** Cmd+B, mirrors `Task.bold` — live on the draft before the line has ever saved, so toggling
+   *  bold while typing a brand-new line (no `taskId` yet) has somewhere to live; `persistNow`
+   *  carries it into the create call, same as the typed title. */
+  bold: boolean
+  /** What the backend last actually confirmed for `bold` — same role as `lastSaved` plays for
+   *  `text`, so `persistNow` only issues a PATCH when the flag has genuinely changed since the
+   *  last save, not on every debounce/settle pass. */
+  lastSavedBold: boolean
 }
 
 export type LineSlot =
@@ -162,6 +170,7 @@ export function useAutosaveLines(opts: {
     const draft: DraftLine = {
       key: `draft_${uid}`, lineIndex: index, text: '', lastSaved: '', taskId: null,
       themeId: opts.defaultThemeId(), saving: false, failed: false, toastShown: false,
+      bold: false, lastSavedBold: false,
     }
     activeDrafts.value.set(index, draft)
   }
@@ -187,7 +196,7 @@ export function useAutosaveLines(opts: {
 
     const promise = (async () => {
       if (normalized.value.has(draft.lineIndex)) await pushDownFrom(draft.lineIndex)
-      const created = await tasks.createBacklogTask(themeId, title)
+      const created = await tasks.createBacklogTask(themeId, title, draft.bold)
       if (!created) return null
       if (opts.scheduledOn && opts.daypart) {
         await tasks.schedule(created.id, opts.scheduledOn(), opts.daypart(), draft.lineIndex)
@@ -247,9 +256,15 @@ export function useAutosaveLines(opts: {
       draft.saving = true
       const id = draft.taskId ?? await ensureCreated(draft, trimmed)
       if (!id) { draft.failed = true; return }
+      // Both checks gate on `draft.taskId` (the value BEFORE `ensureCreated` may have just set
+      // it below) for the same reason: a task created by `ensureCreated` this pass already
+      // carries the current text/bold from the create call itself (title + `draft.bold`, see
+      // `ensureCreated`) — only an ALREADY-existing task needs a follow-up PATCH here.
       if (draft.taskId && draft.lastSaved !== trimmed) await tasks.updateTitle(id, trimmed)
+      if (draft.taskId && draft.lastSavedBold !== draft.bold) await tasks.patchTask(id, { bold: draft.bold })
       draft.taskId = id
       draft.lastSaved = trimmed
+      draft.lastSavedBold = draft.bold
       draft.failed = false
       draft.toastShown = false
     } catch {
@@ -266,6 +281,16 @@ export function useAutosaveLines(opts: {
   function onInput(draft: DraftLine): void {
     clearTimer(draft.key)
     timers.set(draft.key, setTimeout(() => { void persist(draft) }, DEBOUNCE_MS))
+  }
+
+  /** Cmd+B on a not-yet-saved (or still being typed) line. Flips the flag right away (so the
+   *  line reads bold instantly) and routes the save through the same per-draft `persist` queue
+   *  as the title (INC-16) — not a separate immediate PATCH — so a bold toggle mid-typing can't
+   *  race the debounced title save; if the line hasn't become a task yet, the flag simply rides
+   *  along on the eventual create call (see `ensureCreated`/`persistNow` above). */
+  function toggleBold(draft: DraftLine): Promise<void> {
+    draft.bold = !draft.bold
+    return persist(draft)
   }
 
   /** Cancel uncommitted local edits, back to whatever was last actually saved — an untouched
@@ -302,5 +327,5 @@ export function useAutosaveLines(opts: {
     }
   }
 
-  return { slots, activateLine, onInput, onEnter: settle, onBlur: settle, revert, dropTaskAt, maxIndex }
+  return { slots, activateLine, onInput, onEnter: settle, onBlur: settle, revert, dropTaskAt, maxIndex, toggleBold }
 }

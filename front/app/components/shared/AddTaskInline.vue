@@ -17,7 +17,7 @@ import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useTasksStore } from '~/stores/tasks'
 import { useAutosaveLines, type DraftLine } from '~/composables/useAutosaveLines'
 import { taskIdFromDrag } from '~/utils/dnd'
-import { forceHomeEnd } from '~/utils/textInputKeys'
+import { forceHomeEnd, isBoldShortcut } from '~/utils/textInputKeys'
 import { useDragTaught } from '~/composables/useDragTaught'
 import { useDragOverTracking } from '~/composables/useDragOverTracking'
 import { useLastUsedTheme } from '~/composables/useLastUsedTheme'
@@ -30,11 +30,22 @@ const lastUsedTheme = useLastUsedTheme()
 const root = ref<HTMLElement | null>(null)
 const { current: dragOverIndex, markOver: onRowDragOver, clear: clearDragOverIndex } = useDragOverTracking<number>()
 
-const { slots, activateLine, onInput, onEnter, onBlur, revert, dropTaskAt } = useAutosaveLines({
+const { slots, activateLine, onInput, onEnter, onBlur, revert, dropTaskAt, toggleBold } = useAutosaveLines({
   savedList: () => tasks.backlogFor(props.themeId),
   defaultThemeId: () => props.themeId,
   dynamicTrailing: true,
 })
+
+/** Cmd+B while typing/editing a draft line — see useAutosaveLines' `toggleBold` doc comment for
+ *  why this goes through the composable rather than a direct store call (the per-draft save
+ *  queue, INC-16). */
+function onDraftKeydown(e: KeyboardEvent, draft: DraftLine): void {
+  forceHomeEnd(e)
+  if (isBoldShortcut(e)) {
+    e.preventDefault()
+    toggleBold(draft)
+  }
+}
 
 function focusDraft(index: number): void {
   const el = root.value?.querySelector<HTMLInputElement>(`[data-line-index="${index}"]`)
@@ -103,9 +114,10 @@ onBeforeUnmount(() => document.removeEventListener('dragend', clearDragOverIndex
         :value="slot.draft.text"
         :placeholder="placeholder ?? 'Write a task…'"
         class="diary-input font-write min-w-0 w-full text-[18px] leading-[22px] text-[var(--ink)] placeholder:font-write placeholder:text-[var(--ink-faint)]"
+        :class="{ 'font-write--bold': slot.draft.bold }"
         @click.stop
         @input="slot.draft.text = ($event.target as HTMLInputElement).value; onInput(slot.draft)"
-        @keydown="forceHomeEnd"
+        @keydown="onDraftKeydown($event, slot.draft)"
         @keydown.enter.prevent="handleEnter(slot.draft)"
         @keydown.esc="revert(slot.draft); ($event.target as HTMLInputElement).blur()"
         @blur="onBlur(slot.draft)"

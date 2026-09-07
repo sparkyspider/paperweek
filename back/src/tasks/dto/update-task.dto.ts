@@ -54,4 +54,9 @@ export class UpdateTaskDto {
   @IsOptional()
   @IsBoolean()
   done?: boolean;
+
+  /** Whole-line bold (Cmd+B in the frontend). */
+  @IsOptional()
+  @IsBoolean()
+  bold?: boolean;
 }

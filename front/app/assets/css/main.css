@@ -121,6 +121,16 @@ body {
   font-weight: 600;
 }
 
+/* Cmd+B whole-line bold (Mark's ask, 2026-09-07) — a real heavier Caveat cut, not
+   font-synthesis/faux-bold: weight 700 is already in the Google Fonts request alongside
+   500/600 (`nuxt.config.ts`'s `Caveat:wght@500;600;700` link), so this just selects it. Applied
+   ALONGSIDE `.font-write`, never instead of it, so a bold line keeps the family/fallback and
+   only the weight changes. Independent of `.ink-strike` (that's an ::after overlay on the inner
+   text span) — a done-AND-bold task still reads struck through, bold styling never hides it. */
+.font-write--bold {
+  font-weight: 700;
+}
+
 /* Paper doesn't have rounded edges: every surface below is borderless (grey-border sweep —
    a diffuse warm shadow or a warm sepia rule line stands in for a hard edge everywhere) AND
    square-cornered (kill-rounded-edges pass — the floating shadows carry the "lifted paper"

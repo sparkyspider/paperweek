@@ -215,6 +215,7 @@ function onHeaderDragEnd() {
         class="h-4 w-4 rounded-full border-2 transition-transform hover:scale-110"
         :style="{ background: c, borderColor: theme.color === c ? 'var(--ink)' : 'transparent' }"
         :aria-label="`Set color ${c}`"
+        @mousedown.prevent
         @click="themes.recolorTheme(theme.id, c)"
       />
     </div>

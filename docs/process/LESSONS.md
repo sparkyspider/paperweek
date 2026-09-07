@@ -392,6 +392,36 @@ corroborated against direct evidence).
   `selectionStart`/`selectionEnd`, per this project's own touch/instrument standard
   (`rules-front.md` §4's "prove the instrument, don't just screenshot it").
 
+## INC-18 — 2026-09-07: recoloring a life-theme silently did nothing (Positive Polar)
+- **Symptom**: Mark tried to change Positive Polar's colour from the sidebar palette — clicking a
+  swatch did nothing visible, and no `PATCH /api/themes/:id` ever reached the back end.
+- **Root cause**: `front/app/components/sidebar/ThemeCard.vue` only renders the THEME_PALETTE
+  swatch row while the theme name is in rename mode (`v-if="editing"`), and the rename `<input>`
+  closes that mode `@blur="commitEdit"`. A click is a `mousedown` + `mouseup`/`click`; `mousedown`
+  on the swatch shifts focus away from the still-focused name input, firing `blur` → `commitEdit`
+  → `editing = false` → the palette `v-if` unmounts the swatch **before its `click` handler can
+  run**, so `recolorTheme` never fired. Reproduced live with Playwright: entering rename mode,
+  clicking a swatch, editing mode was `false` immediately after and the theme's colour was
+  provably unchanged (before: blob fill `#C7EDE4` before/after click/after blur all identical, 0
+  PATCH requests in the back log).
+- **Fix**: `@mousedown.prevent` on each swatch `<button>` in `ThemeCard.vue` — `preventDefault` on
+  `mousedown` stops the browser from moving focus off the name input at all, so `blur`/`commitEdit`
+  never fires and the palette stays mounted through the swatch's own `click`, which now reaches
+  `recolorTheme`. Side benefit: the palette stays open afterward so multiple colours can be tried
+  in one sitting, without touching how the palette is opened (still only reachable via rename
+  mode — noted, not redesigned, since that's outside this bug's scope). Verified post-fix with the
+  same Playwright flow: editing mode stays `true` after the click, blob fill changes immediately
+  (`#93ab7c`), `PATCH /api/themes/<id> {"color":"#93ab7c"}` returns 200, and the colour survives a
+  full page reload.
+- **Rule for next time**: a control that lives **inside** an edit surface which closes on `blur`
+  must `preventDefault` on `mousedown` (not just handle `click`) — otherwise the surface closing
+  itself is the thing that eats the control's own click. This is the same shape as `TaskChip`
+  (INC-17) but on the opposite event: there, an ancestor's `draggable` silently ate an unrelated
+  browser behaviour (text selection); here, a sibling losing focus silently unmounts the very
+  control the user is trying to click. Both only show up by actually driving the interaction with
+  a real (or Playwright-simulated) pointer sequence, never by reading the code or a static
+  screenshot.
+
 ## Open watch items (not yet incidents — logged so they don't become one silently)
 - **`<scratchpad>/front.log` — sparse-file gap from an uncoordinated truncate, not an
   active disk-fill risk.** Real on-disk usage is low (~12-98KB, root volume has 21Gi

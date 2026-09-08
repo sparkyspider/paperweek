@@ -22,6 +22,9 @@
   --ink: #2e2a25;
   --ink-soft: #7a6650;
   --ink-faint: #a08d6c;
+  /* Bold task text (see `.font-write--bold` below) — a notch darker than --ink so a bold line
+     also reads as a deeper stroke of ink, not just a slightly heavier one. */
+  --ink-bold: #17130d;
   --line: #ded4bf;
   --line-soft: #e7ded0;
 
@@ -121,14 +124,22 @@ body {
   font-weight: 600;
 }
 
-/* Cmd+B whole-line bold (Mark's ask, 2026-09-07) — a real heavier Caveat cut, not
-   font-synthesis/faux-bold: weight 700 is already in the Google Fonts request alongside
-   500/600 (`nuxt.config.ts`'s `Caveat:wght@500;600;700` link), so this just selects it. Applied
+/* Cmd+B whole-line bold (Mark's ask, 2026-09-07; toughened 2026-09-08 — "can hardly see it").
+   Weight 700 is Caveat's HEAVIEST available cut (it only ships 400-700; there is no heavier
+   real weight to reach for, option (a) in the brief) and .font-write's own base is already 600,
+   so the jump from 600 -> 700 in a hand-lettered face is genuinely subtle at 18px — real, but not
+   "unmistakable at a glance." So on top of the real 700 weight we stack a thin ink outline
+   (-webkit-text-stroke) and switch to a darker --ink-bold tone, which together read as a
+   distinctly heavier, wetter stroke rather than a font-synthesis fake-bold smear. Applied
    ALONGSIDE `.font-write`, never instead of it, so a bold line keeps the family/fallback and
-   only the weight changes. Independent of `.ink-strike` (that's an ::after overlay on the inner
-   text span) — a done-AND-bold task still reads struck through, bold styling never hides it. */
+   only weight/color/stroke change. Independent of `.ink-strike` (that's an ::after overlay on
+   the inner text span) — a done-AND-bold task still reads struck through, bold never hides it.
+   -webkit-text-stroke is Chromium/WebKit-only; Firefox silently drops it and keeps the real 700
+   weight + darker color, which is still a legible (if smaller) improvement there. */
 .font-write--bold {
   font-weight: 700;
+  color: var(--ink-bold);
+  -webkit-text-stroke: 0.45px var(--ink-bold);
 }
 
 /* Paper doesn't have rounded edges: every surface below is borderless (grey-border sweep —

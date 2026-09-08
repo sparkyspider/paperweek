@@ -37,6 +37,12 @@ const props = withDefaults(
   { dense: false, dotInMargin: false, themeName: undefined },
 )
 
+/** Enter while editing this task's title (Mark's ask, 2026-09-08) — the parent list owns "what's
+ *  the next line" (it's the one with the ordered slots), so this just reports whether the title
+ *  being committed was blank; the parent decides whether that means "chain to the next task" or
+ *  "last line, nothing to chain to." See DaySection.vue / AddTaskInline.vue's `onEnterNext`. */
+const emit = defineEmits<{ enterNext: [payload: { empty: boolean }] }>()
+
 const tasks = useTasksStore()
 const { show } = useToast()
 
@@ -44,12 +50,22 @@ const editing = ref(false)
 const draft = ref(props.task.title)
 const titleInput = ref<HTMLInputElement | null>(null)
 
-async function startEdit() {
+/** `caretAtEnd` (default false, the original dblclick/F2/Enter-on-row gesture) select-alls, the
+ *  normal rename affordance. The Enter-chain landing (`onEnterNext` in the parent) instead wants
+ *  the caret parked at the END of the title it just opened, not a selection — matches "press
+ *  Enter, keep typing where the last line left off" rather than "press Enter, retype the whole
+ *  line." */
+async function startEdit(caretAtEnd = false) {
   draft.value = props.task.title
   editing.value = true
   await nextTick()
   const el = titleInput.value
   el?.focus()
+  if (caretAtEnd && el) {
+    const end = el.value.length
+    el.setSelectionRange(end, end)
+    return
+  }
   el?.select()
   // select() leaves the input's own scroll window parked wherever the browser feels like
   // after selecting-all (often the END of a long title) — disorienting: you open edit and the
@@ -58,6 +74,10 @@ async function startEdit() {
   // behave exactly as normal from there.
   if (el) el.scrollLeft = 0
 }
+
+// The parent list (DaySection.vue / AddTaskInline.vue) drives the Enter-chain landing by calling
+// this directly on the next chip's instance — same shape as DayStrip.vue's `scrollToToday` expose.
+defineExpose({ startEdit })
 
 function commitEdit() {
   editing.value = false
@@ -68,6 +88,16 @@ function commitEdit() {
 function cancelEdit() {
   editing.value = false
   draft.value = props.task.title
+}
+
+/** Enter while editing (Mark's ask): commit exactly as before, then hand off to the parent to
+ *  open the next line down. Read `draft` for "was this blank" BEFORE `commitEdit` runs (it
+ *  doesn't clear `draft`, but read it first anyway so the emitted payload can never depend on
+ *  commit's own side effects). */
+function onEditEnter() {
+  const empty = !draft.value.trim()
+  commitEdit()
+  emit('enterNext', { empty })
 }
 
 /** Cmd+B (Mark's ask) — whole-line bold, keyboard only, no button. This edits an already-saved
@@ -240,7 +270,7 @@ onBeforeUnmount(() => {
       class="font-write min-w-0 flex-1 border-0 bg-transparent text-[18px] leading-[22px] text-[var(--ink)] outline-none"
       :class="{ 'font-write--bold': task.bold }"
       @keydown="onEditKeydown"
-      @keyup.enter="commitEdit"
+      @keyup.enter="onEditEnter"
       @keyup.esc="cancelEdit"
       @blur="commitEdit"
     >
@@ -279,7 +309,7 @@ onBeforeUnmount(() => {
         class="inline-flex shrink-0 items-center justify-center p-1 text-[var(--ink-faint)] opacity-0 transition-opacity hover:text-[var(--ink)] group-hover:opacity-100"
         aria-label="Edit task"
         title="Edit"
-        @click="startEdit"
+        @click="() => startEdit()"
       >
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
           <path d="M11 2l3 3-8 8-3.5 1L3 10.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />

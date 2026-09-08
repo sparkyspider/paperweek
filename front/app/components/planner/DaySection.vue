@@ -22,6 +22,9 @@ import { useDragTaught } from '~/composables/useDragTaught'
 import { useDragOverTracking } from '~/composables/useDragOverTracking'
 import { taskIdFromDrag } from '~/utils/dnd'
 import { forceHomeEnd, isBoldShortcut } from '~/utils/textInputKeys'
+// Type-only — TaskChip itself is still resolved by Nuxt's auto-import in the template; this just
+// gives `taskChipRefs` a real exposed-API type (mirrors DayStrip.vue's `scrollToToday` shape).
+import type TaskChip from '~/components/shared/TaskChip.vue'
 
 const props = defineProps<{
   dateISO: string
@@ -127,6 +130,30 @@ async function handleEnter(draft: DraftLine) {
 async function handleBlur(draft: DraftLine) {
   await onBlur(draft)
   noteThemeUsed(draft)
+}
+
+/** Enter while editing an EXISTING task's title (TaskChip's own rename mode, not this file's
+ *  write-anywhere draft lines above) — Mark's ask: chain down to the line directly below within
+ *  this same day-cell/daypart. Keyed by line-slot index so it works for either kind of "next"
+ *  line without the two mechanisms (TaskChip's local edit state vs. this composable's draft
+ *  slots) needing to know about each other beyond this handoff. */
+const taskChipRefs = new Map<number, InstanceType<typeof TaskChip>>()
+function setTaskChipRef(index: number, el: unknown): void {
+  if (el) taskChipRefs.set(index, el as InstanceType<typeof TaskChip>)
+  else taskChipRefs.delete(index)
+}
+
+async function onEnterNextFromTask(index: number, payload: { empty: boolean }): Promise<void> {
+  const nextSlot = slots.value[index + 1]
+  if (nextSlot?.kind === 'task') {
+    taskChipRefs.get(index + 1)?.startEdit(true)
+    return
+  }
+  // No task on the very next line: that's "editing the last line" in the ordinary (gapless)
+  // case. A title that was cleared to empty must not spawn another blank line underneath it
+  // (runaway empty tasks) — just leave editing closed, which onEditEnter's commitEdit already did.
+  if (payload.empty) return
+  await onClickEmpty(index + 1)
 }
 
 function onDropAt(e: DragEvent, index: number) {
@@ -321,7 +348,14 @@ onBeforeUnmount(() => document.removeEventListener('dragend', clearDragOverIndex
             />
             <!-- A muted theme's scheduled task renders NO text here — the line stays occupied
                  (not writable) but shows nothing beyond its ghost dot above (task 25). -->
-            <TaskChip :task="slot.task" :color="colorFor(slot.task.themeId)" dense dot-in-margin />
+            <TaskChip
+              :ref="(el) => setTaskChipRef(slot.index, el)"
+              :task="slot.task"
+              :color="colorFor(slot.task.themeId)"
+              dense
+              dot-in-margin
+              @enter-next="(payload) => onEnterNextFromTask(slot.index, payload)"
+            />
           </template>
           <template v-else-if="slot.kind === 'draft'">
             <!-- Reserves the identical slot even before there's anything to categorise — a

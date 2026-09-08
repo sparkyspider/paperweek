@@ -21,6 +21,9 @@ import { forceHomeEnd, isBoldShortcut } from '~/utils/textInputKeys'
 import { useDragTaught } from '~/composables/useDragTaught'
 import { useDragOverTracking } from '~/composables/useDragOverTracking'
 import { useLastUsedTheme } from '~/composables/useLastUsedTheme'
+// Type-only — TaskChip itself is still resolved by Nuxt's auto-import in the template; this just
+// gives `taskChipRefs` a real exposed-API type (mirrors DayStrip.vue's `scrollToToday` shape).
+import type TaskChip from '~/components/shared/TaskChip.vue'
 
 const props = defineProps<{ themeId: string; color: string; themeName?: string; placeholder?: string }>()
 
@@ -73,6 +76,30 @@ async function handleEnter(draft: DraftLine) {
   await onClickEmpty(nextIndex)
 }
 
+/** Enter while editing an EXISTING task's title (TaskChip's own rename mode, not this file's
+ *  write-anywhere draft lines above) — Mark's ask: chain down to the line directly below within
+ *  this same backlog. Keyed by line-slot index so it works for either kind of "next" line without
+ *  the two mechanisms (TaskChip's local edit state vs. this composable's draft slots) needing to
+ *  know about each other beyond this handoff. */
+const taskChipRefs = new Map<number, InstanceType<typeof TaskChip>>()
+function setTaskChipRef(index: number, el: unknown): void {
+  if (el) taskChipRefs.set(index, el as InstanceType<typeof TaskChip>)
+  else taskChipRefs.delete(index)
+}
+
+async function onEnterNextFromTask(index: number, payload: { empty: boolean }): Promise<void> {
+  const nextSlot = slots.value[index + 1]
+  if (nextSlot?.kind === 'task') {
+    taskChipRefs.get(index + 1)?.startEdit(true)
+    return
+  }
+  // No task on the very next line: that's "editing the last line" in the ordinary (gapless)
+  // case. A title that was cleared to empty must not spawn another blank line underneath it
+  // (runaway empty tasks) — just leave editing closed, which onEditEnter's commitEdit already did.
+  if (payload.empty) return
+  await onClickEmpty(index + 1)
+}
+
 /** A drop here always re-themes the dropped task to `props.themeId` (see `dropTaskAt` /
  *  `defaultThemeId` above) — a native HTML5 drag never fires `pointerdown`/`focusin` on the
  *  DESTINATION card (only the source gets those, on grab), so ThemeCard's root listener can't
@@ -105,7 +132,15 @@ onBeforeUnmount(() => document.removeEventListener('dragend', clearDragOverIndex
       @drop.prevent.stop="onDropAt($event, slot.index)"
       @click="slot.kind === 'empty' ? onClickEmpty(slot.index) : undefined"
     >
-      <TaskChip v-if="slot.kind === 'task'" :task="slot.task" :color="color" :theme-name="themeName" dense />
+      <TaskChip
+        v-if="slot.kind === 'task'"
+        :ref="(el) => setTaskChipRef(slot.index, el)"
+        :task="slot.task"
+        :color="color"
+        :theme-name="themeName"
+        dense
+        @enter-next="(payload) => onEnterNextFromTask(slot.index, payload)"
+      />
 
       <input
         v-else-if="slot.kind === 'draft'"

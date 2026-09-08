@@ -83,12 +83,17 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /** Email + password sign-in against the BFF. A 401 (bad credentials) is shown as a plain
-   *  friendly sentence — no lockout-counter UI, the backend owns any rate-limiting. */
+   *  friendly sentence — no lockout-counter UI, the backend owns any rate-limiting. Any other
+   *  answer (503 Zitadel-down, 500, …) shows the server's own `error.message` verbatim — it
+   *  must never be mistaken for "wrong password", so the fallback below is used ONLY when the
+   *  backend genuinely sent no message. A total network failure reaching `back/` itself (not
+   *  Zitadel — the Nest process never answered at all) gets its own sentence naming `back/`. */
   async function login(email: string, password: string): Promise<boolean> {
     error.value = null; unreachable.value = false; pending.value = true
     try {
       const r = await api<{ accessToken: string }>('/auth/login', {
         method: 'POST', body: { email, password }, auth: false,
+        unreachableMessage: "Can't reach the Paperweek server. Is the back end running?",
       })
       await applyAccessToken(r.accessToken)
       return true

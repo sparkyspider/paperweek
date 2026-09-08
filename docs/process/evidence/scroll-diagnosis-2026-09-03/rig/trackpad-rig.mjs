@@ -14,7 +14,7 @@
 // for a macOS trackpad); `float` leaves them fractional. `line` sends DOM_DELTA_LINE with
 // dx/16 (Firefox line-mode convention the code normalises). `diag` makes two inertia samples
 // slightly diagonal (deltaY > deltaX) to exercise the horizontal-intent gate.
-import { chromium, firefox } from '/Users/sparkyspider/IdeaProjects/productivity-tools/.claude/skills/view-website/node_modules/playwright/index.mjs'
+import { chromium, firefox } from '/Users/sparkyspider/IdeaProjects/paperweek/.claude/skills/view-website/node_modules/playwright/index.mjs'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 

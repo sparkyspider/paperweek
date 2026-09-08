@@ -31,7 +31,7 @@
 //   PW defaults to the contents of auth/.machinekey/mark-initial-password.txt.
 //   --selftest fires ONE synthetic fast/int burst (the after-rig's stream) right after setup, so a
 //   `selftest-*` gesture set gets written and plotted; the recorder then keeps running for real use.
-import { chromium } from '/Users/sparkyspider/IdeaProjects/productivity-tools/.claude/skills/view-website/node_modules/playwright/index.mjs'
+import { chromium } from '/Users/sparkyspider/IdeaProjects/paperweek/.claude/skills/view-website/node_modules/playwright/index.mjs'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'

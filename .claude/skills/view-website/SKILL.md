@@ -39,7 +39,7 @@ logging in with your credentials (stored at `auth/.machinekey/mark-initial-passw
 Playwright + a Chromium build live inside this skill folder (gitignored). Install once:
 
 ```bash
-cd /Users/sparkyspider/IdeaProjects/productivity-tools/.claude/skills/view-website
+cd /Users/sparkyspider/IdeaProjects/paperweek/.claude/skills/view-website
 npm install
 npx playwright install chromium
 ```
@@ -53,7 +53,7 @@ If the Chromium download is blocked by a TLS-inspecting network, retry, or set
 status, console errors/warnings, page errors, title, screenshot path).
 
 ```bash
-cd /Users/sparkyspider/IdeaProjects/productivity-tools/.claude/skills/view-website
+cd /Users/sparkyspider/IdeaProjects/paperweek/.claude/skills/view-website
 # the Paperweek login page (ungated, no auth needed):
 node shot.mjs http://localhost:3200/login
 # a local HTML file — pass an absolute path OR a file:// URL:
@@ -74,7 +74,7 @@ given authenticated route and screenshots it. It drives the real UI (fills the f
 submits, waits for navigation to the app) so that the Pinia auth store gets populated.
 
 ```bash
-cd /Users/sparkyspider/IdeaProjects/productivity-tools/.claude/skills/view-website
+cd /Users/sparkyspider/IdeaProjects/paperweek/.claude/skills/view-website
 # Screenshot the planner (/) as mark@flyh2.com:
 node authed-shot.mjs mark@flyh2.com <password> / ./planner.png
 # The password is stored at: auth/.machinekey/mark-initial-password.txt
@@ -91,7 +91,7 @@ what the browser actually built, not the pre-hydration source. It writes files a
 prints a JSON summary (status, title, byte/char sizes, paths, console/page errors).
 
 ```bash
-cd /Users/sparkyspider/IdeaProjects/productivity-tools/.claude/skills/view-website
+cd /Users/sparkyspider/IdeaProjects/paperweek/.claude/skills/view-website
 # write both page.html (rendered DOM) + page.txt (visible text) to the scratchpad:
 node read.mjs http://localhost:3200/login /path/to/scratchpad/login
 # just the rendered HTML file:

@@ -15,7 +15,7 @@
     {
       "id": "b",
       "pass": true,
-      "note": "deleteHitServer=true backAfterUndo=true restoredToast=true restoreHitApi(200)=true getIncludesAfterReload=true getTasksHit=true apiLog=[{\"method\":\"DELETE\",\"url\":\"http://localhost:3201/api/tasks/84a09e3f-dc08-41ae-bdae-48f4f4eff291\",\"status\":200},{\"method\":\"POST\",\"url\":\"http://localhost:3201/api/tasks/84a09e3f-dc08-41ae-bdae-48f4f4eff291/restore\",\"status\":201},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?from=2026-08-22&to=2026-10-21\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=174be47f-9e6f-4810-a16c-ad063a726faf&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=9a6fb679-68f4-471e-93e1-33cbb3582920&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=3981a6bc-21ec-4e3a-a065-bb98c31d50c1&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=0d5b27ed-14dc-4fbb-a5c4-de6db169fb15&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=1a1d1f11-81cd-455f-a744-209e441a4e82&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=67251f2c-4310-4b2e-97d3-50c7a8938159&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=2999c4b1-0469-4c7c-9f6b-c3745d3569c3&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=0150c8db-c459-4af8-88a1-9f962fc04cbb&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=acfd6d5c-f636-43e9-b7a4-98d73ce38f2b&backlog=true\",\"status\":200}]",
+      "note": "deleteHitServer=true backAfterUndo=true restoredToast=true restoreHitApi(200)=true getIncludesAfterReload=true getTasksHit=true apiLog=[{\"method\":\"DELETE\",\"url\":\"http://localhost:3201/api/tasks/caff665f-2f41-4173-8d00-23eb219a00a1\",\"status\":200},{\"method\":\"POST\",\"url\":\"http://localhost:3201/api/tasks/caff665f-2f41-4173-8d00-23eb219a00a1/restore\",\"status\":201},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?from=2026-08-22&to=2026-10-21\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=174be47f-9e6f-4810-a16c-ad063a726faf&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=9a6fb679-68f4-471e-93e1-33cbb3582920&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=3981a6bc-21ec-4e3a-a065-bb98c31d50c1&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=0d5b27ed-14dc-4fbb-a5c4-de6db169fb15&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=2999c4b1-0469-4c7c-9f6b-c3745d3569c3&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=1a1d1f11-81cd-455f-a744-209e441a4e82&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=67251f2c-4310-4b2e-97d3-50c7a8938159&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=acfd6d5c-f636-43e9-b7a4-98d73ce38f2b&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=0150c8db-c459-4af8-88a1-9f962fc04cbb&backlog=true\",\"status\":200}]",
       "shot": "5a-t2-after-delete.png / 5b-t2-after-cmdz-late.png / 5c-t2-reload.png"
     },
     {
@@ -43,10 +43,16 @@
       "shot": "10a-typing-char.png / 10b-after-native-undo.png"
     },
     {
+      "id": "g",
+      "pass": true,
+      "note": "focusedTagBeforeDelete=INPUT deletedGone=true backAfterUndo=true restoredToast=true deletedToastGone=true",
+      "shot": "11a-t4-created-draft-focused.png / 11b-t4-after-delete.png / 11c-t4-after-cmdz-no-manual-blur.png"
+    },
+    {
       "id": "cleanup",
       "pass": true,
-      "note": "all three throwaway tasks gone from view=true",
-      "shot": "11-after-cleanup.png"
+      "note": "all four throwaway tasks gone from view=true",
+      "shot": "12-after-cleanup.png"
     }
   ],
   "consoleErrors": [
@@ -54,18 +60,33 @@
   ],
   "apiLogTail": [
     {
-      "method": "DELETE",
-      "url": "http://localhost:3201/api/tasks/a74411b9-3368-46c8-a09d-db1c8a7b541e",
+      "method": "POST",
+      "url": "http://localhost:3201/api/tasks",
+      "status": 201
+    },
+    {
+      "method": "PATCH",
+      "url": "http://localhost:3201/api/tasks/53f42e1f-de80-4242-a6ec-e74eaab7f8ed",
       "status": 200
     },
     {
       "method": "DELETE",
-      "url": "http://localhost:3201/api/tasks/84a09e3f-dc08-41ae-bdae-48f4f4eff291",
+      "url": "http://localhost:3201/api/tasks/4b1625e8-bc27-46ee-b7e2-5d75ba0968f5",
       "status": 200
     },
     {
       "method": "DELETE",
-      "url": "http://localhost:3201/api/tasks/1dd4efb7-6906-4351-8499-8a35e0e99d3c",
+      "url": "http://localhost:3201/api/tasks/caff665f-2f41-4173-8d00-23eb219a00a1",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "url": "http://localhost:3201/api/tasks/169dcb88-d9d2-4402-9195-1d7b59e6ca12",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "url": "http://localhost:3201/api/tasks/53f42e1f-de80-4242-a6ec-e74eaab7f8ed",
       "status": 200
     }
   ]

@@ -15,6 +15,7 @@ import { useDragOverTracking } from '~/composables/useDragOverTracking'
 import { useLastUsedTheme } from '~/composables/useLastUsedTheme'
 import { useThemeDragState } from '~/composables/useThemeDragState'
 import { taskIdFromDrag, THEME_DRAG_MIME } from '~/utils/dnd'
+import { blurActiveEditable } from '~/utils/textInputKeys'
 
 const props = defineProps<{ theme: Theme }>()
 
@@ -120,9 +121,14 @@ function onCardDragOver(e: DragEvent) {
 /** Drag SOURCE for reordering: only the header (name row) starts a theme drag — the swatch
  *  (visibility toggle), rename/archive buttons and the rename input all opt out with an
  *  explicit `draggable="false"` on themselves, which native drag respects even though they sit
- *  inside this draggable row (see template). Blocked entirely while renaming. */
+ *  inside this draggable row (see template). Blocked entirely while renaming.
+ *
+ *  `blurActiveEditable()` — same fix as TaskChip's own drag/delete handlers: a theme reorder
+ *  started while some OTHER line's blank draft is still focused elsewhere must not leave Cmd+Z
+ *  stuck stepping aside for that draft's native undo. */
 function onHeaderDragStart(e: DragEvent) {
   if (editing.value) { e.preventDefault(); return }
+  blurActiveEditable()
   e.dataTransfer?.setData(THEME_DRAG_MIME, props.theme.id)
   if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move'
   dragTaught.markDragged()

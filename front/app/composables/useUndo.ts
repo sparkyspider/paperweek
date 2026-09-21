@@ -14,6 +14,10 @@ export interface UndoEntry {
   id: number
   label: string
   undo: () => Promise<void>
+  /** Set via `attachToast` when a caller shows its own toast whose Undo button duplicates this
+   *  entry (e.g. "Task deleted · Undo") — `undoLast` dismisses it too, so Cmd+Z never leaves
+   *  that toast stacked alongside the fresh one it shows. */
+  toastId?: number
 }
 
 const MAX_STACK = 30
@@ -40,20 +44,30 @@ export function useUndo() {
     if (i !== -1) stack.value.splice(i, 1)
   }
 
+  /** Links an already-pushed entry to a toast the caller showed for the same action (its id,
+   *  from `useToast().show`) — see `UndoEntry.toastId`. */
+  function attachToast(id: number, toastId: number): void {
+    const entry = stack.value.find(e => e.id === id)
+    if (entry) entry.toastId = toastId
+  }
+
   /** Cmd+Z. Pops the most recent entry and runs it. Empty stack: silently does nothing (no
-   *  toast — there is nothing to report). Success: a toast names what came back. Failure: an
-   *  error toast, and the entry is NOT put back — a failed undo isn't retried by pressing
-   *  Cmd+Z again, since the underlying action's own error path already reported this. */
+   *  toast — there is nothing to report). Success: dismisses that entry's own toast if it had
+   *  one (so an old "Task deleted · Undo" never sits stacked next to the new toast), then shows
+   *  a toast naming what came back. Failure: an error toast, and the entry is NOT put back — a
+   *  failed undo isn't retried by pressing Cmd+Z again, since the underlying action's own error
+   *  path already reported this. */
   async function undoLast(): Promise<void> {
     const entry = stack.value.pop()
     if (!entry) return
     try {
       await entry.undo()
+      if (entry.toastId !== undefined) useToast().dismiss(entry.toastId)
       useToast().show(entry.label)
     } catch {
       useToast().show('Could not undo that.')
     }
   }
 
-  return { stack, canUndo, push, remove, undoLast }
+  return { stack, canUndo, push, remove, attachToast, undoLast }
 }

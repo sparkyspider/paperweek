@@ -41,7 +41,7 @@ import { useThemesStore } from '~/stores/themes'
 import { useThemeVisibility } from '~/composables/useThemeVisibility'
 import { useToast } from '~/composables/useToast'
 import { useUndo } from '~/composables/useUndo'
-import { forceHomeEnd, isBoldShortcut } from '~/utils/textInputKeys'
+import { blurActiveEditable, forceHomeEnd, isBoldShortcut } from '~/utils/textInputKeys'
 import ThemePickerPopover from '~/components/shared/ThemePickerPopover.vue'
 
 const props = withDefaults(
@@ -280,17 +280,25 @@ onBeforeUnmount(() => {
 /** Same Cmd+Z entry (D-front-038) backs both this toast's own Undo button and the keyboard
  *  shortcut, so the stack never holds two ways to undo the same delete: clicking Undo here
  *  removes the pushed entry before running it, exactly as `useUndo.undoLast` removes it by
- *  popping. */
+ *  popping (which also dismisses THIS toast via `attachToast`, so Cmd+Z afterward never leaves
+ *  it stacked next to "Task restored").
+ *
+ *  `blurActiveEditable()` first — Mark's reported scenario: he's just typed a task (leaving its
+ *  blank next-line draft focused), mis-clicks the (x) on an unrelated line, then reaches for
+ *  Cmd+Z. Without this, that stale focus is still sitting in the OTHER draft, and the app-level
+ *  shortcut correctly steps aside for native undo there instead of undoing this delete. */
 function remove() {
+  blurActiveEditable()
   const entry = tasks.deleteTaskQueued(props.task.id)
   if (!entry) return
-  show('Task deleted', {
+  const toastId = show('Task deleted', {
     actionLabel: 'Undo',
     onAction: () => {
       useUndo().remove(entry.undoId)
       entry.undo().catch(() => show('Could not restore that task.'))
     },
   })
+  useUndo().attachToast(entry.undoId, toastId)
 }
 
 /** `draggable` on the row is dropped to `false` while `editing` (see the template) — Chrome
@@ -301,6 +309,10 @@ function remove() {
  *  `draggable` on `!editing` restores normal text-editing behaviour with no loss of the drag
  *  affordance outside edit mode. */
 function onDragStart(e: DragEvent) {
+  // Same stale-focus fix as `remove()` above — a drag started while some OTHER line's blank
+  // draft is still focused must not leave Cmd+Z stuck stepping aside for that draft's native
+  // undo once the drag (and its own undo entry) lands.
+  blurActiveEditable()
   e.dataTransfer?.setData('text/plain', props.task.id)
   if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move'
 }

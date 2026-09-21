@@ -37,12 +37,19 @@ sometimes drags a task to the wrong place; wants Cmd+Z / Ctrl+Z to undelete and 
    (`isUndoShortcut`/`isEditableTarget` in `textInputKeys.ts`) — steps aside inside any
    input/textarea/contenteditable so native text-undo keeps working. `D-front-038`.
 4. **Verified live** with Playwright (not stubbed) — evidence + screenshots + a short README at
-   `docs/process/evidence/undo-2026-09-21/`. All six checks (a–f) plus cleanup passed. One
-   real finding along the way, documented in that README: creating a task via the existing
-   "Enter chains to next line" feature leaves a blank draft focused, and this Chromium build
-   doesn't shift focus to a plain `<button>` on click — so Cmd+Z can legitimately do nothing
-   (by design, native-undo guard) if that leftover focus is never cleared. Not a bug, just worth
-   knowing.
+   `docs/process/evidence/undo-2026-09-21/`.
+5. **Follow-up fix (same day)**: the stale-focus interaction from step 4 turned out to be
+   Mark's exact reported scenario (type a task, mis-click (x) on another line, Cmd+Z does
+   nothing) — fixed in source, not worked around. `blurActiveEditable()`
+   (`textInputKeys.ts`) blurs the stale focused field immediately and again one macrotask later
+   (`setTimeout(fn, 0)`) — needed because clicking a plain `<button>` on this Chromium/macOS
+   combination transiently focuses it, then the browser synchronously restores focus back to
+   the stale field right after the click handler returns, so only a deferred pass actually
+   catches it. Wired into `TaskChip.vue`'s `remove()`/`onDragStart()` and `ThemeCard.vue`'s
+   `onHeaderDragStart()`. Also fixed: Cmd+Z restoring a delete now dismisses the older "Task
+   deleted · Undo" toast (`useUndo.attachToast`) instead of stacking both. Re-verified with a
+   new Playwright check (g) driving Mark's exact scenario with **no** test-side blur workaround
+   — all checks a–g plus cleanup pass; evidence updated in the same folder.
 
 **Open product question for Mark** (not yet actioned, carried forward from a prior session):
 theme colour is currently only reachable via rename mode (dblclick name / pencil icon).

@@ -56,3 +56,32 @@ export function isEditableTarget(target: EventTarget | null): boolean {
   const tag = el.tagName
   return tag === 'INPUT' || tag === 'TEXTAREA' || el.isContentEditable
 }
+
+/**
+ * Mark's exact reported scenario: typing a task (leaving its blank next-line draft focused),
+ * then mis-clicking the hover-revealed (x) on a DIFFERENT line, then reaching for Cmd+Z — the
+ * app-level shortcut correctly saw focus still sitting in that unrelated draft and stepped
+ * aside for native undo there, so the delete's own undo never ran. Fix: any gesture that starts
+ * a NEW action elsewhere on the page (a delete click, a drag) first blurs whatever text field
+ * still has focus, exactly as clicking into it would — `blur()` fires the field's own `@blur`
+ * handler synchronously (a fresh empty draft is discarded, same as it always was on blur; a
+ * dirty one saves, same as it always was). Cmd+Z itself is untouched: while a field IS actually
+ * focused and the user presses Cmd+Z without clicking anything else first, native undo still
+ * wins (see `isEditableTarget` above) — this only clears STALE focus left over from an earlier,
+ * finished interaction.
+ */
+export function blurActiveEditable(): void {
+  const tryBlur = () => {
+    const el = document.activeElement
+    if (el instanceof HTMLElement && isEditableTarget(el)) el.blur()
+  }
+  tryBlur()
+  // Clicking a plain `<button>` (the delete glyph) on this Chromium/macOS combination briefly
+  // moves focus to the button — so at the point our click handler runs, `document.activeElement`
+  // is already the BUTTON, not the stale input, and the immediate `tryBlur()` above is a no-op —
+  // and the browser then SYNCHRONOUSLY restores focus back to that same stale input right after
+  // our handler returns (macOS convention: a plain button never keeps focus from a click). A
+  // deferred pass, one macrotask later, runs after that restore has happened and blurs it for
+  // real. Cheap and harmless when there was nothing to blur either way.
+  setTimeout(tryBlur, 0)
+}

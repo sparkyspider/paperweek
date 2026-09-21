@@ -1,6 +1,7 @@
-// One-off verification script for the Cmd+Z undo feature (task 2026-09-21).
-// Logs in and drives the real UI (no store stubbing), and proves checks a-f from the task
-// brief. Screenshots + a JSON result log go to docs/process/evidence/undo-2026-09-21/.
+// One-off verification script for the Cmd+Z undo feature (task 2026-09-21, plus the 2026-09-21
+// follow-up fix for the stale-focus bug). Logs in and drives the real UI (no store stubbing),
+// and proves checks a-g from the task briefs. Screenshots + a JSON result log go to
+// docs/process/evidence/undo-2026-09-21/.
 //
 // Usage: node undo-verify.mjs <email> <password>
 // (credentials are never hardcoded here — see auth/.machinekey/mark-initial-password.txt)
@@ -24,20 +25,6 @@ function record(id, pass, note, shot) {
 
 function shotPath(name) {
   return `${EVIDENCE_DIR}/${name}`
-}
-
-/** The write-anywhere "Enter chains to the next line" feature (pre-existing, unrelated to
- *  Cmd+Z) leaves a fresh empty draft `<input>` focused after every task creation. This
- *  Chromium build (macOS defaults) does not shift focus to a plain `<button>` on click, so
- *  that leftover focus can persist right through a later hover+click on an unrelated task's
- *  delete button. Blur it explicitly before each Cmd+Z check so the test exercises "nothing
- *  editable is focused" — the realistic case Mark is in once he's clicked/toggled anything
- *  else on the page — rather than an artifact of the test's own task-creation step. */
-async function blurActive(page) {
-  await page.evaluate(() => {
-    const el = document.activeElement
-    if (el && typeof el.blur === 'function') el.blur()
-  })
 }
 
 /** Toasts self-dismiss after 5s; wait for a specific one to clear so an EARLIER check's toast
@@ -149,7 +136,6 @@ async function main() {
     await page.waitForTimeout(200)
     const deletedGone = (await page.getByText(T1, { exact: true }).count()) === 0
     await page.screenshot({ path: shotPath('2a-after-delete-toast.png'), fullPage: false })
-    await blurActive(page)
     await page.keyboard.press('Meta+z')
     await page.waitForTimeout(400)
     const backAfterUndo = (await page.getByText(T1, { exact: true }).count()) > 0
@@ -185,7 +171,6 @@ async function main() {
     await page.screenshot({ path: shotPath('5a-t2-after-delete.png'), fullPage: false })
     await page.waitForTimeout(7000)
     const deleteHitServer = apiLog.some((r) => r.method === 'DELETE' && r.url.includes('/api/tasks/'))
-    await blurActive(page)
     await page.keyboard.press('Meta+z')
     await page.waitForTimeout(600)
     const backAfterUndo = (await page.getByText(T2, { exact: true }).count()) > 0
@@ -221,7 +206,6 @@ async function main() {
     await page.waitForTimeout(700)
     const onGrid = (await daySectionByLabel(page, MON, 'Morning').getByText(T3, { exact: true }).count()) > 0
     await page.screenshot({ path: shotPath('7a-t3-dropped-monday-morning.png'), fullPage: false })
-    await blurActive(page)
     await page.keyboard.press('Meta+z')
     await page.waitForTimeout(500)
     const backInBacklog = (await themeCard(page, 'Personal').getByText(T3, { exact: true }).count()) > 0
@@ -258,7 +242,6 @@ async function main() {
     await page.waitForTimeout(700)
     const onWednesday = (await daySectionByLabel(page, WED, 'Morning').getByText(T3, { exact: true }).count()) > 0
     await page.screenshot({ path: shotPath('9a-t3-dropped-wednesday.png'), fullPage: false })
-    await blurActive(page)
     await page.keyboard.press('Meta+z')
     await page.waitForTimeout(500)
     const backOnMonday = (await daySectionByLabel(page, MON, 'Morning').getByText(T3, { exact: true }).count()) > 0
@@ -305,9 +288,43 @@ async function main() {
       '10a-typing-char.png / 10b-after-native-undo.png')
   }
 
-  // ---------- Cleanup: delete T1, T2, T3 for real (no undo) ----------
+  // Let (e)'s own toast-absence window fully clear before (g) starts checking toasts again.
+  await page.waitForTimeout(500)
+
+  // ---------- (g) — Mark's exact reported scenario: type a task (leaving its blank next-line
+  // draft focused), mis-click (x) on ANOTHER line, Cmd+Z WITHOUT ever blurring by hand. The
+  // 2026-09-21 follow-up fix (blurActiveEditable() in TaskChip's remove()/onDragStart and
+  // ThemeCard's onHeaderDragStart) must make this work without any test-side workaround. ----------
+  const T4 = 'undo-test-focus-gap'
+  {
+    await createBacklogTask(page, 'Personal', T4) // leaves the NEXT blank draft line focused
+    const focusedTagBeforeDelete = await page.evaluate(() => document.activeElement?.tagName ?? null)
+    await page.screenshot({ path: shotPath('11a-t4-created-draft-focused.png'), fullPage: false })
+
+    const row = taskRow(page, T4) // T4's own saved row — a DIFFERENT line from the focused draft
+    await row.hover()
+    await page.waitForTimeout(150)
+    await row.locator('button[aria-label="Delete task"]').click() // no manual blur before this
+    await page.waitForTimeout(200)
+    const deletedGone = (await page.getByText(T4, { exact: true }).count()) === 0
+    await page.screenshot({ path: shotPath('11b-t4-after-delete.png'), fullPage: false })
+
+    // No blurActive(page) call — the fix must have already cleared the stale focus itself.
+    await page.keyboard.press('Meta+z')
+    await page.waitForTimeout(400)
+    const backAfterUndo = (await page.getByText(T4, { exact: true }).count()) > 0
+    const restoredToastVisible = (await page.getByText('Task restored', { exact: true }).count()) > 0
+    const deletedToastGone = (await page.getByText('Task deleted', { exact: true }).count()) === 0
+    await page.screenshot({ path: shotPath('11c-t4-after-cmdz-no-manual-blur.png'), fullPage: false })
+
+    record('g', focusedTagBeforeDelete === 'INPUT' && deletedGone && backAfterUndo && restoredToastVisible && deletedToastGone,
+      `focusedTagBeforeDelete=${focusedTagBeforeDelete} deletedGone=${deletedGone} backAfterUndo=${backAfterUndo} restoredToast=${restoredToastVisible} deletedToastGone=${deletedToastGone}`,
+      '11a-t4-created-draft-focused.png / 11b-t4-after-delete.png / 11c-t4-after-cmdz-no-manual-blur.png')
+  }
+
+  // ---------- Cleanup: delete T1, T2, T3, T4 for real (no undo) ----------
   await page.waitForTimeout(300)
-  for (const title of [T1, T2, T3]) {
+  for (const title of [T1, T2, T3, T4]) {
     const matches = await page.getByText(title, { exact: true }).count()
     if (matches === 0) continue
     const row = page.getByText(title, { exact: true }).first().locator('xpath=ancestor::div[@draggable][1]')
@@ -316,14 +333,15 @@ async function main() {
     await page.waitForTimeout(200)
   }
   await page.waitForTimeout(6000) // let the deferred DELETEs actually commit server-side
-  await page.screenshot({ path: shotPath('11-after-cleanup.png'), fullPage: false })
+  await page.screenshot({ path: shotPath('12-after-cleanup.png'), fullPage: false })
 
   const cleanupOk = (
     (await page.getByText(T1, { exact: true }).count()) === 0 &&
     (await page.getByText(T2, { exact: true }).count()) === 0 &&
-    (await page.getByText(T3, { exact: true }).count()) === 0
+    (await page.getByText(T3, { exact: true }).count()) === 0 &&
+    (await page.getByText(T4, { exact: true }).count()) === 0
   )
-  record('cleanup', cleanupOk, `all three throwaway tasks gone from view=${cleanupOk}`, '11-after-cleanup.png')
+  record('cleanup', cleanupOk, `all four throwaway tasks gone from view=${cleanupOk}`, '12-after-cleanup.png')
 
   fs.writeFileSync(`${EVIDENCE_DIR}/results.json`, JSON.stringify({ results, consoleErrors, apiLogTail: apiLog.slice(-20) }, null, 2))
   console.log('\nConsole/page errors observed during run:', consoleErrors.length)

@@ -27,8 +27,8 @@ for the operational how-to once it exists.
 
 | Path | Stack | Purpose |
 |------|-------|---------|
-| `front/` | Nuxt 4 + Vue 3.5 + Tailwind 4 | Web frontend, port **3100** |
-| `back/`  | NestJS 11 + Prisma 6 + PostgreSQL | API, port **3101**, database `productivity-tools` |
+| `front/` | Nuxt 4 + Vue 3.5 + Tailwind 4 | Web frontend, port **3200** |
+| `back/`  | NestJS 11 + Prisma 6 + PostgreSQL | API, port **3201**, database `productivity` |
 | `auth/`  | Zitadel (Docker, shared) | Points at co-sy-v2's existing local Zitadel (`localhost:8080`), own org **"Productivity"** — not a separate deployment |
 | `docs/`  | Markdown | Rules, architecture, decisions (this index) |
 | `SPEC.md` | Markdown | The product spec — SSOT for what this app does |
@@ -93,7 +93,7 @@ Read [`rules-system.md`](docs/rules-system.md) first (cross-cutting), then your 
 - [`rules-users.md`](docs/rules-users.md) — the (deliberately small) identity model: per-user `ownerId`, no org membership.
 - [`rules-roles.md`](docs/rules-roles.md) — the rights model: ordinary users need no role; `agent` is the one exception.
 - [`rules-database.md`](docs/rules-database.md) — PostgreSQL + Prisma + per-user `ownerId` scoping (no RLS).
-- [`rules-deployment.md`](docs/rules-deployment.md) — packaging, config, running the pieces; ports 3100/3101.
+- [`rules-deployment.md`](docs/rules-deployment.md) — packaging, config, running the pieces; ports 3200/3201.
 - [`rules-security.md`](docs/rules-security.md) — secrets & credentials; the agent service-account trust boundary.
 - [`rules-autodoc-logging.md`](docs/rules-autodoc-logging.md) — JSDoc, OpenAPI/Swagger, and logging conventions.
 - [`rules-agentic.md`](docs/rules-agentic.md) — the `agent` role / `prod-agent` / `X-On-Behalf-Of` API-access mechanism.
@@ -121,3 +121,23 @@ leave the rule in place until it's deliberately changed.
    [`rules-agentic.md`](docs/rules-agentic.md) and root `AGENTS.md`.
 4. Do the work inside the correct folder (`front/`, `back/`, `auth/`, or `docs/`). The
    root stays clean (§2).
+
+## 7. Starting paperweek locally (the short version)
+
+Three pieces, in this order. Ports: Zitadel **8080**, back **3201**, front **3200**
+(3100/3101 belong to Mark's co-sy board launchd services — never use them).
+
+```bash
+# 1. Zitadel — shared from co-sy-v2; Docker Desktop must be running first
+open -a Docker && cd ~/IdeaProjects/co-sy-v2/auth && docker compose up -d
+curl -s -o /dev/null -w '%{http_code}\n' http://localhost:8080/.well-known/openid-configuration   # 200
+
+# 2. Backend (Postgres on localhost:5432 must be up: `pg_isready`)
+cd ~/IdeaProjects/paperweek/back && npm run start:dev          # http://localhost:3201/health -> 200
+
+# 3. Frontend
+cd ~/IdeaProjects/paperweek/front && npm run dev               # http://localhost:3200
+```
+
+Run 2 and 3 in separate terminals (or background them with `nohup ... &`). First-time
+setup (DB role, Zitadel org, `.env`, migrations, seed) is in [`README.md`](README.md).

@@ -543,6 +543,72 @@ button:disabled {
   opacity: 0.35;
 }
 
+/* A BOLD task is a HEADING (Mark's ask, 2026-09-10) — and a heading wears its theme colour a
+   different way: no dot at all (neither the backlog's inline `.line-dot` nor the day card's own
+   margin dot — both call sites skip rendering it when `task.bold`), and instead the words sit on
+   a watercolor highlighter stroke washed in that theme's colour. NO hierarchy is implied: a
+   heading does not own the lines beneath it, it is just a line that reads as a heading.
+
+   The colour itself is DATA, not a palette token — a user's own theme colour — so it arrives as
+   the inline custom property `--wash` at the call site, exactly the way `.line-dot` takes its
+   fill from an inline `background-color`. Nothing here hardcodes a hue.
+
+   Drawn as a `::before` (NOT `::after`: that belongs to `.ink-strike`, which can be on this very
+   same span when a heading is also done) behind the text, inside the span's own stacking context
+   (`isolation: isolate` is what keeps `z-index: -1` from falling behind the ruled-paper ground).
+   The "hand-pulled pen" read comes from three cheap things — an off-axis linear-gradient that
+   fades out at both ends like a stroke running dry, an asymmetric elliptical border-radius so no
+   two corners match, and a fraction of a degree of rotation. No SVG, no filter, no extra element.
+
+   Vertical extent is deliberately tight: `.ruled-line` clips to one grid unit, so a wash that
+   reached further would simply be cut. Horizontal breathing room comes from the span's own
+   padding (the wash extends past the words, not the words past the wash). */
+.wash-highlight {
+  position: relative;
+  isolation: isolate;
+  padding: 0 0.34em 0 0.28em;
+}
+.wash-highlight::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  right: 0;
+  top: -0.08em;
+  bottom: -0.1em;
+  background: linear-gradient(
+    99deg,
+    transparent 0%,
+    color-mix(in srgb, var(--wash, var(--accent-ink)) 46%, transparent) 3%,
+    color-mix(in srgb, var(--wash, var(--accent-ink)) 34%, transparent) 46%,
+    color-mix(in srgb, var(--wash, var(--accent-ink)) 48%, transparent) 82%,
+    color-mix(in srgb, var(--wash, var(--accent-ink)) 22%, transparent) 97%,
+    transparent 100%
+  );
+  border-radius: 0.75em 0.35em 0.6em 0.45em / 1.2em 0.8em 1.3em 0.7em;
+  transform: rotate(-0.45deg);
+  pointer-events: none;
+}
+
+/* The same stroke under the inline rename `<input>`, so a heading doesn't lose its wash the
+   instant you click into it. An `<input>` cannot carry a reliable `::before`, so the identical
+   gradient is painted as the element's OWN background instead (the border-radius rounds the
+   input's box directly — visually the same stroke, one element fewer). */
+.wash-highlight--input {
+  padding: 0 0.34em 0 0.28em;
+  background: linear-gradient(
+    99deg,
+    transparent 0%,
+    color-mix(in srgb, var(--wash, var(--accent-ink)) 46%, transparent) 3%,
+    color-mix(in srgb, var(--wash, var(--accent-ink)) 34%, transparent) 46%,
+    color-mix(in srgb, var(--wash, var(--accent-ink)) 48%, transparent) 82%,
+    color-mix(in srgb, var(--wash, var(--accent-ink)) 22%, transparent) 97%,
+    transparent 100%
+  );
+  border-radius: 0.75em 0.35em 0.6em 0.45em / 1.2em 0.8em 1.3em 0.7em;
+}
+
+
 /* One daypart region of the sheet — not its own box: no background, no border, just a marker
    for where its watermark sits. The heading itself takes no vertical space at all (see
    .section-watermark below). */

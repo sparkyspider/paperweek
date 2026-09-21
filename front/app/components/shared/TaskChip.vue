@@ -10,6 +10,14 @@
  * day card draws its own theme dot out in the ruled margin instead (see DaySection.vue's
  * `.row-margin-dot`), so text starts cleanly at the line rhythm's left edge, undisplaced.
  *
+ * A BOLD task is a HEADING (2026-09-10) and has NO dot at all — not the inline one here, not the
+ * day card's (DaySection skips its own for a bold task). Its theme colour is a watercolor
+ * highlighter wash behind the words instead (`.wash-highlight`), and the theme gesture the dot
+ * used to carry comes back only while the heading is being EDITED: one dot, in the ordinary
+ * place, opening the ordinary swatch+name picker (`ThemePickerPopover`). Deliberately NO
+ * hierarchy: a heading does not own, group or indent the lines beneath it — it is one line that
+ * reads like a heading, nothing more.
+ *
  * Click/dblclick collision: a real double-click fires TWO native `click` events before the
  * `dblclick` event, so listening to both independently means a completed dblclick would ALSO
  * toggle-then-toggle-back (two separate PATCHes) before edit ever opens. Instead this owns its
@@ -26,11 +34,14 @@
  * `dense` is used inside a day-strip section, where a task sits ON a single ruled line rather
  * than wrapping in the sidebar's roomier backlog list.
  */
-import { ref, computed, nextTick, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue'
 import type { Task } from '~/stores/tasks'
 import { useTasksStore } from '~/stores/tasks'
+import { useThemesStore } from '~/stores/themes'
+import { useThemeVisibility } from '~/composables/useThemeVisibility'
 import { useToast } from '~/composables/useToast'
 import { forceHomeEnd, isBoldShortcut } from '~/utils/textInputKeys'
+import ThemePickerPopover from '~/components/shared/ThemePickerPopover.vue'
 
 const props = withDefaults(
   defineProps<{ task: Task; color: string; dense?: boolean; dotInMargin?: boolean; themeName?: string }>(),
@@ -44,11 +55,59 @@ const props = withDefaults(
 const emit = defineEmits<{ enterNext: [payload: { empty: boolean }] }>()
 
 const tasks = useTasksStore()
+const themes = useThemesStore()
+const visibility = useThemeVisibility()
 const { show } = useToast()
+
+/** A bold task IS a heading (Mark's ask, 2026-09-10) — same flag, read by intent everywhere it
+ *  drives more than a font weight. A heading drops its theme DOT entirely and wears the theme
+ *  colour as a watercolor wash behind the words instead (`.wash-highlight` in main.css). No
+ *  hierarchy is implied or built: it does not own, group, or indent the lines beneath it. */
+const isHeading = computed(() => props.task.bold)
+
+/** Only VISIBLE themes are offered — but never a dead end: if every theme is muted, offer them
+ *  all. Same rule (and the same reason) as DaySection's own `pickerThemes`; the heading's dot and
+ *  the plain line's margin dot open the same picker over the same set, so a heading is never
+ *  offered a different world of themes than the line under it. */
+const pickerThemes = computed(() => {
+  const visible = themes.active.filter(t => visibility.isVisible(t.id))
+  return visible.length ? visible : themes.active
+})
+
+/** Read from the store rather than the optional `themeName` prop: only the sidebar backlog passes
+ *  that prop, and the day card needs the name for the dot's label too. */
+const currentThemeName = computed(() => themes.items.find(t => t.id === props.task.themeId)?.name ?? 'Theme')
 
 const editing = ref(false)
 const draft = ref(props.task.title)
 const titleInput = ref<HTMLInputElement | null>(null)
+
+/** A heading's theme gesture (Mark's ruling, 2026-09-10). At rest a heading shows no dot at all —
+ *  the wash IS its theme colour. Put it in edit mode and the dot comes back, in the ordinary
+ *  place (inline in the backlog; on the day card it lands at the same x its margin dot would,
+ *  because DaySection skips its own for a bold task and this is the row's first flex child), and
+ *  clicking it opens the SAME swatch+NAME popover the margin dot opens. Names, not bare swatches:
+ *  seven-plus pastel circles are indistinguishable from one another. */
+const pickerOpen = ref(false)
+const pickerDotEl = ref<HTMLElement | null>(null)
+
+/** WHICH task this open edit session belongs to — and the guard that goes with it.
+ *
+ *  A TaskChip is mounted per LINE SLOT, not per task: both parents key the ruled line by
+ *  `slot.index` and hand this component whatever task currently occupies it. So `props.task` can
+ *  become a DIFFERENT record underneath an editor that is already open, while `draft` still holds
+ *  the text typed for the previous one — and a commit that trusted `props.task.id` would write one
+ *  task's words onto another task's record.
+ *
+ *  That is not hypothetical: it happened during this feature's own verification run, silently
+ *  renaming a real, unrelated backlog task. Two things stop it now — this watcher closes the
+ *  editor the moment the row changes identity (the stale draft is dropped rather than saved
+ *  somewhere wrong), and `commitEdit`/`pickTheme` re-check the owner before writing anything. */
+const editingTaskId = ref<string | null>(null)
+watch(() => props.task.id, () => {
+  editing.value = false
+  editingTaskId.value = null
+})
 
 /** `caretAtEnd` (default false, the original dblclick/F2/Enter-on-row gesture) select-alls, the
  *  normal rename affordance. The Enter-chain landing (`onEnterNext` in the parent) instead wants
@@ -57,6 +116,7 @@ const titleInput = ref<HTMLInputElement | null>(null)
  *  line." */
 async function startEdit(caretAtEnd = false) {
   draft.value = props.task.title
+  editingTaskId.value = props.task.id
   editing.value = true
   await nextTick()
   const el = titleInput.value
@@ -80,13 +140,19 @@ async function startEdit(caretAtEnd = false) {
 defineExpose({ startEdit })
 
 function commitEdit() {
+  const owner = editingTaskId.value
   editing.value = false
+  editingTaskId.value = null
+  // The row changed identity while this editor was open — the typed text belongs to a task this
+  // component no longer renders, so it is dropped rather than written onto the wrong record.
+  if (owner !== props.task.id) return
   const next = draft.value.trim()
   if (next && next !== props.task.title) tasks.updateTitle(props.task.id, next)
 }
 
 function cancelEdit() {
   editing.value = false
+  editingTaskId.value = null
   draft.value = props.task.title
 }
 
@@ -112,6 +178,47 @@ function handleBoldShortcut(e: KeyboardEvent): boolean {
   tasks.toggleBold(props.task.id)
   return true
 }
+
+/** What choosing a theme from that popover does. Three things it must get right:
+ *
+ *  1. **Don't lose the typed text.** The line may be mid-rename with a dirty draft. Its text is
+ *     committed as part of the SAME patch, not a separate one — see `tasks.setTheme`'s doc for
+ *     why two concurrent PATCHes on one task race each other.
+ *  2. **Don't duplicate the re-theme logic.** `tasks.setTheme` is the one place it lives; the
+ *     day card's margin-dot picker (`DaySection.selectTheme`) calls exactly the same action.
+ *  3. **End edit mode cleanly.** In the sidebar backlog a re-themed task moves to the OTHER
+ *     theme's card the moment the store updates, unmounting this component — so `editing` is
+ *     closed here first, before the patch, rather than left for a `@blur` that may never arrive.
+ *
+ *  (The popover options' own `@mousedown.prevent` is what stops the input's blur-commit from
+ *  firing and tearing the row down before the click ever lands.) */
+function pickTheme(themeId: string): void {
+  // Same owner check as commitEdit: only carry the typed title if this editor is still open on
+  // the very task it was opened on.
+  const owned = editing.value && editingTaskId.value === props.task.id
+  const dirty = owned ? draft.value.trim() : ''
+  const pendingTitle = dirty && dirty !== props.task.title ? dirty : undefined
+  editing.value = false
+  editingTaskId.value = null
+  if (themeId === props.task.themeId) {
+    // Same theme — nothing to re-theme, but a dirty title still has to be saved, exactly as
+    // closing edit mode any other way would have saved it.
+    if (pendingTitle) tasks.updateTitle(props.task.id, pendingTitle)
+    return
+  }
+  tasks.setTheme(props.task.id, themeId, pendingTitle)
+}
+
+function togglePicker(): void {
+  pickerOpen.value = !pickerOpen.value
+}
+function onPickTheme(themeId: string): void {
+  pickerOpen.value = false
+  pickTheme(themeId)
+}
+/** Leaving edit mode by ANY route (Enter, Esc, blur, the identity watcher above) takes the dot
+ *  away with it, so a popover still hanging off it would be anchored to nothing. */
+watch(editing, (on) => { if (!on) pickerOpen.value = false })
 
 function onEditKeydown(e: KeyboardEvent): void {
   forceHomeEnd(e)
@@ -254,12 +361,45 @@ onBeforeUnmount(() => {
     :draggable="!editing"
     @dragstart="onDragStart"
   >
+    <!-- No dot on a HEADING at rest: its theme colour arrives as the wash behind the words, and
+         a dot beside it would be the same fact said twice. `dotInMargin` (the day card, which
+         draws its own dot out on the line) already suppressed this one there; the day card skips
+         ITS dot for a bold task too, so a resting heading is dotless in both places. -->
     <span
-      v-if="!dotInMargin"
+      v-if="!dotInMargin && !isHeading"
       class="mb-[3px] inline-block h-1.5 w-1.5 shrink-0 rounded-full self-end"
       :style="{ background: color }"
       :title="themeName"
       aria-hidden="true"
+    />
+
+    <!-- …but a heading being EDITED gets exactly one dot back, and it is the picker trigger — the
+         theme gesture a heading would otherwise have lost along with its dot. Same `.line-dot`
+         control the day card uses, so it lands at the same x there and carries the same generous
+         hit area (a 6px circle in a 20px box).
+
+         Two modifiers are load-bearing, not tidiness:
+         · `@mousedown.prevent` — without it the mousedown blurs the input first, `commitEdit`
+           closes edit mode, this row re-renders (in the backlog it may unmount outright) and the
+           click never reaches a button that no longer exists.
+         · `@click.stop` — the row this sits in (`.ruled-line`, in both AddTaskInline and
+           DaySection) has its own `@click` that writes a NEW draft line onto any slot that is
+           currently empty. A microtask checkpoint runs between one listener returning and the
+           event continuing to bubble, so Vue can re-bind that handler mid-dispatch. Measured, not
+           theorised: without `.stop` an earlier version of this gesture left the source card
+           holding a focused, empty `.diary-input`. -->
+    <button
+      v-if="editing && isHeading"
+      ref="pickerDotEl"
+      type="button"
+      class="line-dot"
+      :style="{ backgroundColor: color }"
+      :title="currentThemeName"
+      :aria-label="`Task theme: ${currentThemeName}. Change theme`"
+      aria-haspopup="listbox"
+      :aria-expanded="pickerOpen"
+      @mousedown.prevent
+      @click.stop="togglePicker"
     />
 
     <input
@@ -268,7 +408,8 @@ onBeforeUnmount(() => {
       v-model="draft"
       type="text"
       class="font-write min-w-0 flex-1 border-0 bg-transparent text-[18px] leading-[22px] text-[var(--ink)] outline-none"
-      :class="{ 'font-write--bold': task.bold }"
+      :class="{ 'font-write--bold': task.bold, 'wash-highlight--input': isHeading }"
+      :style="isHeading ? { '--wash': color } : undefined"
       @keydown="onEditKeydown"
       @keyup.enter="onEditEnter"
       @keyup.esc="cancelEdit"
@@ -289,7 +430,10 @@ onBeforeUnmount(() => {
       @mouseleave="hideTape"
       @focus="scheduleTape"
       @blur="hideTape"
-    ><span :class="[task.doneAt ? 'ink-strike' : '', task.bold ? 'font-write--bold' : '']">{{ task.title }}</span></span>
+    ><span
+      :class="[task.doneAt ? 'ink-strike' : '', task.bold ? 'font-write--bold' : '', isHeading ? 'wash-highlight' : '']"
+      :style="isHeading ? { '--wash': color } : undefined"
+    >{{ task.title }}</span></span>
 
     <!-- Both glyph buttons as one snug pair, not two independent flex items spaced by the row's
          own gap-1.5 (that read as two stray marks scattered across the line-end, not a cluster).
@@ -326,6 +470,15 @@ onBeforeUnmount(() => {
         </svg>
       </button>
     </div>
+
+    <ThemePickerPopover
+      :open="pickerOpen"
+      :trigger="pickerDotEl"
+      :themes="pickerThemes"
+      :selected-id="task.themeId"
+      @select="onPickTheme"
+      @close="pickerOpen = false"
+    />
 
     <!-- The "sticky tape" tooltip — full title, ONLY when this title is actually ellipsis-
          truncated right now (see scheduleTape). Teleported + fixed-positioned for the same

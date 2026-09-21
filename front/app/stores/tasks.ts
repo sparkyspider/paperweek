@@ -14,6 +14,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useApi } from '~/composables/useApi'
 import { useThemeVisibility } from '~/composables/useThemeVisibility'
+import { useLastUsedTheme } from '~/composables/useLastUsedTheme'
 
 export type Daypart = 'morning' | 'afternoon' | 'evening' | 'notes'
 
@@ -173,6 +174,37 @@ export const useTasksStore = defineStore('tasks', () => {
     return patchTask(id, { title: title.trim() })
   }
 
+  /** Re-theme a saved task — the ONE place the "change this task's theme" gesture lands, so the
+   *  day card's margin-dot popover (DaySection.selectTheme) and a bold heading's own swatch row
+   *  (TaskChip, which has no dot to click) cannot drift apart. Also marks that theme last-used,
+   *  same as every other explicit theme pick does.
+   *
+   *  `title` is the heading-swatch case: clicking a swatch while the line is mid-rename must not
+   *  throw the typed text away, and must not send it as a SECOND, concurrent PATCH either — two
+   *  in-flight patches on one task race, and whichever response lands last overwrites the other's
+   *  field (patchTask replaces the whole record with the server's copy). Folding the pending
+   *  title into this one patch keeps it a single round trip with a single outcome. */
+  function setTheme(id: string, themeId: string, title?: string): Promise<void> {
+    const t = byId.value[id]
+    if (!t) return Promise.resolve()
+    useLastUsedTheme().set(themeId)
+    const patch: Partial<Pick<Task, 'themeId' | 'title' | 'position'>> = { themeId }
+    const trimmed = title?.trim()
+    if (trimmed) patch.title = trimmed
+    // A BACKLOG task keeps its `position`, and `position` is a LINE-SLOT INDEX inside one list
+    // (useAutosaveLines) — so carrying it into a different theme lands it on a slot the
+    // destination may already have occupied. Duplicate slots tip that whole list out of the slot
+    // model into the legacy dense fallback, which silently RE-ORDERS every row in it. Append to
+    // the end of the destination instead — the same thing dropping a task onto a theme card
+    // already does (ThemeCard.onDropEnd). A SCHEDULED task keeps its position untouched: its slot
+    // belongs to a day cell, which re-theming does not move it out of.
+    if (!t.scheduledOn && t.themeId !== themeId) {
+      const dest = backlogFor(themeId)
+      patch.position = dest.length ? Math.max(...dest.map(x => x.position)) + 1 : 0
+    }
+    return patchTask(id, patch)
+  }
+
   /** Cmd+B — same thin wrapper-over-`patchTask` shape as `updateTitle` (optimistic, revert on
    *  failure, via `patchTask`'s own snapshot/restore). Whole-line bold, no per-word formatting. */
   function toggleBold(id: string): Promise<void> {
@@ -295,6 +327,6 @@ export const useTasksStore = defineStore('tasks', () => {
   return {
     byId, all, loading, error, unreachable, backlogLoaded, rangeLoaded,
     forCell, backlogFor, fetchRange, fetchBacklog, createBacklogTask,
-    patchTask, schedule, unschedule, updateTitle, toggleBold, toggleDone, toggleDoneDeferred, deleteTaskQueued,
+    patchTask, schedule, unschedule, updateTitle, setTheme, toggleBold, toggleDone, toggleDoneDeferred, deleteTaskQueued,
   }
 })

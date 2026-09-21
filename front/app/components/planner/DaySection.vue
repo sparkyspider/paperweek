@@ -25,6 +25,7 @@ import { forceHomeEnd, isBoldShortcut } from '~/utils/textInputKeys'
 // Type-only — TaskChip itself is still resolved by Nuxt's auto-import in the template; this just
 // gives `taskChipRefs` a real exposed-API type (mirrors DayStrip.vue's `scrollToToday` shape).
 import type TaskChip from '~/components/shared/TaskChip.vue'
+import ThemePickerPopover from '~/components/shared/ThemePickerPopover.vue'
 
 const props = defineProps<{
   dateISO: string
@@ -167,12 +168,13 @@ function onDropAt(e: DragEvent, index: number) {
 /** The theme gesture (task 16 redesign): the margin DOT itself IS the picker trigger — click
  *  either a draft row's dot (previewing its quiet default) or a saved task's dot to open a
  *  small floating list of swatch+NAME options (color alone can't identify 7+ themes at a
- *  glance). Teleported to <body> and positioned from the trigger's own
- *  `getBoundingClientRect()` (not just `position: absolute` in place) because `.ruled-line`
- *  clips overflow on both axes to hold the one-grid-unit row height — an in-place popover would
- *  be silently clipped exactly like the margin dot was before that got pulled out too. Only one
- *  open at a time, keyed by a `draft:<key>` / `task:<id>` string so the same mechanism serves
- *  both row kinds. */
+ *  glance). Only one open at a time, keyed by a `draft:<key>` / `task:<id>` string so the same
+ *  mechanism serves both row kinds.
+ *
+ *  The popover itself now lives in `shared/ThemePickerPopover.vue` (2026-09-10) — a bold HEADING
+ *  has no margin dot at rest, so its own edit-mode dot in TaskChip must open the SAME picker, and
+ *  one implementation is the only way that stays true. Positioning, the outside-click rule and
+ *  the arrow-key nav all moved there with it; this file keeps only "which row is picking". */
 function themeNameFor(id: string | null): string {
   return themes.items.find(t => t.id === id)?.name ?? 'Theme'
 }
@@ -180,25 +182,9 @@ function themeNameFor(id: string | null): string {
 type PickerTarget = { kind: 'draft'; draft: DraftLine } | { kind: 'task'; task: Task }
 
 const pickerOpenFor = ref<string | null>(null)
-const pickerPos = ref<{ top: number; left: number }>({ top: 0, left: 0 })
-const pickerEl = ref<HTMLElement | null>(null)
-/** The dot BUTTON that opened/last-toggled the popover — set in `togglePicker`, read by
- *  `onDocClick` below. Root-caused bug (task 27): `onDocClick` is a real, non-Vue
- *  `document.addEventListener('click', …)` (needed so it also catches clicks OUTSIDE this
- *  component's own tree, e.g. on another day-section's dot or empty page background — a Vue
- *  `@click` binding only ever sees clicks inside its own template). Because a native click
- *  bubbles all the way to `document` in the SAME synchronous dispatch as the click that just
- *  opened the popover (target-phase `togglePicker` runs first, then bubbling continues up
- *  through this exact button to `document`), `onDocClick` used to see that SAME click, find
- *  `pickerOpenFor.value` already truthy (togglePicker had just set it) and the click's target
- *  sitting outside `pickerEl` (the popover, being freshly opened, may not even be rendered yet
- *  this same tick) — and call `closePicker()` immediately, undoing the open before a single
- *  frame painted. Real mouse clicks (mousedown → mouseup → click, all trusted, all bubbling)
- *  hit this every time; `el.click()` in a test happened to dodge it by whatever else differed
- *  in that call's dispatch, which is what made this look automation-only. The fix: `onDocClick`
- *  must recognise "the click that just opened/toggled this popover" and not treat it as an
- *  outside click — comparing against the actual trigger BUTTON (not just `pickerEl`, the
- *  popover panel itself, which is a separate, later-mounted element). */
+/** The dot BUTTON that opened/last-toggled the popover — handed to ThemePickerPopover so its
+ *  outside-click check can recognise "the click that just opened this" and not close what it
+ *  just opened. The full story lives in that component's `onDocClick`. */
 const pickerTriggerEl = ref<HTMLElement | null>(null)
 
 /** The draft or task the open popover is actually choosing a theme for — factored out of the
@@ -221,11 +207,8 @@ const activePickerThemeId = computed<string | null>(() => {
 
 function togglePicker(key: string, e: MouseEvent): void {
   if (pickerOpenFor.value === key) { pickerOpenFor.value = null; pickerTriggerEl.value = null; return }
-  const trigger = e.currentTarget as HTMLElement
-  const rect = trigger.getBoundingClientRect()
-  pickerPos.value = { top: rect.bottom + 4, left: rect.left }
   pickerOpenFor.value = key
-  pickerTriggerEl.value = trigger
+  pickerTriggerEl.value = e.currentTarget as HTMLElement
 }
 function closePicker(): void {
   pickerOpenFor.value = null
@@ -235,37 +218,16 @@ function selectTheme(themeId: string): void {
   const target = activePickerTarget.value
   if (!target) return
   if (target.kind === 'draft') {
+    // Not saved yet — nothing to PATCH, the draft just carries the choice into its own save.
     target.draft.themeId = themeId
+    lastUsedTheme.set(themeId)
   } else {
-    tasks.patchTask(target.task.id, { themeId })
+    // `tasks.setTheme` is the ONE re-theme action (it marks last-used itself) — a bold heading's
+    // swatch row in TaskChip calls the very same one, so the two gestures cannot drift apart.
+    tasks.setTheme(target.task.id, themeId)
   }
-  lastUsedTheme.set(themeId)
   closePicker()
 }
-/** Cheap keyboard nav within the open list — Tab already reaches every option and Enter/Space
- *  already activates one (they're plain buttons), so this only adds the extra affordance of
- *  Arrow keys moving focus between them without leaving the list. */
-function onPickerKeydown(e: KeyboardEvent): void {
-  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
-  e.preventDefault()
-  const items = Array.from(pickerEl.value?.querySelectorAll<HTMLElement>('[role="option"]') ?? [])
-  if (!items.length) return
-  const i = items.indexOf(document.activeElement as HTMLElement)
-  const next = e.key === 'ArrowDown' ? (i + 1) % items.length : (i - 1 + items.length) % items.length
-  items[next]?.focus()
-}
-function onDocClick(e: MouseEvent): void {
-  if (!pickerOpenFor.value) return
-  const target = e.target as Node
-  // The click that just opened (or re-toggled) this popover bubbles to `document` in the SAME
-  // synchronous dispatch — it must not read as an "outside" click and immediately close what
-  // it just opened (see the doc comment on `pickerTriggerEl` above).
-  if (pickerTriggerEl.value && pickerTriggerEl.value.contains(target)) return
-  if (pickerEl.value && !pickerEl.value.contains(target)) closePicker()
-}
-onMounted(() => document.addEventListener('click', onDocClick))
-onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
-
 /** Instant clear on `dragend` (fires regardless of where/whether the drop landed, or whether the
  *  dragged row itself just unmounted) — a fast path on top of useDragOverTracking's own ~150ms
  *  self-healing decay, not a replacement for it: this is for zero visible lag on the common
@@ -335,7 +297,16 @@ onBeforeUnmount(() => document.removeEventListener('dragend', clearDragOverIndex
             @click="visibility.show(slot.task.themeId)"
           />
           <template v-else-if="slot.kind === 'task'">
+            <!-- A HEADING (bold task) gets NO margin dot at all (2026-09-10) — its theme colour
+                 is the wash behind its words instead (`.wash-highlight`), and the dot's other job
+                 (opening the theme picker) moves onto the heading's own swatch row in TaskChip,
+                 shown while it's being edited. The dot is skipped entirely rather than hidden, so
+                 the heading's wash actually starts at the line's left edge like a pen stroke
+                 would, instead of a blank 20px reserved for a dot that isn't there. The GHOST
+                 branch above is deliberately NOT skipped for a bold task: a muted theme's task
+                 renders no text, so its faded dot is the only trace it has left. -->
             <button
+              v-if="!slot.task.bold"
               type="button"
               class="line-dot"
               :title="themeNameFor(slot.task.themeId)"
@@ -399,34 +370,13 @@ onBeforeUnmount(() => document.removeEventListener('dragend', clearDragOverIndex
       </div>
     </div>
 
-    <!-- Teleported to <body>, fixed-positioned from the trigger's own getBoundingClientRect —
-         see the script doc comment above for why (`.ruled-line` clips overflow on both axes,
-         so an in-place popover would be silently invisible). -->
-    <Teleport to="body">
-      <div
-        v-if="pickerOpenFor"
-        ref="pickerEl"
-        role="listbox"
-        aria-label="Choose theme"
-        class="paper-card fixed z-30 min-w-[10rem] p-1"
-        :style="{ top: `${pickerPos.top}px`, left: `${pickerPos.left}px` }"
-        @keydown="onPickerKeydown"
-        @keydown.esc="closePicker"
-      >
-        <button
-          v-for="th in pickerThemes"
-          :key="th.id"
-          type="button"
-          role="option"
-          :aria-selected="activePickerThemeId === th.id"
-          class="font-ui flex w-full items-center gap-2 rounded-none px-2 py-1 text-left text-xs text-[var(--ink-soft)] transition-colors hover:text-[var(--accent-ink)]"
-          @mousedown.prevent
-          @click="selectTheme(th.id)"
-        >
-          <span class="h-2.5 w-2.5 shrink-0 rounded-full" :style="{ background: th.color }" aria-hidden="true" />
-          {{ th.name }}
-        </button>
-      </div>
-    </Teleport>
+    <ThemePickerPopover
+      :open="!!pickerOpenFor"
+      :trigger="pickerTriggerEl"
+      :themes="pickerThemes"
+      :selected-id="activePickerThemeId"
+      @select="selectTheme"
+      @close="closePicker"
+    />
   </div>
 </template>

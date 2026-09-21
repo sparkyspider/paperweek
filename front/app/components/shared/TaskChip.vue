@@ -40,6 +40,7 @@ import { useTasksStore } from '~/stores/tasks'
 import { useThemesStore } from '~/stores/themes'
 import { useThemeVisibility } from '~/composables/useThemeVisibility'
 import { useToast } from '~/composables/useToast'
+import { useUndo } from '~/composables/useUndo'
 import { forceHomeEnd, isBoldShortcut } from '~/utils/textInputKeys'
 import ThemePickerPopover from '~/components/shared/ThemePickerPopover.vue'
 
@@ -276,9 +277,20 @@ onBeforeUnmount(() => {
   // collision; letting the store's own timer complete it is correct.
 })
 
+/** Same Cmd+Z entry (D-front-038) backs both this toast's own Undo button and the keyboard
+ *  shortcut, so the stack never holds two ways to undo the same delete: clicking Undo here
+ *  removes the pushed entry before running it, exactly as `useUndo.undoLast` removes it by
+ *  popping. */
 function remove() {
-  const undo = tasks.deleteTaskQueued(props.task.id)
-  show('Task deleted', { actionLabel: 'Undo', onAction: () => undo?.() })
+  const entry = tasks.deleteTaskQueued(props.task.id)
+  if (!entry) return
+  show('Task deleted', {
+    actionLabel: 'Undo',
+    onAction: () => {
+      useUndo().remove(entry.undoId)
+      entry.undo().catch(() => show('Could not restore that task.'))
+    },
+  })
 }
 
 /** `draggable` on the row is dropped to `false` while `editing` (see the template) — Chrome

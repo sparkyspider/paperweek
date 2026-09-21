@@ -35,3 +35,24 @@ export function forceHomeEnd(e: KeyboardEvent): void {
 export function isBoldShortcut(e: KeyboardEvent): boolean {
   return (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b'
 }
+
+/**
+ * Cmd+Z (macOS) / Ctrl+Z (everyone else) — the session undo stack (`useUndo`, D-front-038).
+ * `!e.shiftKey` deliberately excludes Cmd+Shift+Z/redo, which is out of scope: this shortcut is
+ * for undoing an accidental delete or drag, not a redo stack.
+ */
+export function isUndoShortcut(e: KeyboardEvent): boolean {
+  return (e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'z'
+}
+
+/**
+ * Is this event's target a place the browser owns its OWN native undo for (a text field or a
+ * contenteditable)? The app-level Cmd+Z listener (`app.vue`) must not intercept there — a task
+ * mid-rename, a theme name being typed, or any other in-place text edit keeps native undo.
+ */
+export function isEditableTarget(target: EventTarget | null): boolean {
+  const el = target as HTMLElement | null
+  if (!el) return false
+  const tag = el.tagName
+  return tag === 'INPUT' || tag === 'TEXTAREA' || el.isContentEditable
+}

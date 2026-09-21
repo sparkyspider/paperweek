@@ -90,3 +90,11 @@ agreements/documents/signing domain, multi-org RLS, or invitations (co-sy's D-ba
   lives in `decisions-database.md`; this entry records only the consequence for backend code: the
   `ownerId` filter is not optional per-query discipline, it is the equivalent of what co-sy-v2's
   RLS-by-org gave that project — a query that forgets it is a security bug, not a style nit.
+
+- **D-back-012 · `POST /api/tasks/:id/restore` — undo for the soft delete, reaching a row past the deferred-commit window** — Decided 2026-09-21
+  Backs the front end's Cmd+Z (`D-front-038`). `softDelete` only sets `deletedAt`; this route
+  clears it, owner-scoped exactly like every other task route, and finds the row even though it
+  is already soft-deleted (the owner-lookup helper never filtered on `deletedAt`, so no new bypass
+  was needed). Exists because the front end holds a delete behind a 5s deferred commit before
+  ever sending it — within that window Undo just cancels the pending request, but once it has
+  actually fired there was no way back without a real restore endpoint.

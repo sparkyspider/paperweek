@@ -107,6 +107,20 @@ export class TasksService {
     return toTaskResponse(task);
   }
 
+  /** POST /api/tasks/:id/restore — undo for `softDelete`, backing the front end's Cmd+Z
+   *  (D-front-038 / D-back-012). `taskOwnedOrThrow` below does not filter on `deletedAt`, so it
+   *  finds the row whether or not it is currently soft-deleted — that is what lets this reach a
+   *  task the ordinary owner-scoped list/read paths would already have hidden. 404s the same way
+   *  every other task route does when the id doesn't exist or isn't this caller's. */
+  async restore(ownerId: string, id: string): Promise<TaskResponse> {
+    await this.taskOwnedOrThrow(ownerId, id);
+    const task = await this.prisma.task.update({
+      where: { id },
+      data: { deletedAt: null },
+    });
+    return toTaskResponse(task);
+  }
+
   private async taskOwnedOrThrow(ownerId: string, id: string): Promise<Task> {
     const task = await this.prisma.task.findUnique({ where: { id } });
     if (!task || task.ownerId !== ownerId) {

@@ -174,3 +174,20 @@ needed. New entries for this project start at **D-front-029**.
   dock ran 25× in one flick, each a native smooth scroll fighting the hand-driven position.
   `wheelGestureActive` gates them from first owned event to the gesture's own landing; non-wheel
   scrolling (scrollbar, touch, programmatic) still docks the old way.
+
+- **D-front-038 · Cmd+Z is a session undo stack for delete and placement changes; typing fields keep native undo** — Decided 2026-09-21
+  Mark: presses the hover-revealed (x) by mistake instead of the strikethrough, and sometimes
+  drags a task to the wrong place — he wants Cmd+Z / Ctrl+Z to undelete and un-move. One
+  module-level stack (`useUndo`, capped at 30, session-only) holds `{label, undo}` entries; a
+  single app-level `keydown` listener (`app.vue`, not per-component) pops and runs the last one,
+  showing a toast named by the entry's label ("Task restored" / "Moved back" / "Theme restored").
+  It never intercepts inside an input/textarea/contenteditable (`isEditableTarget`) — native
+  text-undo must keep working while a task or theme name is mid-edit; that guard is what makes
+  this safe to bind globally instead of per-field. Delete's undo is backed by a new backend
+  restore route (`D-back-012`) precisely because the existing "Task deleted · Undo" toast already
+  holds its DELETE behind a 5s deferred commit — Cmd+Z must still work once that window has
+  closed, not just inside it. Placement undo (schedule/unschedule/setTheme/backlog drag-drop) is
+  centralized inside `tasks.ts`'s `patchTask` — any patch touching
+  `scheduledOn`/`daypart`/`position`/`themeId` snapshots the prior values and pushes an undo
+  entry; a pure title/bold/notes patch pushes nothing, so Cmd+Z stays out of ordinary typing.
+  Cmd+Shift+Z/redo is explicitly out of scope.

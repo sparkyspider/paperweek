@@ -9,12 +9,14 @@
  *   PATCH  /api/tasks/:id {title?, notes?, themeId?, scheduledOn?|null, daypart?|null,
  *                          position?, done?}
  *   DELETE /api/tasks/:id  (soft delete)
+ *   POST   /api/tasks/:id/restore  (undo for the soft delete above — D-front-038)
  */
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useApi } from '~/composables/useApi'
 import { useThemeVisibility } from '~/composables/useThemeVisibility'
 import { useLastUsedTheme } from '~/composables/useLastUsedTheme'
+import { useUndo } from '~/composables/useUndo'
 
 export type Daypart = 'morning' | 'afternoon' | 'evening' | 'notes'
 
@@ -141,8 +143,13 @@ export const useTasksStore = defineStore('tasks', () => {
     }
   }
 
-  /** Also used directly for scheduling / moving / unscheduling — they are all just a patch. */
-  async function patchTask(id: string, patch: Partial<Pick<Task, 'title' | 'notes' | 'themeId' | 'scheduledOn' | 'daypart' | 'position' | 'bold'>>): Promise<void> {
+  const PLACEMENT_KEYS = ['scheduledOn', 'daypart', 'position', 'themeId'] as const
+  type PlacementPatch = Partial<Pick<Task, (typeof PLACEMENT_KEYS)[number]>>
+
+  /** The undo target for a placement change — a raw patch with no undo bookkeeping of its own,
+   *  so restoring a prior placement never pushes a fresh ("undo the undo") entry onto the
+   *  stack. Shares `patchTask`'s optimistic-apply/revert-on-failure shape. */
+  async function applyPlacementPatch(id: string, patch: PlacementPatch): Promise<void> {
     const t = byId.value[id]
     if (!t) return
     const prev = { ...t }
@@ -153,6 +160,40 @@ export const useTasksStore = defineStore('tasks', () => {
     } catch (e) {
       byId.value[id] = prev
       error.value = messageOf(e, 'Could not save that change.')
+      throw e
+    }
+  }
+
+  /** Also used directly for scheduling / moving / unscheduling — they are all just a patch.
+   *
+   *  Every patch that touches WHERE a task lives (`scheduledOn`/`daypart`/`position`/`themeId` —
+   *  schedule, unschedule, setTheme, and the backlog drop/reorder paths in useAutosaveLines and
+   *  ThemeCard all funnel through here) pushes a Cmd+Z undo entry that restores the task's prior
+   *  placement (D-front-038). A pure title/bold/notes patch is not a "move" and pushes nothing —
+   *  Mark's ask was specifically to undo an accidental drag or delete, not ordinary typing. */
+  async function patchTask(id: string, patch: Partial<Pick<Task, 'title' | 'notes' | 'themeId' | 'scheduledOn' | 'daypart' | 'position' | 'bold'>>): Promise<void> {
+    const t = byId.value[id]
+    if (!t) return
+    const prev = { ...t }
+
+    const isMove = PLACEMENT_KEYS.some(k => k in patch)
+    let undoId: number | null = null
+    if (isMove) {
+      const restoreTo: PlacementPatch = {
+        scheduledOn: prev.scheduledOn, daypart: prev.daypart, position: prev.position, themeId: prev.themeId,
+      }
+      const label = 'themeId' in patch ? 'Theme restored' : 'Moved back'
+      undoId = useUndo().push({ label, undo: () => applyPlacementPatch(id, restoreTo) })
+    }
+
+    Object.assign(t, patch)
+    try {
+      const updated = await api<Task>(`/api/tasks/${id}`, { method: 'PATCH', body: patch })
+      byId.value[id] = updated
+    } catch (e) {
+      byId.value[id] = prev
+      error.value = messageOf(e, 'Could not save that change.')
+      if (undoId !== null) useUndo().remove(undoId)
     }
   }
 
@@ -275,24 +316,38 @@ export const useTasksStore = defineStore('tasks', () => {
     }
   }
 
+  /** POST /api/tasks/:id/restore — undo for a delete that has already committed server-side
+   *  (D-front-038). Reaches a soft-deleted row the ordinary owner-scoped GET would hide. */
+  async function restoreTask(id: string): Promise<void> {
+    const restored = await api<Task>(`/api/tasks/${id}/restore`, { method: 'POST' })
+    byId.value[id] = restored
+  }
+
   /** Soft delete, held for `delayMs` behind an Undo — same debounced-commit pattern as
-   *  `themes.archiveThemeQueued`, and for the same reason: the API has no separate "restore"
-   *  route, so an in-time Undo simply cancels the DELETE before it is ever sent. */
+   *  `themes.archiveThemeQueued`. The Cmd+Z undo entry is pushed HERE (not by each caller) so
+   *  every caller gets it for free, including `useAutosaveLines`'s "clearing a line's text
+   *  deletes its task" path. Within the delay window, undo simply cancels the queued DELETE
+   *  before it's ever sent; once it has actually gone out (`committed`), undo instead calls the
+   *  restore route and puts the task back with `deletedAt` cleared (D-back-012) — so Undo keeps
+   *  working even after the deferred commit has fired. */
   const pendingDelete = new Map<string, { timer: ReturnType<typeof setTimeout> }>()
 
-  function deleteTaskQueued(id: string, delayMs = 5000): (() => void) | null {
+  function deleteTaskQueued(id: string, delayMs = 5000): { undoId: number; undo: () => Promise<void> } | null {
     const t = byId.value[id]
     if (!t) return null
     const prevDeletedAt = t.deletedAt
     t.deletedAt = new Date().toISOString()
     const commitKey = `delete:${id}`
+    let committed = false
 
     async function commitNow(): Promise<void> {
+      committed = true
       pendingDelete.delete(id)
       pendingCommits.delete(commitKey)
       try {
         await api(`/api/tasks/${id}`, { method: 'DELETE' })
       } catch (e) {
+        committed = false
         const cur = byId.value[id]
         if (cur) cur.deletedAt = prevDeletedAt
         error.value = messageOf(e, 'Could not delete that task.')
@@ -302,6 +357,7 @@ export const useTasksStore = defineStore('tasks', () => {
     const timer = setTimeout(() => { void commitNow() }, delayMs)
     pendingDelete.set(id, { timer })
     pendingCommits.set(commitKey, () => {
+      committed = true
       clearTimeout(timer)
       pendingDelete.delete(id)
       pendingCommits.delete(commitKey)
@@ -313,15 +369,28 @@ export const useTasksStore = defineStore('tasks', () => {
       }).catch(() => {})
     })
 
-    return () => {
-      const p = pendingDelete.get(id)
-      if (!p) return
-      clearTimeout(p.timer)
-      pendingDelete.delete(id)
-      pendingCommits.delete(commitKey)
-      const cur = byId.value[id]
-      if (cur) cur.deletedAt = prevDeletedAt
+    async function undo(): Promise<void> {
+      if (!committed) {
+        const p = pendingDelete.get(id)
+        if (p) {
+          clearTimeout(p.timer)
+          pendingDelete.delete(id)
+          pendingCommits.delete(commitKey)
+          const cur = byId.value[id]
+          if (cur) cur.deletedAt = prevDeletedAt
+          return
+        }
+      }
+      try {
+        await restoreTask(id)
+      } catch (e) {
+        error.value = messageOf(e, 'Could not restore that task.')
+        throw e
+      }
     }
+
+    const undoId = useUndo().push({ label: 'Task restored', undo })
+    return { undoId, undo }
   }
 
   return {

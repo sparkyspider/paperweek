@@ -1,0 +1,72 @@
+{
+  "results": [
+    {
+      "id": "a",
+      "pass": true,
+      "note": "deletedGone=true backAfterUndo=true restoredToast=true",
+      "shot": "2a-after-delete-toast.png / 2b-after-cmdz-restored.png"
+    },
+    {
+      "id": "f1",
+      "pass": true,
+      "note": "T1 \"undo-test-delete\" present after reload=true",
+      "shot": "3-reload-after-a.png"
+    },
+    {
+      "id": "b",
+      "pass": true,
+      "note": "deleteHitServer=true backAfterUndo=true restoredToast=true restoreHitApi(200)=true getIncludesAfterReload=true getTasksHit=true apiLog=[{\"method\":\"DELETE\",\"url\":\"http://localhost:3201/api/tasks/84a09e3f-dc08-41ae-bdae-48f4f4eff291\",\"status\":200},{\"method\":\"POST\",\"url\":\"http://localhost:3201/api/tasks/84a09e3f-dc08-41ae-bdae-48f4f4eff291/restore\",\"status\":201},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?from=2026-08-22&to=2026-10-21\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=174be47f-9e6f-4810-a16c-ad063a726faf&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=9a6fb679-68f4-471e-93e1-33cbb3582920&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=3981a6bc-21ec-4e3a-a065-bb98c31d50c1&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=0d5b27ed-14dc-4fbb-a5c4-de6db169fb15&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=1a1d1f11-81cd-455f-a744-209e441a4e82&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=67251f2c-4310-4b2e-97d3-50c7a8938159&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=2999c4b1-0469-4c7c-9f6b-c3745d3569c3&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=0150c8db-c459-4af8-88a1-9f962fc04cbb&backlog=true\",\"status\":200},{\"method\":\"GET\",\"url\":\"http://localhost:3201/api/tasks?themeId=acfd6d5c-f636-43e9-b7a4-98d73ce38f2b&backlog=true\",\"status\":200}]",
+      "shot": "5a-t2-after-delete.png / 5b-t2-after-cmdz-late.png / 5c-t2-reload.png"
+    },
+    {
+      "id": "c",
+      "pass": true,
+      "note": "onGrid=true backInBacklog=true offGridAfterUndo=true movedBackToast=true",
+      "shot": "7a-t3-dropped-monday-morning.png / 7b-t3-cmdz-back-in-backlog.png"
+    },
+    {
+      "id": "f2",
+      "pass": true,
+      "note": "T3 \"undo-test-move\" present back in Personal backlog after reload=true",
+      "shot": "8-reload-after-c.png"
+    },
+    {
+      "id": "d",
+      "pass": true,
+      "note": "onWednesday=true backOnMonday=true offWednesday=true",
+      "shot": "9a-t3-dropped-wednesday.png / 9b-t3-cmdz-back-monday.png"
+    },
+    {
+      "id": "e",
+      "pass": true,
+      "note": "valueAfterType=\"X\" valueAfterUndo=\"undo-test-move\" noMoveToast=true noRestoreToast=true noPatchFired=true stillOnMonday=true",
+      "shot": "10a-typing-char.png / 10b-after-native-undo.png"
+    },
+    {
+      "id": "cleanup",
+      "pass": true,
+      "note": "all three throwaway tasks gone from view=true",
+      "shot": "11-after-cleanup.png"
+    }
+  ],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  ],
+  "apiLogTail": [
+    {
+      "method": "DELETE",
+      "url": "http://localhost:3201/api/tasks/a74411b9-3368-46c8-a09d-db1c8a7b541e",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "url": "http://localhost:3201/api/tasks/84a09e3f-dc08-41ae-bdae-48f4f4eff291",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "url": "http://localhost:3201/api/tasks/1dd4efb7-6906-4351-8499-8a35e0e99d3c",
+      "status": 200
+    }
+  ]
+}

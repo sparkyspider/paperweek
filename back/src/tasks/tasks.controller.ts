@@ -54,4 +54,15 @@ export class TasksController {
   ): Promise<TaskResponse> {
     return this.tasks.softDelete(user.ownerId, id);
   }
+
+  /** Undo for `DELETE /api/tasks/:id` — Cmd+Z in the front end (D-front-038). Reaches a
+   *  soft-deleted row (ordinary routes never see one) so an in-time undo works even after the
+   *  deferred client-side DELETE has already fired. */
+  @Post(':id/restore')
+  restore(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+  ): Promise<TaskResponse> {
+    return this.tasks.restore(user.ownerId, id);
+  }
 }

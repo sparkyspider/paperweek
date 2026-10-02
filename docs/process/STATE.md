@@ -3,6 +3,8 @@
 *(Resurrection point for the next session. OPERATIONS.md says how the operation runs,
 LESSONS.md holds the incident-derived rules.)*
 
+Satellite conversion (M2, not started): see satellite-conversion-plan.md
+
 ## Where everything stands
 
 - **The app Mark uses**: branch `v2`, front on **:3200**, back on **:3201** — both were already

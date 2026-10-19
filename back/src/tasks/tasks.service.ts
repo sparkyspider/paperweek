@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { Task } from '@prisma/client';
@@ -10,9 +11,12 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { ListTasksQueryDto } from './dto/list-tasks-query.dto';
 import { dateOnlyToDb } from '../common/date-only';
 import { toTaskResponse, TaskResponse } from './task-response';
+import { HardDeletedTaskDto } from './dto/hard-deleted-task.dto';
 
 @Injectable()
 export class TasksService {
+  private readonly logger = new Logger('Tasks');
+
   constructor(private readonly prisma: PrismaService) {}
 
   async list(ownerId: string, q: ListTasksQueryDto): Promise<TaskResponse[]> {
@@ -119,6 +123,24 @@ export class TasksService {
       data: { deletedAt: null },
     });
     return toTaskResponse(task);
+  }
+
+  /**
+   * DELETE /api/tasks/:id/hard — removes the task row for good (084-Q8: an agent may hard delete
+   * its OWN test data). The route needs the agent role on top of PAPERWEEK_USER; this method
+   * enforces ownership in the delete statement itself (`id` AND `ownerId`), so a row that is not
+   * the caller's can never be removed. Nothing removed → 404 "Task not found.", the same answer
+   * every other task route gives. A soft-deleted task of the caller's is included.
+   */
+  async hardDelete(ownerId: string, id: string): Promise<HardDeletedTaskDto> {
+    const { count } = await this.prisma.task.deleteMany({
+      where: { id, ownerId },
+    });
+    if (count === 0) {
+      throw new NotFoundException('Task not found.');
+    }
+    this.logger.log(`hard delete: task ${id}, owner ${ownerId}`);
+    return { id };
   }
 
   private async taskOwnedOrThrow(ownerId: string, id: string): Promise<Task> {

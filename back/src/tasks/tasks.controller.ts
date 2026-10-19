@@ -8,7 +8,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiExcludeController } from '@nestjs/swagger';
+import { ApiExcludeController, ApiOperation } from '@nestjs/swagger';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -18,8 +18,12 @@ import {
   RequireRole,
 } from '@co-sy/satellite-guard/nest';
 import type { SatelliteUser } from '@co-sy/satellite-guard';
-import { PAPERWEEK_ROLE } from '../core/security/satellite-auth.config';
+import {
+  PAPERWEEK_AGENT_ROLE,
+  PAPERWEEK_ROLE,
+} from '../core/security/satellite-auth.config';
 import { TaskResponse } from './task-response';
+import { HardDeletedTaskDto } from './dto/hard-deleted-task.dto';
 
 @ApiExcludeController()
 @RequireRole(PAPERWEEK_ROLE)
@@ -50,6 +54,22 @@ export class TasksController {
     @Body() dto: UpdateTaskDto,
   ): Promise<TaskResponse> {
     return this.tasks.update(me.sub, id, dto);
+  }
+
+  /**
+   * Hard delete one of the caller's own tasks (084-Q8). Needs BOTH roles: the controller's
+   * PAPERWEEK_USER and this route's PAPERWEEK_AGENT, both from the verified token. No agent role
+   * → 403 ROLE_REQUIRED. Not the caller's task → 404, nothing deleted. Declared before
+   * `DELETE :id` for reading order only; the two paths never overlap.
+   */
+  @ApiOperation({ summary: "Hard delete one of the caller's own tasks (agent role)" })
+  @RequireRole(PAPERWEEK_AGENT_ROLE)
+  @Delete(':id/hard')
+  hardDelete(
+    @CurrentSatelliteUser() me: SatelliteUser,
+    @Param('id') id: string,
+  ): Promise<HardDeletedTaskDto> {
+    return this.tasks.hardDelete(me.sub, id);
   }
 
   @Delete(':id')

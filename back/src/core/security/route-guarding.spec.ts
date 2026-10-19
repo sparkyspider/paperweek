@@ -15,7 +15,7 @@ import {
 import { AppController } from '../../app.controller';
 import { ThemesController } from '../../themes/themes.controller';
 import { TasksController } from '../../tasks/tasks.controller';
-import { PAPERWEEK_ROLE } from './satellite-auth.config';
+import { PAPERWEEK_AGENT_ROLE, PAPERWEEK_ROLE } from './satellite-auth.config';
 
 type Ctor = { prototype: Record<string, unknown>; name: string };
 
@@ -50,6 +50,15 @@ describe('route guarding', () => {
         expect(isPublic(c, h)).toBe(false);
         expect(roles(c, h)).toContain(PAPERWEEK_ROLE);
       }
+    },
+  );
+
+  it.each([ThemesController, TasksController] as unknown as Ctor[])(
+    '%p: only hardDelete carries the agent role (084-Q8)',
+    (c) => {
+      expect(handlers(c).filter((h) => roles(c, h).includes(PAPERWEEK_AGENT_ROLE))).toEqual([
+        'hardDelete',
+      ]);
     },
   );
 

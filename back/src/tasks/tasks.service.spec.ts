@@ -64,3 +64,34 @@ describe('TasksService.restore', () => {
     expect(update).not.toHaveBeenCalled();
   });
 });
+
+/**
+ * TasksService.hardDelete (084-Q8): an agent may hard delete its OWN task. Ownership sits in the
+ * delete statement itself (`id` AND `ownerId`), so another person's row is never matched; when
+ * nothing is removed the answer is the ordinary 404.
+ */
+describe('TasksService.hardDelete', () => {
+  function build(count: number) {
+    const deleteMany = jest.fn().mockResolvedValue({ count });
+    const service = new TasksService({ task: { deleteMany } } as unknown as PrismaService);
+    return { service, deleteMany };
+  }
+
+  it("deletes the caller's own task, scoped on id AND owner", async () => {
+    const { service, deleteMany } = build(1);
+
+    await expect(service.hardDelete('agent-1', 't1')).resolves.toEqual({ id: 't1' });
+    expect(deleteMany).toHaveBeenCalledWith({ where: { id: 't1', ownerId: 'agent-1' } });
+  });
+
+  it('404s when the task is someone else\'s or missing (the owner-scoped delete matched nothing)', async () => {
+    const { service, deleteMany } = build(0);
+
+    await expect(service.hardDelete('agent-1', 'member-099-task')).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
+    expect(deleteMany).toHaveBeenCalledWith({
+      where: { id: 'member-099-task', ownerId: 'agent-1' },
+    });
+  });
+});

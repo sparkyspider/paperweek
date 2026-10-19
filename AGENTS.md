@@ -13,90 +13,36 @@ using it.
 - **Never run `docker compose down -v`** (or any destructive compose command) in
   `co-sy-v2/auth/` — that is the shared Zitadel instance every project on this machine
   depends on, containers included.
-- **Never modify the "Co-Sy" org**, its project, apps, or machine users. This app's bootstrap
-  (`auth/bootstrap-productivity.sh`) only ever touches the "Productivity" org it creates.
+- **Never modify the "Co-Sy" org**, its project, apps, or machine users. This app no longer provisions
+  anything in Zitadel (old bootstrap script removed 2026-10-19).
 - **Never touch ports 3100/3101.** Those belong to Mark's own launchd services
   (`org.co-sy.board-web` / `org.co-sy.board-api`, `~/Library/LaunchAgents/`), deliberately
   outside this app's port range. This app uses 3200 (front) / 3201 (back).
 - **Never write secret values (PATs, client secrets, passwords) to stdout, logs, or any file
-  outside `auth/.machinekey/`** (git-ignored). `auth/.machinekey/prod-agent-secret.json` holds
-  the credential this document tells you how to use — read it, never print it.
+  outside `auth/.machinekey/`** (git-ignored). The old `prod-agent` credential is retired: an
+  agent signs in with its own Public account, and its token is read, never printed.
 - Themes/tasks are **soft-deleted** everywhere (`archivedAt` / `deletedAt`, row kept). Prefer
   the API's `DELETE` routes over raw SQL; if you must touch the DB directly, never hard-delete
   a user-created row.
 
 ## How an agent authenticates
 
-The `prod-agent` Zitadel machine user (provisioned by `auth/bootstrap-productivity.sh`) holds
-the project role `agent`. Its client credentials live in
-`auth/.machinekey/prod-agent-secret.json`: `{"userId", "clientId", "clientSecret"}`.
+**Retired (2026-10-19).** The old `prod-agent` client-credentials path and its provisioning
+scripts (`auth/bootstrap-productivity.sh`, `auth/add-user.sh`) were removed when Paperweek became a
+Co-Sy satellite. Agents acting for a person are parked pending Mark's ruling. Sign-in is now the
+Co-Sy satellite guard; see `auth/co-space.json`. The curl examples below are historical.
 
-Get a token via the OAuth2 **client_credentials** grant, requesting BOTH the project-audience
-scope (so the token's `aud` includes the "Productivity Platform" project, which is what
-back/'s JWKS-based guard checks) AND the projects-roles scope (so the `agent` role is actually
-asserted into the token — verified live: without it, the roles claim is silently absent):
-
-```bash
-CLIENT_ID=$(python3 -c "import json;print(json.load(open('auth/.machinekey/prod-agent-secret.json'))['clientId'])")
-CLIENT_SECRET=$(python3 -c "import json;print(json.load(open('auth/.machinekey/prod-agent-secret.json'))['clientSecret'])")
-PROJECT_ID=<from auth/.env ZITADEL_PROJECT_ID>
-
-TOKEN=$(curl -s -X POST http://localhost:8080/oauth/v2/token \
-  -u "$CLIENT_ID:$CLIENT_SECRET" \
-  -d grant_type=client_credentials \
-  -d "scope=openid urn:zitadel:iam:org:projects:roles urn:zitadel:iam:org:project:id:${PROJECT_ID}:aud" \
-  | python3 -c "import json,sys;print(json.load(sys.stdin)['access_token'])")
-```
-
-The resulting JWT's `aud` is `[<projectId>]` and it carries a roles claim under
-`urn:zitadel:iam:org:project:<projectId>:roles` — a **different key shape** than a human BFF
-login gets (`urn:zitadel:iam:org:project:roles`, no project id in the key). back/'s
-`JwtAuthGuard` checks both shapes (`core/security/claims.ts` `ROLES_CLAIM_PATTERN`) and both
-audiences (`ZitadelService.audiences` = `[oidcClientId, projectId]`), so either kind of token
-authenticates the same routes.
-
-Tokens last ~12h (`expires_in`); just request a fresh one, there is no refresh flow for
-machine tokens.
-
-### Acting on behalf of a person — `X-On-Behalf-Of`
-
-Every `/api/*` route scopes data by `ownerId`. A caller normally acts as themselves (their
-JWT `sub`). The `agent` role may instead act on a named person's behalf by setting:
-
-```
-X-On-Behalf-Of: <that person's Zitadel user id>
-```
-
-The guard refuses this header outright (403) for any caller that does **not** hold the
-`agent` role — it never widens what a non-agent caller can do, only narrows what `prod-agent`
-acts as. Omit the header to act as `prod-agent`'s own (empty) data.
-
-Mark's (mark@flyh2.com) Zitadel user id — the value to put in `X-On-Behalf-Of` to manage his
-themes/tasks — is `387437754994130946`, or look it up fresh:
-`GET /management/v1/users/_search {"queries":[{"emailQuery":{"emailAddress":"mark@flyh2.com","method":"TEXT_QUERY_METHOD_EQUALS_IGNORE_CASE"}}]}`
-against Zitadel with any of this app's PATs.
-
-**Mark's account:** home org **FlyH2** (`387435674619346946`, a live tenant org of the
-separate `co-sy-v2` app — not this project's org), user id `387437754994130946`. He does not
-live in "Productivity" — he reaches this app's `admin`/`user` project roles via Zitadel's
-native cross-org mechanism (a project grant of "Productivity Platform" to the FlyH2 org, plus
-a user grant for him on it), not a duplicate account. See `auth/README.md` "Known state" and
-`docs/decisions-auth.md` D-auth-058.
-
-### Verified live (2026-09-01)
-
-Real curl against the running instance: obtained a `prod-agent` token as above, called
-`GET /auth/me` (confirmed `roles: ["agent"]`, `isAgent: true`), created a theme with
-`X-On-Behalf-Of: <mark's sub>` (confirmed `ownerId` on the created row = mark's sub, and the
-theme appeared in `GET /api/themes` for that owner), and deleted it (soft-archived, then
-removed as pure verification noise). Full transcript basis for this doc — not a hypothetical.
+**Agents now (Mark's ruling 084-Q8, 19 Oct 2026).** An agent signs in with its own Public account,
+exactly like a person: Co-Sy's sign-in page, Paperweek's one sign-in app, the same guard. It works
+only on its own themes and tasks. `PAPERWEEK_AGENT` adds owner-only hard delete. Nobody acts for
+another person: `X-On-Behalf-Of` is ignored, and every row is keyed on the token's `sub`.
 
 ## API contract
 
 Base URL: `http://localhost:3201`. **All responses use the envelope**
 `{ data, meta: { status, code, requestId, messages? }, error: { code, message, fields? } | null }`.
-All `/api/*` routes require `Authorization: Bearer <token>` (human via the BFF, or `prod-agent`
-as above). `/auth/*` routes are the BFF surface (see below). Weeks start Monday; dates are
+All `/api/*` routes require `Authorization: Bearer <token>` (a Co-Sy satellite token: a person
+or an agent, each signed in as themselves). `/auth/*` routes are the BFF surface (see below). Weeks start Monday; dates are
 plain `YYYY-MM-DD` strings, no timezone math server-side.
 
 ### Auth (BFF)
@@ -126,6 +72,9 @@ PUT    /api/themes/order {ids: string[]}                     → reorders: ids m
                                                                  ids) or 400; sets position=index
 PATCH  /api/themes/:id {name?, color?, position?, archived?}  → archived:true/false sets/clears archivedAt
 DELETE /api/themes/:id                                       → soft archive (= PATCH {archived:true})
+DELETE /api/themes/:id/hard                                  → PAPERWEEK_AGENT only: deletes the caller's
+                                                                 own theme and its tasks for good
+                                                                 (not the caller's → 404)
 ```
 
 ### Tasks
@@ -136,9 +85,13 @@ GET    /api/tasks?themeId=<uuid>&backlog=true         → non-deleted unschedule
 POST   /api/tasks {themeId, title, notes?, bold?}     → creates a backlog task (bold defaults to false)
 PATCH  /api/tasks/:id {title?, notes?, bold?, themeId?, scheduledOn?(YYYY-MM-DD|null), daypart?(morning|afternoon|evening|notes|null), position?, done?}
 DELETE /api/tasks/:id                                  → soft delete
+DELETE /api/tasks/:id/hard                             → PAPERWEEK_AGENT only: deletes the caller's own task
+                                                          for good (not the caller's → 404)
 ```
 
 ### curl examples (agent token)
+
+Historical: `X-On-Behalf-Of` no longer does anything. An agent sends only its own token.
 
 ```bash
 # List Mark's active themes
@@ -176,7 +129,7 @@ curl -s -X PATCH http://localhost:3201/api/tasks/<task-id> \
 
 ## Roles
 
-`admin`, `user`, `agent` on the "Productivity Platform" project. The API does not currently
-gate any `/api/*` route by role — every valid token may manage its own (or, for `agent`,
-its `X-On-Behalf-Of` target's) themes/tasks. `RolesGuard`/`@Roles(...)` exist as reusable
-infrastructure for future role-gated routes.
+Paperweek's project roles, granted in Co-Sy by Public and read only from the verified token
+(`auth/co-space.json`): `PAPERWEEK_USER` uses the app; `PAPERWEEK_AGENT` adds the two hard delete
+routes, on the caller's own rows only. Every caller manages only its own themes and tasks; no
+role reaches another person's rows (084-Q8).

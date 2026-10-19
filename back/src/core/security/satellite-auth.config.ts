@@ -11,15 +11,25 @@
  *
  * Paperweek's data stays in Paperweek's own database; every row is keyed on the token's `sub`.
  *
- * Agents acting for a person (the old `X-On-Behalf-Of` header) are NOT carried over: that design
- * is parked pending Mark's ruling 084-Q8, and a converted Paperweek carries no private agent
- * path beside this guard.
+ * Agents (Mark's ruling 084-Q8, 19 Oct 2026: "yes they may login and create their won crap. And
+ * hard delete their OWN test data?") are ordinary Co-Sy accounts. They sign in on Co-Sy's page
+ * through the same sign-in app and pass this same guard; there is no client-credentials path, no
+ * second client id and no header naming another person (the old `X-On-Behalf-Of` is gone). An
+ * agent works only on rows keyed on its own `sub`, like anyone else.
  */
 import type { ConfigService } from '@nestjs/config';
 import type { SatelliteGuardConfig } from '@co-sy/satellite-guard';
 
 /** The one Paperweek project role that admits a person (the app-user right "use Paperweek"). */
 export const PAPERWEEK_ROLE = 'PAPERWEEK_USER';
+
+/**
+ * The agent role (084-Q8), declared in `auth/co-space.json` as "Paperweek agent: may hard delete
+ * its own data". It adds exactly one thing to {@link PAPERWEEK_ROLE}: the hard delete routes, and
+ * only on rows the caller owns. Read, like every role here, only from the verified token's
+ * Paperweek project claim, granted by the owning organisation; never looked up in a database.
+ */
+export const PAPERWEEK_AGENT_ROLE = 'PAPERWEEK_AGENT';
 
 /** Configuration keys, named as Co-Sy's `satellite:register` prints them. */
 export const SATELLITE_KEYS = [

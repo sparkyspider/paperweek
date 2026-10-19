@@ -1,12 +1,15 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { Theme } from '@prisma/client';
 import { PrismaService } from '../core/prisma/prisma.service';
 import { CreateThemeDto } from './dto/create-theme.dto';
 import { UpdateThemeDto } from './dto/update-theme.dto';
+import { HardDeletedThemeDto } from './dto/hard-deleted-theme.dto';
 
 /** Fallback palette when a theme is created with no `color` — soft watercolor tones,
  *  matching the seeded set (SPEC.md "watercolor blob swatches per theme"). */
@@ -22,6 +25,8 @@ const DEFAULT_COLORS = [
 
 @Injectable()
 export class ThemesService {
+  private readonly logger = new Logger('Themes');
+
   constructor(private readonly prisma: PrismaService) {}
 
   async list(ownerId: string, includeArchived: boolean): Promise<Theme[]> {
@@ -106,6 +111,45 @@ export class ThemesService {
       where: { id },
       data: { archivedAt: new Date() },
     });
+  }
+
+  /**
+   * DELETE /api/themes/:id/hard — removes the theme row and the caller's own tasks under it, for
+   * good (084-Q8: an agent may hard delete its OWN test data). The route needs the agent role on
+   * top of PAPERWEEK_USER; this method enforces ownership. One transaction, all or nothing:
+   *
+   * - not the caller's theme, or no such theme → 404 "Theme not found.", nothing deleted (the same
+   *   answer every other theme route gives, so it says nothing about whose the row is);
+   * - a task under it owned by someone else (the API never makes one; this is a guard against a
+   *   row written another way) → 409, nothing deleted, never another person's task;
+   * - otherwise the tasks go first (owner-scoped), then the theme (owner-scoped again in the
+   *   delete itself). Archived themes and soft-deleted tasks are included: that is the point.
+   */
+  async hardDelete(ownerId: string, id: string): Promise<HardDeletedThemeDto> {
+    const result = await this.prisma.$transaction(async (tx) => {
+      const theme = await tx.theme.findUnique({ where: { id } });
+      if (!theme || theme.ownerId !== ownerId) {
+        throw new NotFoundException('Theme not found.');
+      }
+      const othersTasks = await tx.task.count({
+        where: { themeId: id, NOT: { ownerId } },
+      });
+      if (othersTasks > 0) {
+        throw new ConflictException(
+          'This theme holds tasks that are not yours, so nothing was deleted.',
+        );
+      }
+      const tasks = await tx.task.deleteMany({ where: { themeId: id, ownerId } });
+      const themes = await tx.theme.deleteMany({ where: { id, ownerId } });
+      if (themes.count !== 1) {
+        throw new NotFoundException('Theme not found.');
+      }
+      return { id, tasksDeleted: tasks.count };
+    });
+    this.logger.log(
+      `hard delete: theme ${id} and ${result.tasksDeleted} task(s), owner ${ownerId}`,
+    );
+    return result;
   }
 
   private async ownedOrThrow(ownerId: string, id: string): Promise<void> {

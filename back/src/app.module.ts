@@ -1,31 +1,34 @@
 /**
- * Root module. Wires the cross-cutting modules (config, Prisma, Zitadel) and every feature
- * module, plus the two global guards:
+ * Root module. Wires the cross-cutting modules (config, Prisma, logging) and every feature
+ * module, plus the two global guards, in this order:
  *
  *   1. `ThrottlerTrackerGuard` — rate limiting, registered FIRST so floods are rejected
- *      before any auth/JWKS work.
- *   2. `JwtAuthGuard` — deny-by-default: every route needs a valid JWT unless `@Public()`.
+ *      before any token or key work.
+ *   2. `SatelliteAuthGuard` (`@co-sy/satellite-guard`) — deny-by-default: every route needs a
+ *      valid Co-Sy satellite token unless it carries `@SatellitePublic()`. Feature controllers
+ *      add `@RequireRole(PAPERWEEK_ROLE)`, read only from the verified token.
  *
- * Single-org app: no acting-org header, no org-drift reconciliation, no invitations module
- * (co-sy-v2's multi-tenant machinery is deliberately stripped — see AGENTS.md / README.md).
+ * Paperweek is a Co-Sy satellite (co-sy-v2 task 084): people sign in on Co-Sy's page, and this
+ * API holds no login broker, no refresh cookie and no Zitadel credential of its own.
  */
 import { Module } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import {
+  SatelliteAuthGuard,
+  SatelliteGuardModule,
+} from '@co-sy/satellite-guard/nest';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
 import { ThemesModule } from './themes/themes.module';
 import { TasksModule } from './tasks/tasks.module';
 import { PrismaModule } from './core/prisma/prisma.module';
-import { ZitadelModule } from './core/zitadel/zitadel.module';
-import { SecurityModule } from './core/security/security.module';
-import { JwtAuthGuard } from './core/security/jwt-auth.guard';
 import { ThrottlerTrackerGuard } from './common/throttler/throttler-tracker.guard';
 import { THROTTLERS } from './common/throttler/throttler.config';
 import { LoggingModule } from './core/logging/logging.module';
 import { HttpLoggingInterceptor } from './core/logging/http-logging.interceptor';
+import { satelliteAuthConfig } from './core/security/satellite-auth.config';
 
 @Module({
   imports: [
@@ -33,9 +36,12 @@ import { HttpLoggingInterceptor } from './core/logging/http-logging.interceptor'
     LoggingModule,
     ThrottlerModule.forRoot(THROTTLERS),
     PrismaModule,
-    ZitadelModule, // JwtAuthGuard (global) needs ZitadelService (JWKS) resolvable here
-    SecurityModule,
-    AuthModule,
+    // globalGuard: false — registered below, AFTER the throttler, so the order is explicit.
+    SatelliteGuardModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => satelliteAuthConfig(config),
+      globalGuard: false,
+    }),
     ThemesModule,
     TasksModule,
   ],
@@ -44,7 +50,7 @@ import { HttpLoggingInterceptor } from './core/logging/http-logging.interceptor'
     AppService,
     { provide: APP_INTERCEPTOR, useClass: HttpLoggingInterceptor },
     { provide: APP_GUARD, useClass: ThrottlerTrackerGuard },
-    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useExisting: SatelliteAuthGuard },
   ],
 })
 export class AppModule {}

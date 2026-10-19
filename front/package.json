@@ -12,6 +12,7 @@
     "test:unit": "vitest run"
   },
   "dependencies": {
+    "@co-sy/satellite-auth": "file:vendor/co-sy-satellite-auth-0.1.13.tgz",
     "@pinia/nuxt": "^0.11.3",
     "nuxt": "^4.5.2",
     "pinia": "^3.0.4",

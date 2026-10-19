@@ -11,10 +11,6 @@ import type { Request, Response } from 'express';
 import { Envelope, EnvelopeError, FieldError } from './envelope.types';
 import { ValidationFailedException } from './validation.exception';
 import {
-  AuthUpstreamUnavailableError,
-  ZitadelApiError,
-} from '../../core/zitadel/zitadel.service';
-import {
   safeErrorDetail,
   safeErrorStack,
 } from '../../core/logging/safe-diagnostic';
@@ -68,32 +64,6 @@ export class ExceptionEnvelopeFilter implements ExceptionFilter {
           fields: exception.fields,
         },
         detail: summariseFields(exception.fields),
-      };
-    }
-
-    if (exception instanceof AuthUpstreamUnavailableError) {
-      return {
-        status: HttpStatus.SERVICE_UNAVAILABLE,
-        error: {
-          code: 'AUTH_UPSTREAM_UNAVAILABLE',
-          message: 'Could not contact the authentication service.',
-        },
-        detail: `Zitadel unreachable: ${exception.message}`,
-      };
-    }
-
-    if (exception instanceof ZitadelApiError) {
-      const status =
-        exception.status >= 400 && exception.status < 500
-          ? exception.status
-          : HttpStatus.BAD_GATEWAY;
-      return {
-        status,
-        error: {
-          code: 'UPSTREAM_ERROR',
-          message: 'The identity service could not complete the request.',
-        },
-        detail: `Zitadel ${exception.status}: ${exception.message}`,
       };
     }
 

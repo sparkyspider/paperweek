@@ -3,20 +3,20 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { AppService } from './app.service';
-import { Public } from './core/security/public.decorator';
+import { SatellitePublic } from '@co-sy/satellite-guard/nest';
 
 @ApiExcludeController()
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Public()
+  @SatellitePublic()
   @Get()
   getHello(): string {
     return this.appService.livenessMessage();
   }
 
-  @Public()
+  @SatellitePublic()
   @Get('health')
   health(): { status: 'ok' } {
     return { status: 'ok' };

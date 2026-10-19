@@ -4,21 +4,18 @@
  * later as an opaque upstream error. Values are NEVER logged — key NAMES only.
  */
 
-/** Keys the app cannot serve anyone without, in any environment. Mirrors
- *  `ZitadelService.onModuleInit` — listed here too so the operator gets ALL of them at once,
+/** Keys the app cannot serve anyone without, in any environment — named all at once,
  *  before Nest's DI error wall. */
 export const REQUIRED_KEYS = [
   'DATABASE_URL',
-  'ZITADEL_ISSUER',
-  'ZITADEL_ORG_ID',
-  'ZITADEL_PROJECT_ID',
-  'ZITADEL_BACK_PAT',
-  'ZITADEL_OIDC_CLIENT_ID',
-  'OIDC_REDIRECT_URI',
+  // Co-Sy satellite settings (core/security/satellite-auth.config.ts), as Co-Sy's
+  // satellite:register prints them. None of them is a secret.
+  'COSY_ISSUER',
+  'COSY_API_URL',
+  'SATELLITE_PROJECT_ID',
+  'SATELLITE_CLIENT_IDS',
+  'SATELLITE_OWNER_ORG',
 ] as const;
-// ZITADEL_MGMT_PAT is deliberately NOT here: it is used only by auth/bootstrap-productivity.sh
-// and auth/add-user.sh (org/user provisioning), never read by the running app at runtime
-// (ZitadelService only holds ZITADEL_BACK_PAT, the least-privilege login-broker credential).
 
 /** Keys with a safe localhost default in development that MUST be explicit in production. */
 export const PROD_REQUIRED_KEYS = ['FRONT_BASE_URL'] as const;

@@ -13,7 +13,7 @@
  */
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { useApi } from '~/composables/useApi'
+import { useApi, backendBase } from '~/composables/useApi'
 import { useThemeVisibility } from '~/composables/useThemeVisibility'
 import { useLastUsedTheme } from '~/composables/useLastUsedTheme'
 import { useUndo } from '~/composables/useUndo'
@@ -38,7 +38,7 @@ export interface Task {
 }
 
 export const useTasksStore = defineStore('tasks', () => {
-  const { api, messageOf, isUnreachable, session } = useApi()
+  const { api, messageOf, isUnreachable, authHeaders } = useApi()
 
   const byId = ref<Record<string, Task>>({})
   const loading = ref(false)
@@ -73,9 +73,6 @@ export const useTasksStore = defineStore('tasks', () => {
     })
   }
 
-  function authHeaders(): Record<string, string> {
-    return session.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}
-  }
 
   const all = computed<Task[]>(() => Object.values(byId.value).filter(t => !t.deletedAt))
 
@@ -299,9 +296,8 @@ export const useTasksStore = defineStore('tasks', () => {
     pendingCommits.set(commitKey, () => {
       clearTimeout(timer)
       pendingCommits.delete(commitKey)
-      fetch(`${session.base()}/api/tasks/${id}`, {
+      fetch(`${backendBase()}/api/tasks/${id}`, {
         method: 'PATCH',
-        credentials: 'include',
         keepalive: true,
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({ done }),
@@ -361,9 +357,8 @@ export const useTasksStore = defineStore('tasks', () => {
       clearTimeout(timer)
       pendingDelete.delete(id)
       pendingCommits.delete(commitKey)
-      fetch(`${session.base()}/api/tasks/${id}`, {
+      fetch(`${backendBase()}/api/tasks/${id}`, {
         method: 'DELETE',
-        credentials: 'include',
         keepalive: true,
         headers: authHeaders(),
       }).catch(() => {})

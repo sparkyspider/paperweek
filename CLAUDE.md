@@ -17,11 +17,15 @@ than corporate. Full detail, including the two named users and the soft-delete
 philosophy: [`SPEC.md`](SPEC.md) (single source of truth for product behaviour — this
 file never repeats it).
 
-**AI agents are first-class users.** A `prod-agent` Zitadel service account can call
-the `back/` API directly on a person's behalf (header `X-On-Behalf-Of`) to manage
-their themes/tasks — see [`rules-agentic.md`](docs/rules-agentic.md) for the
-mechanism and root **`AGENTS.md`** (owned by the back/front build, not this index)
-for the operational how-to once it exists.
+**Paperweek is a Co-Sy satellite app** (branch `sat-1019`, co-sy-v2 task 084). People sign
+in on Co-Sy's sign-in page with their Co-Sy account (`@co-sy/satellite-auth` in `front/`);
+`back/` checks their token with `@co-sy/satellite-guard` and admits only holders of the
+`PAPERWEEK_USER` role of Paperweek's own project, owned by Co-Sy's **Public** organisation.
+Data stays in Paperweek's own database, keyed on the token's `sub`.
+
+**Agents acting for a person are PARKED.** The old `prod-agent` + `X-On-Behalf-Of` path is
+removed and not replaced, pending Mark's ruling 084-Q8 (what an agent may do for a person).
+[`rules-agentic.md`](docs/rules-agentic.md) describes the old mechanism and no longer applies.
 
 ## 2. Repository layout
 
@@ -29,7 +33,7 @@ for the operational how-to once it exists.
 |------|-------|---------|
 | `front/` | Nuxt 4 + Vue 3.5 + Tailwind 4 | Web frontend, port **3200** |
 | `back/`  | NestJS 11 + Prisma 6 + PostgreSQL | API, port **3201**, database `productivity` |
-| `auth/`  | Zitadel (Docker, shared) | Points at co-sy-v2's existing local Zitadel (`localhost:8080`), own org **"Productivity"** — not a separate deployment |
+| `auth/`  | Zitadel (Docker, shared) | Points at co-sy-v2's existing local Zitadel (`localhost:8080`). `auth/co-space.json` is Paperweek's Co-Sy settings file; the old "Productivity" scripts predate the satellite conversion |
 | `docs/`  | Markdown | Rules, architecture, decisions (this index) |
 | `SPEC.md` | Markdown | The product spec — SSOT for what this app does |
 
@@ -52,9 +56,9 @@ conventions, envelope response shape, logging) but is a **much simpler shape**:
 - **No forced MFA.**
 - **No agreements, documents, e-signing, or CRM** — none of co-sy-v2's business
   domain applies here.
-- **New:** the `agent` role + `prod-agent` service account + `X-On-Behalf-Of` header,
-  letting AI agents act on a specific user's data directly via the API —
-  `decisions-agentic.md` D-agentic-002.
+- **Sign-in is Co-Sy's** (satellite conversion, 084): no BFF login routes, no refresh cookie,
+  no Zitadel credential in `back/`. The `agent` role / `X-On-Behalf-Of` path
+  (`decisions-agentic.md` D-agentic-002) is removed, parked on 084-Q8.
 
 Every ported doc below states explicitly, where it matters, what it kept from
 co-sy-v2 and what it cut or replaced because of these differences.

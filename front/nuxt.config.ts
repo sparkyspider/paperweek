@@ -1,5 +1,14 @@
 import tailwindcss from '@tailwindcss/vite'
 
+// The Snag switch the satellite converter writes (`snag: { enabled: false, … }` below) is typed
+// by @co-sy/snag, which Paperweek does not install. Declared here so the switch stays written,
+// off and inert, and the config still typechecks.
+declare module 'nuxt/schema' {
+  interface NuxtConfig {
+    snag?: { enabled: boolean; slug: string; apiBase: string }
+  }
+}
+
 // Node env without node typings: this config only ever runs under Node, where
 // globalThis.process is always present.
 const env =
@@ -39,7 +48,7 @@ export default defineNuxtConfig({
       ],
     },
   },
-  modules: ['@pinia/nuxt'],
+  modules: ['@co-sy/satellite-auth', '@pinia/nuxt'],
   css: ['~/assets/css/main.css'],
   // Components live under planner/, sidebar/, shared/ but are used by their bare filename
   // (<WeekRow>, <ThemeCard>, …) — explicit `pathPrefix: false` so Nuxt never folder-prefixes
@@ -48,10 +57,13 @@ export default defineNuxtConfig({
   // Stale-tab self-healing (co-sy convention): a build that has moved on from under an open
   // tab must not render blank on the next client-side navigation — reload to the same route.
   experimental: { emitRouteChunkError: 'automatic' },
-  // The planner is entirely auth-gated client state (JWT lives in memory only) — SSR-ing it
-  // and then redirecting client-side would hydration-mismatch. Mirrors co-sy's `/app/**` rule.
+  // The planner is entirely auth-gated client state (the Co-Sy session lives in the browser) —
+  // SSR-ing it and then redirecting client-side would hydration-mismatch.
   routeRules: {
     '/': { ssr: false, headers: securityHeaders },
+    // The old email + password page is gone: sign-in is Co-Sy's. An old bookmark lands on the
+    // planner, whose `cosy-auth` middleware sends a signed-out person to Co-Sy's sign-in.
+    '/login': { redirect: '/' },
     '/**': { headers: securityHeaders },
   },
   vite: {
@@ -59,10 +71,41 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      // Single backend origin — the BFF's `/auth/*` and the API's `/api/*` both live here,
-      // same convention as co-sy's `apiBase`. Override via NUXT_PUBLIC_BACKEND_BASE.
+      // Paperweek's own API (`/api/*`), behind the Co-Sy satellite guard. Override via
+      // NUXT_PUBLIC_BACKEND_BASE (build time or run time).
       // 3101 was Mark's pre-existing co-sy "board" launchd service — this app lives on 3201.
       backendBase: env.NUXT_PUBLIC_BACKEND_BASE || 'http://localhost:3201',
     },
   },
+  // ───────────────────────────────────────────────────────────────────────────
+  // co-sy satellite (managed by satellite-app-converter, 2026-10-19 10:09:44 SAST)
+  // People sign in to this app with their Co-Sy account. The module registers
+  // /auth/callback itself — this app creates no callback page — and its route
+  // middleware refuses anyone without `requiredRole`, read ONLY from the keyed
+  // claim urn:zitadel:iam:org:project:395776530166317058:roles.
+  // There is no client secret here, and there never is one: the login
+  // application is PKCE.
+  // ───────────────────────────────────────────────────────────────────────────
+  cosySatellite: {
+    slug: 'paperweek',
+    // What people know the app as; the refusal page names it.
+    name: 'Paperweek',
+    // Read at BUILD time (the sign-in scopes are built from the two project ids), so a
+    // production image is built with its own values; the literals are the local defaults the
+    // converter wrote, from Co-Sy's satellite:register on 2026-10-19.
+    issuer: env.COSY_ISSUER || 'http://localhost:8080',
+    clientId: env.COSY_SATELLITE_CLIENT_ID || '395776530585747458',
+    satelliteProjectId: env.COSY_SATELLITE_PROJECT_ID || '395776530166317058',
+    cosyProjectId: env.COSY_PROJECT_ID || '392299905571356674',
+    cosyApiBase: env.COSY_API_BASE || 'http://localhost:3051/api',
+    requiredRole: 'PAPERWEEK_USER',
+    callbackPath: '/auth/callback',
+    postLogoutPath: '/',
+    enabled: true,
+  },
+  // The Snag-reports switch (084). `enabled: false` registers nothing at all —
+  // the same early return @co-sy/snag uses, so off is off in the bundle and not
+  // a runtime `if`. The toggle a PERSON sees is another task; this is the hook
+  // it will flip. @co-sy/snag is only named in `modules` when it is installed.
+  snag: { enabled: false, slug: 'paperweek', apiBase: 'http://localhost:3051/api' },
 })

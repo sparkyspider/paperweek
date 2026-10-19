@@ -16,28 +16,33 @@ import { CreateThemeDto } from './dto/create-theme.dto';
 import { UpdateThemeDto } from './dto/update-theme.dto';
 import { ListThemesQueryDto } from './dto/list-themes-query.dto';
 import { ReorderThemesDto } from './dto/reorder-themes.dto';
-import { CurrentUser } from '../core/security/current-user.decorator';
-import type { AuthUser } from '../core/security/jwt-auth.guard';
+import {
+  CurrentSatelliteUser,
+  RequireRole,
+} from '@co-sy/satellite-guard/nest';
+import type { SatelliteUser } from '@co-sy/satellite-guard';
+import { PAPERWEEK_ROLE } from '../core/security/satellite-auth.config';
 
 @ApiExcludeController()
+@RequireRole(PAPERWEEK_ROLE)
 @Controller('api/themes')
 export class ThemesController {
   constructor(private readonly themes: ThemesService) {}
 
   @Get()
   list(
-    @CurrentUser() user: AuthUser,
+    @CurrentSatelliteUser() me: SatelliteUser,
     @Query() query: ListThemesQueryDto,
   ): Promise<Theme[]> {
-    return this.themes.list(user.ownerId, query.includeArchived ?? false);
+    return this.themes.list(me.sub, query.includeArchived ?? false);
   }
 
   @Post()
   create(
-    @CurrentUser() user: AuthUser,
+    @CurrentSatelliteUser() me: SatelliteUser,
     @Body() dto: CreateThemeDto,
   ): Promise<Theme> {
-    return this.themes.create(user.ownerId, dto);
+    return this.themes.create(me.sub, dto);
   }
 
   // Declared before the `:id` routes (and on a distinct verb, PUT, so it can never be shadowed
@@ -45,23 +50,23 @@ export class ThemesController {
   // writes through this in one transaction rather than N individual `PATCH :id {position}` calls.
   @Put('order')
   reorder(
-    @CurrentUser() user: AuthUser,
+    @CurrentSatelliteUser() me: SatelliteUser,
     @Body() dto: ReorderThemesDto,
   ): Promise<Theme[]> {
-    return this.themes.reorder(user.ownerId, dto.ids);
+    return this.themes.reorder(me.sub, dto.ids);
   }
 
   @Patch(':id')
   update(
-    @CurrentUser() user: AuthUser,
+    @CurrentSatelliteUser() me: SatelliteUser,
     @Param('id') id: string,
     @Body() dto: UpdateThemeDto,
   ): Promise<Theme> {
-    return this.themes.update(user.ownerId, id, dto);
+    return this.themes.update(me.sub, id, dto);
   }
 
   @Delete(':id')
-  archive(@CurrentUser() user: AuthUser, @Param('id') id: string): Promise<Theme> {
-    return this.themes.archive(user.ownerId, id);
+  archive(@CurrentSatelliteUser() me: SatelliteUser, @Param('id') id: string): Promise<Theme> {
+    return this.themes.archive(me.sub, id);
   }
 }

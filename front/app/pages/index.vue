@@ -3,14 +3,15 @@
  *  left. The header stays the desk (--paper, no white slabs): "Today" is ink text with an
  *  underline that appears on interaction, not a button-shaped card; the user's own name IS the
  *  menu — a signature (Caveat) that opens a small paper popover holding Sign out. */
-definePageMeta({ middleware: 'auth' })
+// Co-Sy sign-in (@co-sy/satellite-auth): signed out → Co-Sy's sign-in page and back here;
+// signed in without Paperweek's role → the module's plain refusal page.
+definePageMeta({ middleware: 'cosy-auth' })
 
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useThemesStore } from '~/stores/themes'
-import { useAuthStore } from '~/stores/auth'
 
 const themes = useThemesStore()
-const auth = useAuthStore()
+const { user, logout } = useCosySatelliteAuth()
 
 const stripRef = ref<{ scrollToToday: (smooth?: boolean) => void } | null>(null)
 
@@ -21,8 +22,7 @@ onMounted(() => {
 const loadIssue = computed(() => (themes.unreachable ? themes.error : null))
 
 async function signOut() {
-  await auth.logout()
-  await navigateTo('/login')
+  await logout()
 }
 
 const menuOpen = ref(false)
@@ -59,7 +59,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
             Today
           </button>
 
-          <div v-if="auth.user" ref="menuRoot" class="relative">
+          <div v-if="user" ref="menuRoot" class="relative">
             <button
               type="button"
               class="font-hand cursor-pointer text-lg text-[var(--ink)] transition-opacity hover:opacity-75"
@@ -68,7 +68,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
               @click="toggleMenu"
               @keydown.esc="closeMenu"
             >
-              {{ auth.user.name }}
+              {{ user.name }}
             </button>
 
             <div

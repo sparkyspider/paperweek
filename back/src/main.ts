@@ -1,6 +1,6 @@
 /**
  * Application bootstrap. The single place the global request pipeline is assembled:
- * security headers, CORS (SPA + refresh cookie), validation, the mandatory response
+ * security headers, CORS (the SPA's origin, bearer tokens only), validation, the mandatory response
  * envelope + exception filter, and Swagger (dev only). Adapted from co-sy-v2's main.ts.
  */
 import { config as loadDotenv } from 'dotenv';
@@ -14,7 +14,6 @@ import {
   ValidationFailedException,
   toFieldErrors,
 } from './common/envelope/validation.exception';
-import cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { applyEnvelopeToDocument } from './common/envelope/openapi-envelope';
 import { AppLogger } from './core/logging/app-logger.service';
@@ -54,8 +53,8 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const frontBase = frontBaseUrls(configService);
 
-  app.enableCors({ origin: frontBase, credentials: true });
-  app.use(cookieParser());
+  // Bearer tokens only: no cookie is sent or read, so CORS does not allow credentials.
+  app.enableCors({ origin: frontBase, credentials: false });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -73,7 +72,7 @@ async function bootstrap() {
   if (process.env.NODE_ENV !== 'production') {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('Productivity Tools API')
-      .setDescription('back/ API — auth BFF + themes/tasks.')
+      .setDescription('back/ API — themes/tasks, behind the Co-Sy satellite guard.')
       .setVersion('1.0')
       .addBearerAuth()
       .build();

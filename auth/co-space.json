@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "name": "Paperweek",
+  "slug": "paperweek",
+  "origins": ["http://localhost:3212"],
+  "rights": [
+    { "key": "PAPERWEEK_USER", "words": "use Paperweek", "kind": "app-user" }
+  ],
+  "storage": false
+}

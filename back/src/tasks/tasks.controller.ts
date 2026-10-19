@@ -13,46 +13,51 @@ import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { ListTasksQueryDto } from './dto/list-tasks-query.dto';
-import { CurrentUser } from '../core/security/current-user.decorator';
-import type { AuthUser } from '../core/security/jwt-auth.guard';
+import {
+  CurrentSatelliteUser,
+  RequireRole,
+} from '@co-sy/satellite-guard/nest';
+import type { SatelliteUser } from '@co-sy/satellite-guard';
+import { PAPERWEEK_ROLE } from '../core/security/satellite-auth.config';
 import { TaskResponse } from './task-response';
 
 @ApiExcludeController()
+@RequireRole(PAPERWEEK_ROLE)
 @Controller('api/tasks')
 export class TasksController {
   constructor(private readonly tasks: TasksService) {}
 
   @Get()
   list(
-    @CurrentUser() user: AuthUser,
+    @CurrentSatelliteUser() me: SatelliteUser,
     @Query() query: ListTasksQueryDto,
   ): Promise<TaskResponse[]> {
-    return this.tasks.list(user.ownerId, query);
+    return this.tasks.list(me.sub, query);
   }
 
   @Post()
   create(
-    @CurrentUser() user: AuthUser,
+    @CurrentSatelliteUser() me: SatelliteUser,
     @Body() dto: CreateTaskDto,
   ): Promise<TaskResponse> {
-    return this.tasks.create(user.ownerId, dto);
+    return this.tasks.create(me.sub, dto);
   }
 
   @Patch(':id')
   update(
-    @CurrentUser() user: AuthUser,
+    @CurrentSatelliteUser() me: SatelliteUser,
     @Param('id') id: string,
     @Body() dto: UpdateTaskDto,
   ): Promise<TaskResponse> {
-    return this.tasks.update(user.ownerId, id, dto);
+    return this.tasks.update(me.sub, id, dto);
   }
 
   @Delete(':id')
   softDelete(
-    @CurrentUser() user: AuthUser,
+    @CurrentSatelliteUser() me: SatelliteUser,
     @Param('id') id: string,
   ): Promise<TaskResponse> {
-    return this.tasks.softDelete(user.ownerId, id);
+    return this.tasks.softDelete(me.sub, id);
   }
 
   /** Undo for `DELETE /api/tasks/:id` — Cmd+Z in the front end (D-front-038). Reaches a
@@ -60,9 +65,9 @@ export class TasksController {
    *  deferred client-side DELETE has already fired. */
   @Post(':id/restore')
   restore(
-    @CurrentUser() user: AuthUser,
+    @CurrentSatelliteUser() me: SatelliteUser,
     @Param('id') id: string,
   ): Promise<TaskResponse> {
-    return this.tasks.restore(user.ownerId, id);
+    return this.tasks.restore(me.sub, id);
   }
 }

@@ -15,7 +15,7 @@ export function frontBaseUrl(config: Pick<ConfigService, 'get'>): string {
 }
 
 /** Every origin allowed to talk to this API — the configured FRONT_BASE_URL plus, outside
- *  production, the design-worktree's 3202. Used by CORS and SameOriginGuard so both stay in
+ *  production, the design-worktree's 3202. Used by CORS and the satellite guard so both stay in
  *  sync on what "same origin" means. */
 export function frontBaseUrls(config: Pick<ConfigService, 'get'>): string[] {
   const primary = frontBaseUrl(config);

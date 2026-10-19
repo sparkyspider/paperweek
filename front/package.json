@@ -8,7 +8,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "typecheck": "nuxi typecheck",
+    "typecheck": "COSY_ALLOW_LOCAL_DEFAULTS=1 nuxi typecheck",
     "test:unit": "vitest run"
   },
   "dependencies": {

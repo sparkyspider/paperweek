@@ -83,7 +83,7 @@ blob itself already toggles visibility there.
 - Past-task aging: missed vs not-yet-due render identically; sepia-fade proposal open.
 - `v2` → `main` merge: main is behind; merge when Mark says.
 - Google login: waits on co-sy-v2 adding a Google IdP to the FlyH2 org.
-- Tarryn's account: `auth/add-user.sh <email> <name>` when her email arrives.
+- Tarryn's account: add her through Co-Sy when her email arrives (old add-user.sh removed 19 Oct).
 - Sexy-branch future: kept as finished alternative (from the 2026-09-01 pipeline).
 
 ## Operating rules in force (see memory + OPERATIONS.md)

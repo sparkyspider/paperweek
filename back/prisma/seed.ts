@@ -5,10 +5,10 @@ const prisma = new PrismaClient();
 /**
  * Seeds/reconciles Mark's (mark@flyh2.com) starter themes — soft watercolor palette, one per
  * life area (SPEC.md). Tarryn is not seeded: she creates her own once her Zitadel user exists
- * (see auth/add-user.sh).
+ * (its account now comes from Co-Sy sign-in).
  *
  * Requires MARK_ZITADEL_USER_ID in the environment — the Zitadel user id (JWT `sub`) for
- * mark@flyh2.com, printed by `auth/bootstrap-productivity.sh` / `auth/add-user.sh`.
+ * mark@flyh2.com, shown in Co-Sy for that person.
  *
  * Idempotent AND self-healing: existing canonical themes have their `position`/`color`
  * reconciled to this list (not just skipped) so re-running after a lineup revision fixes
@@ -31,8 +31,8 @@ async function main() {
   const ownerId = process.env.MARK_ZITADEL_USER_ID;
   if (!ownerId) {
     throw new Error(
-      'MARK_ZITADEL_USER_ID is not set — run auth/bootstrap-productivity.sh (or ' +
-        'auth/add-user.sh) first and export the printed user id before seeding.',
+      'MARK_ZITADEL_USER_ID is not set — take the id from Co-Sy (' +
+        'sign-in) and export that user id before seeding.',
     );
   }
 

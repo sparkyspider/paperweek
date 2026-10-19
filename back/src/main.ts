@@ -68,8 +68,8 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseEnvelopeInterceptor());
   app.useGlobalFilters(new ExceptionEnvelopeFilter());
 
-  // Swagger — dev/test only, same posture as co-sy-v2 (never exposed in production).
-  if (process.env.NODE_ENV !== 'production') {
+  // Swagger — development only (never exposed in production, test or unset environments).
+  if (process.env.NODE_ENV === 'development') {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('Productivity Tools API')
       .setDescription('back/ API — themes/tasks, behind the Co-Sy satellite guard.')

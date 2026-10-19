@@ -11,48 +11,9 @@ instance for every project depending on it, not just this one.
 
 ## Scripts
 
-- **`bootstrap-productivity.sh`** — idempotent (search-then-create-or-update). Creates the
-  "Productivity" org, its "Productivity Platform" project (roles `admin`/`user`/`agent`), the
-  "Productivity Front (SPA)" OIDC app (redirect `http://localhost:3200/auth/callback`,
-  post-logout `http://localhost:3200`), and three machine users:
-  - `prod-back` — instance role `IAM_LOGIN_CLIENT`, PAT → `.machinekey/prod-back-pat.txt` and
-    `back/.env` `ZITADEL_BACK_PAT`. The BFF's only Zitadel credential.
-  - `prod-mgmt` — org-scoped `ORG_OWNER` on the Productivity org **only** (not instance-wide),
-    PAT → `.machinekey/prod-mgmt-pat.txt`. Used solely by `add-user.sh`, never by the running
-    app.
-  - `prod-agent` — granted the `agent` project role, `accessTokenType=JWT` (required so its
-    client-credentials tokens are verifiable via Zitadel's JWKS, not an opaque bearer token),
-    client secret → `.machinekey/prod-agent-secret.json`. See root `AGENTS.md` for the exact
-    token request.
-
-  Run it again any time — it's safe. It also (re-)writes the org id / project id / OIDC
-  client id / back PAT into `back/.env` and `auth/.env`, never printing values.
-
-- **`add-user.sh <email> "<Full Name>" <role1,role2,...>`** — adds (or reconciles the role
-  grant of) a human user in the Productivity org, using `prod-mgmt`'s PAT. Generates an
-  initial password on first creation (`.machinekey/<local-part>-initial-password.txt`,
-  git-ignored, `changeRequired: true`); leaves an existing user's password untouched on a
-  re-run.
-
-  ```bash
-  ./add-user.sh mark@flyh2.com "Mark van Wyk" admin,user
-  ```
-
-  Use this for a person who should live **in** the Productivity org. For someone who already
-  has a Zitadel account in a different org, use the cross-org grant below instead — it never
-  creates a duplicate account.
-
-- **Cross-org grant (`bootstrap-productivity.sh` step, `GRANT_USER_EMAIL`-driven)** — Zitadel's
-  **native** mechanism for letting a user whose home org is elsewhere log into this app without
-  a second account: a **project grant** (this project → their home org) plus a **user grant**
-  (their user → that project grant's roles). Optional and idempotent — skipped unless
-  `GRANT_USER_EMAIL` is set; safe to re-run, never resets an existing password, never touches
-  the target org's own settings/policies/IdPs/members.
-
-  ```bash
-  GRANT_USER_EMAIL=mark@flyh2.com ./bootstrap-productivity.sh   # GRANT_ORG_ID auto-discovered
-  # optional: GRANT_ROLES=admin,user (default), GRANT_ORG_ID=<explicit org id>
-  ```
+None. `bootstrap-productivity.sh` and `add-user.sh` were removed on 2026-10-19: they minted the old
+`prod-agent` client secret and PATs, and Paperweek now signs in through the Co-Sy satellite guard.
+The only file here is `co-space.json`.
 
 ## Known state (2026-09-01)
 

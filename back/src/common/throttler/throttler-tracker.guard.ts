@@ -4,7 +4,7 @@ import { bearerSubject, clientIp } from './throttler.config';
 
 /**
  * Global rate-limit guard. Keys on the bearer subject (unverified — verification happens
- * downstream in JwtAuthGuard; this guard runs first so a flood is rejected before any JWKS
+ * downstream in the satellite guard (SatelliteAuthGuard); this guard runs first so a flood is rejected before any JWKS
  * work) so an authenticated caller spends their own budget, falling back to client IP.
  */
 @Injectable()

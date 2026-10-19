@@ -34,7 +34,7 @@ Co-Sy satellite guard; see `auth/co-space.json`. The curl examples below are his
 
 **Agents now (Mark's ruling 084-Q8, 19 Oct 2026).** An agent signs in with its own Public account,
 exactly like a person: Co-Sy's sign-in page, Paperweek's one sign-in app, the same guard. It works
-only on its own themes and tasks. `PAPERWEEK_AGENT` adds owner-only hard delete. Nobody acts for
+only on its own themes and tasks. `PAPERWEEK_DELETE` adds owner-only hard delete. Nobody acts for
 another person: `X-On-Behalf-Of` is ignored, and every row is keyed on the token's `sub`.
 
 ## API contract
@@ -72,7 +72,7 @@ PUT    /api/themes/order {ids: string[]}                     → reorders: ids m
                                                                  ids) or 400; sets position=index
 PATCH  /api/themes/:id {name?, color?, position?, archived?}  → archived:true/false sets/clears archivedAt
 DELETE /api/themes/:id                                       → soft archive (= PATCH {archived:true})
-DELETE /api/themes/:id/hard                                  → PAPERWEEK_AGENT only: deletes the caller's
+DELETE /api/themes/:id/hard                                  → PAPERWEEK_DELETE only: deletes the caller's
                                                                  own theme and its tasks for good
                                                                  (not the caller's → 404)
 ```
@@ -85,7 +85,7 @@ GET    /api/tasks?themeId=<uuid>&backlog=true         → non-deleted unschedule
 POST   /api/tasks {themeId, title, notes?, bold?}     → creates a backlog task (bold defaults to false)
 PATCH  /api/tasks/:id {title?, notes?, bold?, themeId?, scheduledOn?(YYYY-MM-DD|null), daypart?(morning|afternoon|evening|notes|null), position?, done?}
 DELETE /api/tasks/:id                                  → soft delete
-DELETE /api/tasks/:id/hard                             → PAPERWEEK_AGENT only: deletes the caller's own task
+DELETE /api/tasks/:id/hard                             → PAPERWEEK_DELETE only: deletes the caller's own task
                                                           for good (not the caller's → 404)
 ```
 
@@ -130,6 +130,6 @@ curl -s -X PATCH http://localhost:3201/api/tasks/<task-id> \
 ## Roles
 
 Paperweek's project roles, granted in Co-Sy by Public and read only from the verified token
-(`auth/co-space.json`): `PAPERWEEK_USER` uses the app; `PAPERWEEK_AGENT` adds the two hard delete
+(`auth/co-space.json`): `PAPERWEEK_USER` uses the app; `PAPERWEEK_DELETE` adds the two hard delete
 routes, on the caller's own rows only. Every caller manages only its own themes and tasks; no
 role reaches another person's rows (084-Q8).

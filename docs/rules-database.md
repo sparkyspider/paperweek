@@ -32,7 +32,7 @@ Read `rules-system.md` and `decisions-database.md` first. **Keep terse.**
   — or, for a request carrying the `agent` role, the user id resolved from a verified
   `X-On-Behalf-Of` header (never trust that header from a non-agent caller). See
   `rules-roles.md` and `decisions-roles.md` D-role-011.
-  Superseded 2026-10-19 (084-Q8): agents sign in with their own Public account; PAPERWEEK_AGENT allows owner-only hard delete; no caller acts for another person.
+  Superseded 2026-10-19 (084-Q8): agents sign in with their own Public account; PAPERWEEK_DELETE allows owner-only hard delete; no caller acts for another person.
 - **Never accept `ownerId`/`userId` as a client-supplied field on create/update.** It is
   always derived server-side from the token (or the on-behalf-of resolution), never read
   from the request body.

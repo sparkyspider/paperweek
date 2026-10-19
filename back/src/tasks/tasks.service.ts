@@ -127,7 +127,7 @@ export class TasksService {
 
   /**
    * DELETE /api/tasks/:id/hard — removes the task row for good (084-Q8: an agent may hard delete
-   * its OWN test data). The route needs the agent role on top of PAPERWEEK_USER; this method
+   * its OWN test data). The route needs the PAPERWEEK_DELETE right (granted to agent accounts) on top of PAPERWEEK_USER; this method
    * enforces ownership in the delete statement itself (`id` AND `ownerId`), so a row that is not
    * the caller's can never be removed. Nothing removed → 404 "Task not found.", the same answer
    * every other task route gives. A soft-deleted task of the caller's is included.

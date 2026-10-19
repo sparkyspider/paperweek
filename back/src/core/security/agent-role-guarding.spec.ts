@@ -1,6 +1,6 @@
 /**
- * The agent role (084-Q8), proved through the REAL `SatelliteAuthGuard` over the real controllers'
- * metadata: the two hard delete routes need BOTH PAPERWEEK_USER (controller) and PAPERWEEK_AGENT
+ * The PAPERWEEK_DELETE right, granted to agent accounts (084-Q8), proved through the REAL `SatelliteAuthGuard` over the real controllers'
+ * metadata: the two hard delete routes need BOTH PAPERWEEK_USER (controller) and PAPERWEEK_DELETE
  * (route); soft delete and every other route need PAPERWEEK_USER only. The verifier is a stand-in
  * that returns a person with the roles given, as a verified token would carry them; the role
  * check itself is the package's own.
@@ -17,7 +17,7 @@ jest.mock('jose', () => ({}));
 import { SatelliteAuthGuard } from '@co-sy/satellite-guard/nest';
 import { ThemesController } from '../../themes/themes.controller';
 import { TasksController } from '../../tasks/tasks.controller';
-import { PAPERWEEK_AGENT_ROLE, PAPERWEEK_ROLE } from './satellite-auth.config';
+import { PAPERWEEK_DELETE_ROLE, PAPERWEEK_ROLE } from './satellite-auth.config';
 
 type Handler = (...args: never[]) => unknown;
 
@@ -65,13 +65,13 @@ const HARD = [
   [TasksController, 'hardDelete'],
 ] as const;
 
-describe('agent role guarding (084-Q8)', () => {
+describe('PAPERWEEK_DELETE right guarding (084-Q8)', () => {
   it.each(HARD)('%p.%s: PAPERWEEK_USER alone is refused 403', async (c, h) => {
     expect(await statusOf([PAPERWEEK_ROLE], c, h)).toBe(403);
   });
 
-  it.each(HARD)('%p.%s: PAPERWEEK_AGENT alone is refused 403', async (c, h) => {
-    expect(await statusOf([PAPERWEEK_AGENT_ROLE], c, h)).toBe(403);
+  it.each(HARD)('%p.%s: PAPERWEEK_DELETE alone is refused 403', async (c, h) => {
+    expect(await statusOf([PAPERWEEK_DELETE_ROLE], c, h)).toBe(403);
   });
 
   it.each(HARD)('%p.%s: no Paperweek role is refused 403', async (c, h) => {
@@ -79,7 +79,7 @@ describe('agent role guarding (084-Q8)', () => {
   });
 
   it.each(HARD)('%p.%s: BOTH roles pass the guard', async (c, h) => {
-    expect(await statusOf([PAPERWEEK_ROLE, PAPERWEEK_AGENT_ROLE], c, h)).toBe(
+    expect(await statusOf([PAPERWEEK_ROLE, PAPERWEEK_DELETE_ROLE], c, h)).toBe(
       200,
     );
   });
@@ -101,12 +101,12 @@ describe('agent role guarding (084-Q8)', () => {
         readFileSync(join(__dirname, '../../../../auth', name), 'utf8'),
       ) as { rights: { key: string; words: string; kind: string }[] };
       expect(file.rights.map((r) => r.key).sort()).toEqual(
-        [PAPERWEEK_AGENT_ROLE, PAPERWEEK_ROLE].sort(),
+        [PAPERWEEK_DELETE_ROLE, PAPERWEEK_ROLE].sort(),
       );
-      const agent = file.rights.find((r) => r.key === PAPERWEEK_AGENT_ROLE);
+      const agent = file.rights.find((r) => r.key === PAPERWEEK_DELETE_ROLE);
       expect(agent).toEqual({
-        key: 'PAPERWEEK_AGENT',
-        words: 'Paperweek agent: may hard delete its own data',
+        key: 'PAPERWEEK_DELETE',
+        words: 'Permanently delete own themes and tasks',
         kind: 'app-user',
       });
     },

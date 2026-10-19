@@ -23,7 +23,7 @@ import {
 } from '@co-sy/satellite-guard/nest';
 import type { SatelliteUser } from '@co-sy/satellite-guard';
 import {
-  PAPERWEEK_AGENT_ROLE,
+  PAPERWEEK_DELETE_ROLE,
   PAPERWEEK_ROLE,
 } from '../core/security/satellite-auth.config';
 
@@ -76,13 +76,13 @@ export class ThemesController {
 
   /**
    * Hard delete one of the caller's own themes and its tasks (084-Q8). Needs BOTH roles: the
-   * controller's PAPERWEEK_USER and this route's PAPERWEEK_AGENT, both from the verified token.
-   * No agent role → 403 ROLE_REQUIRED. Not the caller's theme → 404, nothing deleted.
+   * controller's PAPERWEEK_USER and this route's PAPERWEEK_DELETE, both from the verified token.
+   * No PAPERWEEK_DELETE right → 403 ROLE_REQUIRED. Not the caller's theme → 404, nothing deleted.
    */
   @ApiOperation({
-    summary: "Hard delete one of the caller's own themes, with its tasks (agent role)",
+    summary: "Hard delete one of the caller's own themes, with its tasks (PAPERWEEK_DELETE right, granted to agent accounts)",
   })
-  @RequireRole(PAPERWEEK_AGENT_ROLE)
+  @RequireRole(PAPERWEEK_DELETE_ROLE)
   @Delete(':id/hard')
   hardDelete(
     @CurrentSatelliteUser() me: SatelliteUser,

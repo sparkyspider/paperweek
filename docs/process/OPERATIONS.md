@@ -177,7 +177,7 @@ Playwright can't find its local install):
 ### Network/API verification
 Agents (and the `prod-agent` service account) can call the back API directly per
 `AGENTS.md` — bearer token via client_credentials against Zitadel, optional
-`X-On-Behalf-Of: <userId>` header to act on Mark's data (agent role only). Useful for
+`X-On-Behalf-Of: <userId>` header to act on Mark's data (PAPERWEEK_DELETE right, granted to agent accounts only). Useful for
 independently confirming a UI claim (e.g., "task was created") against the actual
 `GET /api/tasks` response rather than trusting the screenshot alone.
 

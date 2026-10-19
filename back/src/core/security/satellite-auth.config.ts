@@ -24,12 +24,12 @@ import type { SatelliteGuardConfig } from '@co-sy/satellite-guard';
 export const PAPERWEEK_ROLE = 'PAPERWEEK_USER';
 
 /**
- * The agent role (084-Q8), declared in `auth/co-space.json` as "Paperweek agent: may hard delete
- * its own data". It adds exactly one thing to {@link PAPERWEEK_ROLE}: the hard delete routes, and
+ * The PAPERWEEK_DELETE right, granted to agent accounts (084-Q8), declared in `auth/co-space.json` as "Permanently delete own themes and tasks".
+ * It adds exactly one thing to {@link PAPERWEEK_ROLE}: the hard delete routes, and
  * only on rows the caller owns. Read, like every role here, only from the verified token's
  * Paperweek project claim, granted by the owning organisation; never looked up in a database.
  */
-export const PAPERWEEK_AGENT_ROLE = 'PAPERWEEK_AGENT';
+export const PAPERWEEK_DELETE_ROLE = 'PAPERWEEK_DELETE';
 
 /** Configuration keys, named as Co-Sy's `satellite:register` prints them. */
 export const SATELLITE_KEYS = [

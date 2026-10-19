@@ -5,7 +5,7 @@
   "origins": ["http://localhost:3212"],
   "rights": [
     { "key": "PAPERWEEK_USER", "words": "use Paperweek", "kind": "app-user" },
-    { "key": "PAPERWEEK_AGENT", "words": "Paperweek agent: may hard delete its own data", "kind": "app-user" }
+    { "key": "PAPERWEEK_DELETE", "words": "Permanently delete own themes and tasks", "kind": "app-user" }
   ],
   "storage": false
 }

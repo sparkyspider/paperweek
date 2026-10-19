@@ -6,7 +6,7 @@ A TeuxDeux-inspired weekly planner. Google Calendar felt messy; this is the calm
 
 - Mark (mark@flyh2.com) and Tarryn — each with their **own** themes and tasks (per-user data, single Zitadel org "Productivity").
 - AI agents are first-class users: a `prod-agent` service account can call the NestJS API directly (with `X-On-Behalf-Of`) to manage themes/tasks on a person's behalf. See `AGENTS.md`.
-Superseded 2026-10-19 (084-Q8): agents sign in with their own Public account; PAPERWEEK_AGENT allows owner-only hard delete; no caller acts for another person.
+Superseded 2026-10-19 (084-Q8): agents sign in with their own Public account; PAPERWEEK_DELETE allows owner-only hard delete; no caller acts for another person.
 
 ## Core concepts
 

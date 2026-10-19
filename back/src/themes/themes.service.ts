@@ -115,7 +115,7 @@ export class ThemesService {
 
   /**
    * DELETE /api/themes/:id/hard — removes the theme row and the caller's own tasks under it, for
-   * good (084-Q8: an agent may hard delete its OWN test data). The route needs the agent role on
+   * good (084-Q8: an agent may hard delete its OWN test data). The route needs the PAPERWEEK_DELETE right (granted to agent accounts) on
    * top of PAPERWEEK_USER; this method enforces ownership. One transaction, all or nothing:
    *
    * - not the caller's theme, or no such theme → 404 "Theme not found.", nothing deleted (the same

@@ -43,4 +43,4 @@ Current-state rules: [`rules-security.md`](rules-security.md); shape:
   (`rules-security.md` §7). **Why:** the alternative — agents holding a human's
   own long-lived credentials — is worse for rotation and audit than one
   well-scoped service account.
-  Superseded 2026-10-19 (084-Q8): agents sign in with their own Public account; PAPERWEEK_AGENT allows owner-only hard delete; no caller acts for another person.
+  Superseded 2026-10-19 (084-Q8): agents sign in with their own Public account; PAPERWEEK_DELETE allows owner-only hard delete; no caller acts for another person.

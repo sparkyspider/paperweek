@@ -19,7 +19,7 @@ import {
 } from '@co-sy/satellite-guard/nest';
 import type { SatelliteUser } from '@co-sy/satellite-guard';
 import {
-  PAPERWEEK_AGENT_ROLE,
+  PAPERWEEK_DELETE_ROLE,
   PAPERWEEK_ROLE,
 } from '../core/security/satellite-auth.config';
 import { TaskResponse } from './task-response';
@@ -58,12 +58,12 @@ export class TasksController {
 
   /**
    * Hard delete one of the caller's own tasks (084-Q8). Needs BOTH roles: the controller's
-   * PAPERWEEK_USER and this route's PAPERWEEK_AGENT, both from the verified token. No agent role
+   * PAPERWEEK_USER and this route's PAPERWEEK_DELETE, both from the verified token. No PAPERWEEK_DELETE right
    * → 403 ROLE_REQUIRED. Not the caller's task → 404, nothing deleted. Declared before
    * `DELETE :id` for reading order only; the two paths never overlap.
    */
-  @ApiOperation({ summary: "Hard delete one of the caller's own tasks (agent role)" })
-  @RequireRole(PAPERWEEK_AGENT_ROLE)
+  @ApiOperation({ summary: "Hard delete one of the caller's own tasks (PAPERWEEK_DELETE right, granted to agent accounts)" })
+  @RequireRole(PAPERWEEK_DELETE_ROLE)
   @Delete(':id/hard')
   hardDelete(
     @CurrentSatelliteUser() me: SatelliteUser,

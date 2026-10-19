@@ -18,7 +18,7 @@ Every authenticated request passes the same stack:
 ```
 request ─▶ JwtAuthGuard        verify Bearer JWT via Zitadel JWKS (iss/aud/sig/exp)
         ─▶ resolve caller       normally the JWT `sub`; for an agent request,
-        │                        the resolved X-On-Behalf-Of subject (agent role only)
+        │                        the resolved X-On-Behalf-Of subject (PAPERWEEK_DELETE right, granted to agent accounts only)
         ─▶ service layer        every Theme/Task query is scoped `WHERE ownerId = :caller`
         └▶ PrismaService        no ambient "all rows" query path exists for these tables
 ```

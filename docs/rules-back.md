@@ -76,7 +76,7 @@ Applies to everything under `back/`. Shape (WHAT): [`architecture-back.md`](arch
   `agent` role, whose effective `ownerId` is resolved from the `X-On-Behalf-Of` header instead of
   its own subject. See [`rules-agentic.md`](rules-agentic.md) for that mechanism in full; this is
   the single sanctioned exception to "the caller only ever touches their own rows."
-  Superseded 2026-10-19 (084-Q8): agents sign in with their own Public account; PAPERWEEK_AGENT allows owner-only hard delete; no caller acts for another person.
+  Superseded 2026-10-19 (084-Q8): agents sign in with their own Public account; PAPERWEEK_DELETE allows owner-only hard delete; no caller acts for another person.
 
 ## 5. Quality gates
 

@@ -1,0 +1,9 @@
+# Keep the build context to what the image needs; never send credentials or local env files.
+node_modules
+dist
+coverage
+.env
+.env.*
+**/.machinekey
+*.log
+.DS_Store

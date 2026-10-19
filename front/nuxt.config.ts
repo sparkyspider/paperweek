@@ -15,6 +15,29 @@ const env =
   (globalThis as { process?: { env: Record<string, string | undefined> } })
     .process?.env ?? {}
 
+// A production build must never fall back to the local ids and URLs below: fail loudly.
+// Checked only by a real production build (`nuxt build`, `nuxt generate`): the inline module in
+// `modules` below skips `nuxt prepare` (npm ci's postinstall, typecheck) and `nuxt dev`, so a
+// plain local `npm ci` needs no values. A local production build opts in with
+// COSY_ALLOW_LOCAL_DEFAULTS=1.
+function refuseProductionBuildOnLocalDefaults(): void {
+  if (env.NODE_ENV !== 'production' || env.COSY_ALLOW_LOCAL_DEFAULTS === '1') return
+  const required = [
+    'COSY_ISSUER',
+    'COSY_SATELLITE_CLIENT_ID',
+    'COSY_SATELLITE_PROJECT_ID',
+    'COSY_PROJECT_ID',
+    'COSY_API_BASE',
+    'NUXT_PUBLIC_BACKEND_BASE',
+  ].filter((k) => !env[k])
+  if (required.length) {
+    throw new Error(
+      `Production build refused: ${required.join(', ')} not set. ` +
+        'Set every COSY_* value and NUXT_PUBLIC_BACKEND_BASE; the local defaults are for development only.',
+    )
+  }
+}
+
 // Protective response headers on every route (co-sy convention: the front's half of a
 // bundle the back mirrors on its own middleware). Anti-framing is the load-bearing pair.
 const securityHeaders: Record<string, string> = {
@@ -48,7 +71,16 @@ export default defineNuxtConfig({
       ],
     },
   },
-  modules: ['@co-sy/satellite-auth', '@pinia/nuxt'],
+  modules: [
+    // The production guard above. `nuxt prepare` runs `build:before` too, so it is told apart by
+    // Nuxt's own `_prepare` flag; dev is never a production build.
+    (_options, nuxt) => {
+      if (nuxt.options._prepare || nuxt.options.dev) return
+      nuxt.hook('build:before', refuseProductionBuildOnLocalDefaults)
+    },
+    '@co-sy/satellite-auth',
+    '@pinia/nuxt',
+  ],
   css: ['~/assets/css/main.css'],
   // Components live under planner/, sidebar/, shared/ but are used by their bare filename
   // (<WeekRow>, <ThemeCard>, …) — explicit `pathPrefix: false` so Nuxt never folder-prefixes

@@ -1,0 +1,114 @@
+# Paperweek's production compose block (co-sy-v2 task 084). NOT a standalone file: its services are
+# merged into co-sy-v2's docs/todo/006-agreements/marlow/deploy/docker-compose.prod.yml (project
+# `cosy-prod`) on the night. Run sheet step 9 writes this block as a patch against the live file's
+# sums, surgically: the live file carries an uncommitted WHALE_PROTECTOR block. It uses that file's
+# `cloud-sql-proxy`, `satellite-start-guard` and the `satellites` (cosy-satellites) and
+# `satellite-db` (cosy-sat-db) networks.
+#
+# Satellite rules (099 story 5, D-deploy-017): off the default network, so the VM identity service
+# is refused by the cosy-satellite-guard nft table; no published port (Caddy reaches the two by
+# name); started only after the start guard; one fixed name each (099-Q6).
+# Spec: co-sy-v2 docs/todo/084-paperweek-satellite-pilot/deploy/RUN-SHEET-paperweek.md, step 9.
+#
+# prod.env gains (public ids, not secrets): PAPERWEEK_TAG, PAPERWEEK_PROJECT_ID,
+# PAPERWEEK_CLIENT_ID, PAPERWEEK_OWNER_ORG. hydrate-secrets.sh writes /run/cosy/paperweek.env
+# (mode 0600) holding DATABASE_URL and nothing else.
+services:
+  paperweek-back:
+    image: cosy-paperweek-back:${PAPERWEEK_TAG:?set in prod.env}
+    container_name: cosy-prod-paperweek-back-1
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    env_file:
+      - ${COSY_SECRETS_DIR:-/run/cosy}/paperweek.env
+    environment:
+      NODE_ENV: production
+      PORT: "3201"
+      FRONT_BASE_URL: https://paperweek.co-sy.org
+      # The registration's COSY_ISSUER (run sheet step 6; expected https://auth.co-sy.org).
+      COSY_ISSUER: https://auth.co-sy.org
+      # Co-Sy's API origin, no /api and no slash: the guard asks <this>/auth/token-status, a route
+      # of Co-Sy's BACK. CONFLICT with run sheet step 9, which says https://v2.co-sy.org: that host
+      # is Co-Sy's front (Caddyfile: FRONT_DOMAIN -> front). api.co-sy.org is the back, as for
+      # Whale Protector's API (hydrate-secrets.sh WP_API_COSY_API_URL). Reported 19 Oct, CP-6 docs pass.
+      COSY_API_URL: https://api.co-sy.org
+      SATELLITE_PROJECT_ID: ${PAPERWEEK_PROJECT_ID:?set in prod.env}
+      SATELLITE_CLIENT_IDS: ${PAPERWEEK_CLIENT_ID:?set in prod.env}
+      SATELLITE_OWNER_ORG: ${PAPERWEEK_OWNER_ORG:?set in prod.env}
+    expose:
+      - "3201"
+    networks:
+      - satellites
+      - satellite-db
+    depends_on:
+      cloud-sql-proxy:
+        condition: service_started
+      satellite-start-guard:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3201/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  paperweek-front:
+    image: cosy-paperweek-front:${PAPERWEEK_TAG:?set in prod.env}
+    container_name: cosy-prod-paperweek-front-1
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    environment:
+      NUXT_PUBLIC_BACKEND_BASE: https://paperweek.co-sy.org
+      PORT: "3000"
+      HOST: 0.0.0.0
+    expose:
+      - "3000"
+    networks:
+      - satellites
+    depends_on:
+      satellite-start-guard:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Migration is its own step (D-deploy-003): the BUILD stage of back/Dockerfile
+  # (docker build --target build), loaded on the VM, never built by compose.
+  #   $DC --profile migrate run --rm paperweek-migrate
+  paperweek-migrate:
+    profiles: ["migrate"]
+    image: cosy-paperweek-back-migrate:${PAPERWEEK_TAG:?set in prod.env}
+    user: node
+    env_file:
+      - ${COSY_SECRETS_DIR:-/run/cosy}/paperweek.env
+    command: ["npx", "prisma", "migrate", "deploy"]
+    networks:
+      - satellites
+      - satellite-db
+    depends_on:
+      cloud-sql-proxy:
+        condition: service_started
+      satellite-start-guard:
+        condition: service_completed_successfully
+
+  # Caddy gains one variable (the Caddyfile block is in run sheet step 9).
+  caddy:
+    environment:
+      PAPERWEEK_DOMAIN: ${PAPERWEEK_DOMAIN:-paperweek.co-sy.org}

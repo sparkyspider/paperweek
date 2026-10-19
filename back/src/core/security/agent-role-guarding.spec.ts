@@ -94,18 +94,21 @@ describe('agent role guarding (084-Q8)', () => {
     },
   );
 
-  it('auth/co-space.json declares exactly the two roles the code checks, the agent one as app-user', () => {
-    const file = JSON.parse(
-      readFileSync(join(__dirname, '../../../../auth/co-space.json'), 'utf8'),
-    ) as { rights: { key: string; words: string; kind: string }[] };
-    expect(file.rights.map((r) => r.key).sort()).toEqual(
-      [PAPERWEEK_AGENT_ROLE, PAPERWEEK_ROLE].sort(),
-    );
-    const agent = file.rights.find((r) => r.key === PAPERWEEK_AGENT_ROLE);
-    expect(agent).toEqual({
-      key: 'PAPERWEEK_AGENT',
-      words: 'Paperweek agent: may hard delete its own data',
-      kind: 'app-user',
-    });
-  });
+  it.each(['co-space.json', 'co-space.production.json'])(
+    'auth/%s declares exactly the two roles the code checks, the agent one as app-user',
+    (name) => {
+      const file = JSON.parse(
+        readFileSync(join(__dirname, '../../../../auth', name), 'utf8'),
+      ) as { rights: { key: string; words: string; kind: string }[] };
+      expect(file.rights.map((r) => r.key).sort()).toEqual(
+        [PAPERWEEK_AGENT_ROLE, PAPERWEEK_ROLE].sort(),
+      );
+      const agent = file.rights.find((r) => r.key === PAPERWEEK_AGENT_ROLE);
+      expect(agent).toEqual({
+        key: 'PAPERWEEK_AGENT',
+        words: 'Paperweek agent: may hard delete its own data',
+        kind: 'app-user',
+      });
+    },
+  );
 });

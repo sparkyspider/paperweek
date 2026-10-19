@@ -26,6 +26,7 @@ Data stays in Paperweek's own database, keyed on the token's `sub`.
 **Agents acting for a person are PARKED.** The old `prod-agent` + `X-On-Behalf-Of` path is
 removed and not replaced, pending Mark's ruling 084-Q8 (what an agent may do for a person).
 [`rules-agentic.md`](docs/rules-agentic.md) describes the old mechanism and no longer applies.
+Superseded 2026-10-19 (084-Q8): agents sign in with their own Public account; PAPERWEEK_AGENT allows owner-only hard delete; no caller acts for another person.
 
 ## 2. Repository layout
 

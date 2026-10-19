@@ -30,9 +30,7 @@ services:
       # The registration's COSY_ISSUER (run sheet step 6; expected https://auth.co-sy.org).
       COSY_ISSUER: https://auth.co-sy.org
       # Co-Sy's API origin, no /api and no slash: the guard asks <this>/auth/token-status, a route
-      # of Co-Sy's BACK. CONFLICT with run sheet step 9, which says https://v2.co-sy.org: that host
-      # is Co-Sy's front (Caddyfile: FRONT_DOMAIN -> front). api.co-sy.org is the back, as for
-      # Whale Protector's API (hydrate-secrets.sh WP_API_COSY_API_URL). Reported 19 Oct, CP-6 docs pass.
+      # of Co-Sy's BACK (api.co-sy.org).
       COSY_API_URL: https://api.co-sy.org
       SATELLITE_PROJECT_ID: ${PAPERWEEK_PROJECT_ID:?set in prod.env}
       SATELLITE_CLIENT_IDS: ${PAPERWEEK_CLIENT_ID:?set in prod.env}

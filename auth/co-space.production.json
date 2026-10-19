@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "name": "Paperweek",
+  "slug": "paperweek",
+  "origins": ["https://paperweek.co-sy.org"],
+  "rights": [
+    { "key": "PAPERWEEK_USER", "words": "use Paperweek", "kind": "app-user" },
+    { "key": "PAPERWEEK_AGENT", "words": "Paperweek agent: may hard delete its own data", "kind": "app-user" }
+  ],
+  "storage": false,
+  "database": true
+}

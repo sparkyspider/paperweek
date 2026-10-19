@@ -96,23 +96,23 @@ Historical: `X-On-Behalf-Of` no longer does anything. An agent sends only its ow
 ```bash
 # List Mark's active themes
 curl -s http://localhost:3201/api/themes \
-  -H "Authorization: Bearer $TOKEN" -H "X-On-Behalf-Of: $MARK_SUB"
+  -H "Authorization: Bearer $TOKEN"
 
 # Create a backlog task
 curl -s -X POST http://localhost:3201/api/tasks \
-  -H "Authorization: Bearer $TOKEN" -H "X-On-Behalf-Of: $MARK_SUB" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"themeId":"<theme-uuid>","title":"Renew FlyH2 insurance"}'
 
 # Schedule it for Monday morning
 curl -s -X PATCH http://localhost:3201/api/tasks/<task-id> \
-  -H "Authorization: Bearer $TOKEN" -H "X-On-Behalf-Of: $MARK_SUB" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"scheduledOn":"2026-09-07","daypart":"morning"}'
 
 # Mark it done
 curl -s -X PATCH http://localhost:3201/api/tasks/<task-id> \
-  -H "Authorization: Bearer $TOKEN" -H "X-On-Behalf-Of: $MARK_SUB" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" -d '{"done":true}'
 ```
 

@@ -16,6 +16,7 @@ import { useLastUsedTheme } from '~/composables/useLastUsedTheme'
 import { useThemeDragState } from '~/composables/useThemeDragState'
 import { taskIdFromDrag, THEME_DRAG_MIME } from '~/utils/dnd'
 import { blurActiveEditable } from '~/utils/textInputKeys'
+import { PAPERWEEK_DELETE } from '~/utils/rights'
 
 const props = defineProps<{ theme: Theme }>()
 
@@ -86,8 +87,22 @@ function commitEdit() {
 }
 
 function archive() {
-  const undo = themes.archiveThemeQueued(props.theme.id)
-  show(`“${props.theme.name}” archived`, { actionLabel: 'Undo', onAction: () => undo?.() })
+  const { id, name } = props.theme
+  const undo = themes.archiveThemeQueued(id)
+  const forGood = useCosySatelliteAuth().hasRole(PAPERWEEK_DELETE)
+  show(`“${name}” archived`, {
+    actionLabel: 'Undo',
+    onAction: () => undo?.(),
+    ...(forGood && {
+      secondaryLabel: 'Delete permanently',
+      onSecondary: () => {
+        void themes.deleteThemeForGood(id).then((ok) => {
+          if (ok) tasks.forgetTheme(id)
+          show(ok ? `“${name}” and its tasks deleted permanently` : `Could not delete “${name}” permanently, so it was only archived.`)
+        })
+      },
+    }),
+  })
 }
 
 /** Drop anywhere on the card (not on a specific task line) — append after the last occupied

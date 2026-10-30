@@ -48,3 +48,5 @@ Nuxt 4 + Vue 3.5 + Tailwind 4 (front, port **3200**) · NestJS 11 + Prisma 6 + P
 ## Soft-delete philosophy
 
 Everything user-created (themes, tasks) is soft-deleted/archived with undo. Agents may change themes/tasks via the DB or (preferably) the API — never destructively.
+
+The one exception is the `PAPERWEEK_DELETE` right, given in Co-Sy (Mark, 30 Oct 2026): a holder's "Task deleted" and "archived" notes offer **Delete permanently** beside Undo, quieter than Undo. It removes their own task, or their own theme with its tasks, for good. Nobody else sees it, and the back checks the right again.

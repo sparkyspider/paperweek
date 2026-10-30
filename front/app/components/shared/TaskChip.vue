@@ -41,6 +41,7 @@ import { useThemesStore } from '~/stores/themes'
 import { useThemeVisibility } from '~/composables/useThemeVisibility'
 import { useToast } from '~/composables/useToast'
 import { useUndo } from '~/composables/useUndo'
+import { PAPERWEEK_DELETE } from '~/utils/rights'
 import { blurActiveEditable, forceHomeEnd, isBoldShortcut } from '~/utils/textInputKeys'
 import ThemePickerPopover from '~/components/shared/ThemePickerPopover.vue'
 
@@ -291,12 +292,21 @@ function remove() {
   blurActiveEditable()
   const entry = tasks.deleteTaskQueued(props.task.id)
   if (!entry) return
+  const forGood = useCosySatelliteAuth().hasRole(PAPERWEEK_DELETE)
+  const id = props.task.id
   const toastId = show('Task deleted', {
     actionLabel: 'Undo',
     onAction: () => {
       useUndo().remove(entry.undoId)
       entry.undo().catch(() => show('Could not restore that task.'))
     },
+    ...(forGood && {
+      secondaryLabel: 'Delete permanently',
+      onSecondary: () => {
+        useUndo().remove(entry.undoId)
+        void tasks.deleteTaskForGood(id).then(ok => show(ok ? 'Task deleted permanently' : 'Could not delete that task permanently, so it was only deleted.'))
+      },
+    }),
   })
   useUndo().attachToast(entry.undoId, toastId)
 }

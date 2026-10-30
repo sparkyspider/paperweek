@@ -10,15 +10,25 @@ export interface ToastMsg {
   message: string
   actionLabel?: string
   onAction?: () => void
+  /** A second, rarer action beside the first (the permanent delete, for PAPERWEEK_DELETE holders only). */
+  secondaryLabel?: string
+  onSecondary?: () => void
 }
 
 const toasts = ref<ToastMsg[]>([])
 let counter = 0
 
 export function useToast() {
-  function show(message: string, opts?: { actionLabel?: string; onAction?: () => void; duration?: number }): number {
+  function show(
+    message: string,
+    opts?: { actionLabel?: string; onAction?: () => void; secondaryLabel?: string; onSecondary?: () => void; duration?: number },
+  ): number {
     const id = ++counter
-    toasts.value.push({ id, message, actionLabel: opts?.actionLabel, onAction: opts?.onAction })
+    toasts.value.push({
+      id, message,
+      actionLabel: opts?.actionLabel, onAction: opts?.onAction,
+      secondaryLabel: opts?.secondaryLabel, onSecondary: opts?.onSecondary,
+    })
     const duration = opts?.duration ?? 5000
     setTimeout(() => dismiss(id), duration)
     return id

@@ -7,6 +7,11 @@ function act(t: { id: number; onAction?: () => void }) {
   t.onAction?.()
   dismiss(t.id)
 }
+
+function actSecondary(t: { id: number; onSecondary?: () => void }) {
+  t.onSecondary?.()
+  dismiss(t.id)
+}
 </script>
 
 <template>
@@ -28,6 +33,15 @@ function act(t: { id: number; onAction?: () => void }) {
           @click="act(t)"
         >
           {{ t.actionLabel }}
+        </button>
+        <!-- Quieter than Undo on purpose: the rare, final choice never outshouts the safe one. -->
+        <button
+          v-if="t.secondaryLabel"
+          type="button"
+          class="text-[var(--paper)]/70 underline decoration-dotted underline-offset-2 hover:text-white"
+          @click="actSecondary(t)"
+        >
+          {{ t.secondaryLabel }}
         </button>
       </div>
     </TransitionGroup>

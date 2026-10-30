@@ -108,6 +108,7 @@ export const useTasksStore = defineStore('tasks', () => {
   }
 
   async function fetchBacklog(themeId: string): Promise<void> {
+    if (themeId.startsWith('tmp_')) return // a theme still being created has no backlog yet
     try {
       const list = await api<Task[]>('/api/tasks', { query: { themeId, backlog: true } })
       upsertMany(list)

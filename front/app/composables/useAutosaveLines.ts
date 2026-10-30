@@ -14,7 +14,7 @@
  * consecutive line slots 0, 1, 2, … in sort order for DISPLAY ONLY — nothing is written back
  * until the user actually creates or moves something in that section.
  */
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type { Daypart, Task } from '~/stores/tasks'
 import { useTasksStore } from '~/stores/tasks'
 import { useToast } from '~/composables/useToast'
@@ -255,7 +255,18 @@ export function useAutosaveLines(opts: {
     try {
       draft.saving = true
       const id = draft.taskId ?? await ensureCreated(draft, trimmed)
-      if (!id) { draft.failed = true; return }
+      if (!id) {
+        draft.failed = true
+        // Every task needs a theme. With none yet, say so (never a silent absence); the watch
+        // below saves the line the moment a theme exists.
+        if (!draft.toastShown) {
+          draft.toastShown = true
+          show(opts.defaultThemeId()
+            ? 'Could not save that line. It’ll retry as you keep writing.'
+            : 'Add a theme to keep this line. It saves as soon as you do.')
+        }
+        return
+      }
       // Both checks gate on `draft.taskId` (the value BEFORE `ensureCreated` may have just set
       // it below) for the same reason: a task created by `ensureCreated` this pass already
       // carries the current text/bold from the create call itself (title + `draft.bold`, see
@@ -327,5 +338,11 @@ export function useAutosaveLines(opts: {
     }
   }
 
-  return { slots, activateLine, onInput, onEnter: settle, onBlur: settle, revert, dropTaskAt, maxIndex, toggleBold }
+  // A line written before any theme existed could not be saved. Save it once a theme appears.
+  watch(() => opts.defaultThemeId(), (themeId) => {
+    if (!themeId) return
+    for (const d of activeDrafts.value.values()) if (!d.taskId && d.text.trim()) void persist(d)
+  })
+
+  return { slots, activateLine, onInput, onEnter: settle, onBlur: settle, revert, dropTaskAt, maxIndex, toggleBold, saveDraft: persist }
 }

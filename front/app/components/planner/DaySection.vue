@@ -68,9 +68,17 @@ const showTeachingNote = computed(() => !!props.showFirstDragTip && !dragTaught.
  *  of `savedList` entirely was the actual bug — the task didn't just look hidden, its LINE
  *  became available again, which is how "muting a theme" turned into "silently deleting its
  *  scheduled tasks' visible trace." */
-const { slots, activateLine, onInput, onEnter, onBlur, revert, dropTaskAt, toggleBold } = useAutosaveLines({
+const { slots, activateLine, onInput, onEnter, onBlur, revert, dropTaskAt, toggleBold, saveDraft } = useAutosaveLines({
   savedList: () => tasks.forCell(props.dateISO, props.daypart),
-  defaultThemeId: () => lastUsedTheme.get() ?? pickerThemes.value[0]?.id ?? themes.items[0]?.id ?? null,
+  // The remembered theme counts only while it still exists: a deleted one made every new line fail
+  // to save, silently (Mark, 30 Oct).
+  defaultThemeId: () => {
+    // A theme still being created has a `tmp_` id the back refuses; wait for its real one.
+    const saved = (id?: string | null) => (id && !id.startsWith('tmp_') ? id : null)
+    const last = lastUsedTheme.get()
+    return (last && themes.items.some(t => t.id === last) ? saved(last) : null)
+      ?? saved(pickerThemes.value[0]?.id) ?? saved(themes.items.find(t => !t.id.startsWith('tmp_'))?.id) ?? null
+  },
   scheduledOn: () => props.dateISO,
   daypart: () => props.daypart,
   minLines: () => props.minLines,
@@ -218,9 +226,11 @@ function selectTheme(themeId: string): void {
   const target = activePickerTarget.value
   if (!target) return
   if (target.kind === 'draft') {
-    // Not saved yet — nothing to PATCH, the draft just carries the choice into its own save.
+    // Not saved yet: the draft carries the choice into its own save, and a written line saves
+    // now (it may have been waiting for a theme to exist; Mark, 30 Oct).
     target.draft.themeId = themeId
     lastUsedTheme.set(themeId)
+    if (target.draft.text.trim()) void saveDraft(target.draft)
   } else {
     // `tasks.setTheme` is the ONE re-theme action (it marks last-used itself) — a bold heading's
     // swatch row in TaskChip calls the very same one, so the two gestures cannot drift apart.

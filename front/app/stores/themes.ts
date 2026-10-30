@@ -6,6 +6,7 @@
  *   PUT    /api/themes/order {ids}  -> reorder (sidebar drag-and-drop; ids = the full active set)
  *   PATCH  /api/themes/:id {name?, color?, position?, archived?}
  *   DELETE /api/themes/:id  (soft archive)
+ *   DELETE /api/themes/:id/hard  (permanent delete with its tasks, PAPERWEEK_DELETE holders only)
  */
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
@@ -167,8 +168,26 @@ export const useThemesStore = defineStore('themes', () => {
     }
   }
 
+  /** DELETE /api/themes/:id/hard — the theme and its tasks, for good (PAPERWEEK_DELETE holders
+   *  only; the back checks the right and ownership, all or nothing). Called from the "archived"
+   *  note while the archive is still queued, so that is cancelled first. If the permanent delete
+   *  fails, the ordinary archive goes out instead: the theme stays gone either way. */
+  async function deleteThemeForGood(id: string): Promise<boolean> {
+    const p = pending.get(id)
+    if (p) clearTimeout(p.timer)
+    pending.delete(id)
+    try {
+      await api(`/api/themes/${id}/hard`, { method: 'DELETE' })
+      return true
+    } catch (e) {
+      error.value = messageOf(e, 'Could not delete that theme permanently.')
+      await api(`/api/themes/${id}`, { method: 'DELETE' }).catch(() => {})
+      return false
+    }
+  }
+
   return {
     items, active, loading, loaded, error, unreachable,
-    fetchThemes, addTheme, renameTheme, recolorTheme, reorderThemes, archiveThemeQueued,
+    fetchThemes, addTheme, renameTheme, recolorTheme, reorderThemes, archiveThemeQueued, deleteThemeForGood,
   }
 })

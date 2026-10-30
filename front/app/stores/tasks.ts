@@ -10,6 +10,7 @@
  *                          position?, done?}
  *   DELETE /api/tasks/:id  (soft delete)
  *   POST   /api/tasks/:id/restore  (undo for the soft delete above — D-front-038)
+ *   DELETE /api/tasks/:id/hard  (permanent delete, PAPERWEEK_DELETE holders only)
  */
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
@@ -107,6 +108,7 @@ export const useTasksStore = defineStore('tasks', () => {
   }
 
   async function fetchBacklog(themeId: string): Promise<void> {
+    if (themeId.startsWith('tmp_')) return // a theme still being created has no backlog yet
     try {
       const list = await api<Task[]>('/api/tasks', { query: { themeId, backlog: true } })
       upsertMany(list)
@@ -388,9 +390,34 @@ export const useTasksStore = defineStore('tasks', () => {
     return { undoId, undo }
   }
 
+  /** DELETE /api/tasks/:id/hard — the permanent delete (PAPERWEEK_DELETE holders only; the back
+   *  checks the right and that the task is the caller's). Called from the "Task deleted" note
+   *  while its soft delete is still queued, so that queue is cancelled first. If the permanent
+   *  delete fails, the ordinary soft delete goes out instead: the task stays gone either way. */
+  async function deleteTaskForGood(id: string): Promise<boolean> {
+    const p = pendingDelete.get(id)
+    if (p) clearTimeout(p.timer)
+    pendingDelete.delete(id)
+    pendingCommits.delete(`delete:${id}`)
+    try {
+      await api(`/api/tasks/${id}/hard`, { method: 'DELETE' })
+      delete byId.value[id]
+      return true
+    } catch (e) {
+      error.value = messageOf(e, 'Could not delete that task permanently.')
+      await api(`/api/tasks/${id}`, { method: 'DELETE' }).catch(() => {})
+      return false
+    }
+  }
+
+  /** Drops every task of a theme from memory — after that theme is deleted for good. */
+  function forgetTheme(themeId: string): void {
+    for (const [id, t] of Object.entries(byId.value)) if (t.themeId === themeId) delete byId.value[id]
+  }
+
   return {
     byId, all, loading, error, unreachable, backlogLoaded, rangeLoaded,
     forCell, backlogFor, fetchRange, fetchBacklog, createBacklogTask,
-    patchTask, schedule, unschedule, updateTitle, setTheme, toggleBold, toggleDone, toggleDoneDeferred, deleteTaskQueued,
+    patchTask, schedule, unschedule, updateTitle, setTheme, toggleBold, toggleDone, toggleDoneDeferred, deleteTaskQueued, deleteTaskForGood, forgetTheme,
   }
 })
